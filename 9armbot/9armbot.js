@@ -9,10 +9,24 @@ var critMultiplier = 2.0;
 var dodgeChance = 3;
 var baseTimeoutSeconds = 600;
 
+var purgeMode = 0;
+var purgeList = [];
+
 function timeoutUser(channel, user, duration, reason) {
-    if (user.mod) {
+
+    // hard coded again. Need priviledge check.
+    if (user.mod || user.username == 'armzi' ) {
+        //return;
+    }
+
+    if (purgeMode) {
+        // add username to purge list and return;
+        // TODO: This will be a problem when this bot is handling multiple channels.
+        // but it will work for now.
+        purgeList.push(user.username);
         return;
     }
+
     let final_duration = duration;
     // roll perfect-dodge
     if (roll(dodgeChance)) {
@@ -27,7 +41,7 @@ function timeoutUser(channel, user, duration, reason) {
 
     if (user.subscriber) {
         final_duration /= 2;
-        client.say(channel, `@${user.username} เป็นนายทุนจึงรับโทษเบา`);
+        //client.say(channel, `@${user.username} เป็นนายทุนจึงรับโทษเบา`);
     }
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${critRate})`).catch((err) => {
         console.log(err);
@@ -73,15 +87,40 @@ client.on('message', (channel, tags, message, self) => {
         timeoutUser(channel, tags, baseTimeoutSeconds, 'อยากบิน');
     }
 
-    if (message == '!purge' && tags.username == 'armzi') {
+    if (message == '!crit')
+        client.say(channel, 'โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
+
+    // Hard coded command for me. We will have to handle priviledge later.
+    if (message == '!reset' && tags.username == 'armzi') {
         critRate = 10;
         critMultiplier = 2;
         client.say(channel, '(RESET) โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
 
     }
 
-    if (message == '!crit')
-        client.say(channel, 'โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
+    if (message == '!purgemode' && tags.username == 'armzi') {
+        if (purgeMode == 0) {
+            purgeMode = 1;
+            client.say(channel, '☠️☠️☠️ เปิดโหมดชำระล้าง.. ☠️☠️☠️');
+        } else {
+            let duration = baseTimeoutSeconds;
+            let critUp = purgeList.length /100;
+            purgeMode = 0;
+            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${purgeList.length} รายการ`);
+            if(roll(critRate)) {
+                duration *= critMultiplier;
+                client.say(channel,`CRITICAL PURGE! พลังโจมตี x${critMultiplier}`);
+            }
+
+            while (purgeList.length) {
+                let username = purgeList.pop();
+                client.timeout(channel, username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
+            }
+            client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น critMultiplier เพิ่มขึ้น ${critUp}`);
+            critMultiplier += critUp;
+        }
+    }
+
 });
 
 
