@@ -4,20 +4,24 @@ const fs = require('fs');
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 
 var critRate = 5;
-var superCritRate = 3;
-var critMultiplier = 2.0;
-var dodgeChance = 3;
+var critMultiplier = 1.5;
+var dodgeRate = 3;
 var baseTimeoutSeconds = 600;
 
 var purgeMode = 0;
 var purgeList = [];
 
+var vengeanceMode=0;
+
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
     if (user.mod || user.username == 'armzi' ) {
-        //return;
+        return;
     }
+
+    if (vengeanceMode)
+        baseTimeoutSeconds+=10;
 
     if (purgeMode) {
         // add username to purge list and return;
@@ -29,7 +33,7 @@ function timeoutUser(channel, user, duration, reason) {
 
     let final_duration = duration;
     // roll perfect-dodge
-    if (roll(dodgeChance)) {
+    if (roll(dodgeRate)) {
         client.say(channel, `MISS!! ${user.username} หลบหลีกการโจมตี!`);
         return;
     }
@@ -74,11 +78,6 @@ client.on('message', (channel, tags, message, self) => {
     let re25 = /25.*25/;
     let re25_th = /๒๕.*๒๕/;
     if (re25.test(message) || re25_th.test(message)) {
-        if (critRate < 100) {
-            critRate++;
-        } else {
-            critRate = 0;
-        }
         timeoutUser(channel, tags, baseTimeoutSeconds, 'เก่งคณิตศาสตร์');
     }
 
@@ -87,15 +86,15 @@ client.on('message', (channel, tags, message, self) => {
         timeoutUser(channel, tags, baseTimeoutSeconds, 'อยากบิน');
     }
 
-    if (message == '!crit')
-        client.say(channel, 'โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
+    if (message == '!botstat')
+        client.say(channel, `<พลังโจมตี: ${baseTimeoutSeconds}> <%crit: ${critRate}> <ตัวคูณ: ${critMultiplier}>`);
 
     // Hard coded command for me. We will have to handle priviledge later.
     if (message == '!reset' && tags.username == 'armzi') {
         critRate = 10;
         critMultiplier = 2;
+        baseTimeoutSeconds = 600;
         client.say(channel, '(RESET) โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
-
     }
 
     if (message == '!purgemode' && tags.username == 'armzi') {
@@ -116,28 +115,34 @@ client.on('message', (channel, tags, message, self) => {
                 let username = purgeList.pop();
                 client.timeout(channel, username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
             }
-            client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น critMultiplier เพิ่มขึ้น ${critUp}`);
+            client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น ตัวคูณเพิ่มขึ้น ${critUp} จากการชำระล้าง`);
             critMultiplier += critUp;
         }
     }
 
+    if (message == '!vengeance' && tags.username == 'armzi') {
+        if (vengeanceMode == 0) {
+            vengeanceMode = 1;
+            client.say(channel, `โหมดแค้น: บอทจะทรงพลังขึ้นทุกครั้งเมื่อโจมตี`);
+        } else {
+            vengeanceMode = 0;
+            client.say(channel, `ไม่แค้นแล้วจ้า..`);
+        }
+    }
 });
 
-
-
 client.on('subscription', (channel, username, method, message, userstate) => {
-    critMultiplier+=0.2;
-    client.say(channel, 'ข้ารู้สึกถึงพลังที่เพิ่มขึ้น!! (critMultiplier = '+critMultiplier+').');
+    critRate+=2;
+    client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
-    critMultiplier+=0.2;
-    client.say(channel, 'ข้ารู้สึกถึงพลังที่เพิ่มขึ้น!! (critMultiplier = '+critMultiplier+').');
-
+    critRate+=2;
+    client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
 });
 
 client.on('cheer', (channel, userstate, message) => {
     let amt =  userstate.bits/1000;
-    client.say(channel, `ตัวคูณเพิ่มขึ้น ${amt}...`);
+    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt} จากพลังของนายทุน <<`);
     critMultiplier += amt;
 });
