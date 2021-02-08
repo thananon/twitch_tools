@@ -75,9 +75,7 @@ client.connect();
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
-    let re25 = /25.*25/;
-    let re25_th = /๒๕.*๒๕/;
-    if (re25.test(message) || re25_th.test(message)) {
+    if (/[2๒].*[5๕].*[2๒].*[5๕]/.test(message)) {
         timeoutUser(channel, tags, baseTimeoutSeconds, 'เก่งคณิตศาสตร์');
     }
 
@@ -146,3 +144,9 @@ client.on('cheer', (channel, userstate, message) => {
     client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt} จากพลังของนายทุน <<`);
     critMultiplier += amt;
 });
+
+
+// We can do fun thing like bot getting stronger when more ppl join.
+// client.on("join", (channel, username, self) => {
+    // console.log(username);
+// });
