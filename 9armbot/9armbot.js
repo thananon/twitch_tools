@@ -108,11 +108,13 @@ function gacha(channel, user, amount) {
     console.log(`gacha: ${channel}, ${user.username}, ${amount}`);
     if (deductCoins(user.username, amount)) {
         if (roll(gachaLegendaryRate)) {
-            coins[user.username] += amount*10;
-            client.say(channel, `@${user.username} ได้รางวัล ${amount*10} armcoin.`);
+            let gain =  parseInt(amount*10 * (1+botLevel/100));
+            coins[user.username] += gain;
+            client.say(channel, `@${user.username} ได้รางวัล ${gain} armcoin.`);
         } else if (roll(gachaMysticRate)) {
-            coins[user.username] += amount*3;
-            client.say(channel, `@${user.username} ได้รางวัล ${amount*3} armcoin.`);
+            let gain =  parseInt(amount*Math.floor(1+(Math.random()*2))*(1+botLevel/100));
+            coins[user.username] += gain;
+            client.say(channel, `@${user.username} ได้รางวัล ${gain} armcoin.`);
         } else {
             //client.say(channel, `🧂🧂🧂 @${user.username} 🧂 LUL🧂🧂🧂🧂`);
         }
