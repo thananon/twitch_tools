@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Aitthi/twitch_tools.git"
+    "url": "git+https://github.com/thananon/twitch_tools.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Aitthi/twitch_tools/issues"
+    "url": "https://github.com/thananon/twitch_tools/issues"
   },
-  "homepage": "https://github.com/Aitthi/twitch_tools#readme",
+  "homepage": "https://github.com/thananon/twitch_tools#readme",
   "dependencies": {
     "dotenv": "^8.2.0",
     "tmi.js": "^1.7.1",
