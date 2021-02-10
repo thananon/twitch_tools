@@ -12,10 +12,7 @@ var botExp = 0;
 var botLevel = 1;
 var botActive = 0;
 
-const purgeList = new Map();
-
 var sentryMode = 1;
-var vengeanceMode=0;
 
 var coins = {};
 
@@ -123,34 +120,11 @@ function gacha(channel, user, amount) {
     }
 }
 
-
-function getPurgeList(channel) {
-    const serverList = purgeList.get(channel);
-    if(!serverList) {
-		const purgeConstruct = {
-            active: 0,
-			users: []
-		};
-		purgeList.set(channel, purgeConstruct);
-        return(purgeConstruct);
-    } else {
-        return(serverList);
-    }
-}
-
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
     if (user.mod || user.username == 'armzi' ) {
         return;
-    }
-
-    if (vengeanceMode)
-        baseTimeoutSeconds+=10;
-
-    let purgeList = getPurgeList(channel);
-    if (purgeList.active) {
-        purgeList.users.push(user);
     }
 
     let final_duration = duration;
@@ -214,13 +188,11 @@ client.on('message', (channel, tags, message, self) => {
     if (!botActive)
         return;
 
-    let purge = getPurgeList(channel);
-
     /* MESSAGE FILTER:
        I added a low chance for timeout instead of kicking right away as chat will be full with
        kicking message and it is unpleasant. */
 
-    if (sentryMode && !purge.active) {
+    if (sentryMode) {
         if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
             client.say(channel, '225 ไง Land Protector อะ');
             if (roll (15))
@@ -247,31 +219,6 @@ client.on('message', (channel, tags, message, self) => {
         critRate = 10;
         critMultiplier = 2;
         baseTimeoutSeconds = 600;
-        return;
-    }
-
-    /* purge mode allows the bot to reap all offenders and level up in the process */
-    if (message == '!purgemode' && tags.username == 'armzi') {
-        if (purge.active == 0) {
-            purge.active = 1;
-            client.say(channel, '☠️☠️☠️ เปิดโหมดชำระล้าง.. ☠️☠️☠️');
-        } else {
-            let duration = baseTimeoutSeconds;
-            let critUp = purge.users.length /100;
-            purge.active = 0;
-            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${purge.users.length} รายการ`);
-            if(roll(critRate)) {
-                duration *= critMultiplier;
-                client.say(channel,`CRITICAL PURGE! พลังโจมตี x${critMultiplier}`);
-            }
-
-            while (purge.users.length) {
-                let user = purge.users.pop();
-                client.timeout(channel, user.username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
-            }
-            client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น ตัวคูณเพิ่มขึ้น ${critUp} จากการชำระล้าง`);
-            critMultiplier += critUp;
-        }
         return;
     }
 
@@ -340,33 +287,27 @@ client.on('message', (channel, tags, message, self) => {
             feedBot(channel, tags, parseInt(group[1]));
     }
 
+    if (message == '!whisper') {
+        console.log('whisper..');
+        client.whisper(tags.username, 'test');
+    }
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
-    if (message == '!vengeance' && tags.username == 'armzi') {
-        if (vengeanceMode == 0) {
-            vengeanceMode = 1;
-            client.say(channel, `โหมดแค้น: บอทจะทรงพลังขึ้นทุกครั้งเมื่อโจมตี`);
-        } else {
-            vengeanceMode = 0;
-            client.say(channel, `ไม่แค้นแล้วจ้า..`);
-        }
-        return;
-    }
 });
 
 client.on('subscription', (channel, username, method, message, userstate) => {
     critRate+=2;
     client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
     client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
-    giveCoinsToUser(channel, username, 50);
+    giveCoinsToUser(channel, username, 10);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
     critRate+=2;
     client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
     client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
-    giveCoinsToUser(channel, username, 50);
+    giveCoinsToUser(channel, username, 10);
 });
 
 client.on('cheer', (channel, userstate, message) => {
