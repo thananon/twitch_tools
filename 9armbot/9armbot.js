@@ -1,8 +1,10 @@
+require('dotenv').config()
 const tmi = require('tmi.js');
 const fs = require('fs');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
+
+const Utils = require('../core/utils')
 
 var critRate = 5;
 var critMultiplier = 1.5;
@@ -70,7 +72,7 @@ function feedBot(channel, user, amount) {
 // return JSON: list of viewer's username.
 function getOnlineUsers (channel) {
     //TODO: channel is currently hard-coded.
-    let query_url = `https://tmi.twitch.tv/group/user/armzi/chatters`;
+    let query_url = `${process.env.twitch_api}/group/user/armzi/chatters`;
     let xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", query_url, false); //synchronous
     xmlhttp.send();
@@ -81,7 +83,7 @@ function getOnlineUsers (channel) {
     }
 }
 
-function thanos (channel, byUser) {
+async function thanos (channel, byUser) {
     let thanosCost = 3000;
     let thanosTimeoutSeconds = 300;
     let casualties = 0;
@@ -93,7 +95,7 @@ function thanos (channel, byUser) {
                 // directly call timeout API as we dont want crit/dodge.
                 console.log(`$list[i] got snapped.`);
                 client.timeout(channel, list[i], thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
-                sleep(200);
+                await new Utils().sleep(2000)
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
@@ -185,10 +187,10 @@ const client = new tmi.Client({
     options: { debug: true},
     connection: { reconnect: true },
     identity: {
-        username: '9armbot',
+        username: process.env.tmi_username,
         password: oauth_token,
     },
-    channels: [ 'armzi' ]
+    channels: [process.env.tmi_channel_name]
 });
 
 client.connect();
