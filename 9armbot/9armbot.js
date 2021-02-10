@@ -11,7 +11,6 @@ var baseTimeoutSeconds = 600;
 var botExp = 0;
 var botLevel = 1;
 
-var purgeMode = 0;
 const purgeList = new Map();
 
 var sentryMode = 1;
@@ -136,12 +135,9 @@ function timeoutUser(channel, user, duration, reason) {
     if (vengeanceMode)
         baseTimeoutSeconds+=10;
 
-    if (purgeMode) {
-        // add username to purge list and return;
-        // TODO: This will be a problem when this bot is handling multiple channels.
-        // but it will work for now.
-        getPurgeList(channel).users.push(user.username);
-        return;
+    let purgeList = getPurgeList(channel);
+    if (purgeList.active) {
+        purgeList.users.push(user);
     }
 
     let final_duration = duration;
@@ -187,17 +183,26 @@ client.connect();
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
-    if (sentryMode) {
+    let purge = getPurgeList(channel);
+
+    /* MESSAGE FILTER:
+       I added a low chance for timeout instead of kicking right away as chat will be full with
+       kicking message and it is unpleasant.
+
+       However, we want the filter to be active when sentry mode is on or purge mode is on.
+       We also want to get everyone in purgemode, so we ignore the roll when purge is going. */
+
+    if (sentryMode || purge.active) {
         if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
             client.say(channel, '225 ไง Land Protector อะ');
-            if (roll (15))
+            if (purge.active || roll (15))
                 timeoutUser(channel, tags, baseTimeoutSeconds, 'เก่งคณิตศาสตร์');
             return;
         }
 
         let wanttofly = /อยากบิน.*/;
         if (wanttofly.test(message)) {
-            if (roll(50))
+            if (purge.active || roll(50))
                 timeoutUser(channel, tags, baseTimeoutSeconds, 'อยากบิน');
             return;
         }
@@ -208,32 +213,32 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
+    /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
     if (message == '!reset' && tags.username == 'armzi') {
         critRate = 10;
         critMultiplier = 2;
         baseTimeoutSeconds = 600;
-        client.say(channel, '(RESET) โอกาศติดคริ = '+critRate+'% ตัวคูณ = '+critMultiplier+'.');
         return;
     }
 
+    /* purge mode allows the bot to reap all offenders and level up in the process */
     if (message == '!purgemode' && tags.username == 'armzi') {
-        let serverList = getPurgeList(channel);
-        if (serverList.active == 0) {
-            serverList.active = 1;
+        if (purge.active == 0) {
+            purge.active = 1;
             client.say(channel, '☠️☠️☠️ เปิดโหมดชำระล้าง.. ☠️☠️☠️');
         } else {
             let duration = baseTimeoutSeconds;
-            let critUp = serverList.users.length /100;
-            serverList.active = 0;
-            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${serverList.users.length} รายการ`);
+            let critUp = purge.users.length /100;
+            purge.active = 0;
+            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${purge.users.length} รายการ`);
             if(roll(critRate)) {
                 duration *= critMultiplier;
                 client.say(channel,`CRITICAL PURGE! พลังโจมตี x${critMultiplier}`);
             }
 
-            while (serverList.users.length) {
-                let username = serverList.users.pop();
+            while (purge.users.length) {
+                let username = purge.users.pop();
                 client.timeout(channel, username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
             }
             client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น ตัวคูณเพิ่มขึ้น ${critUp} จากการชำระล้าง`);
@@ -242,18 +247,26 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
+    /* sentry mode is to toggle message filter on/off. */
     if (tags.username == "armzi" && message == '!sentry') {
         if (sentryMode == 1) sentryMode = 0;
         else sentryMode = 1;
         return
     }
 
+    /* for testing purpose */
     if (message == '!give' && tags.username == "armzi") {
-        //giveCoins(getOnlineUsers(channel), 1);
-        client.say(channel, `สมาชิก ${giveCoins(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
+        client.say(channel, `gave ${giveCoins(getOnlineUsers(channel), 50)} users 50 coins.`); 
         return;
     }
 
+    /* testing purpose, give myself bunch of coins */
+    if (message == '!c') {
+        coins['armzi'] = 999999;
+        return;
+    }
+
+    /* query amount of coin */
     if (message == '!coin') {
         if (coins[tags.username])
             client.say(channel, `@${tags.username} มี ${coins[tags.username]} armcoin.`);
@@ -262,16 +275,14 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
+    /* This should be fun, if its not broken. */
     if (message == '!thanos') {
         thanos(channel, tags);
         return;
     }
 
-    if (message == '!c') {
-        coins['armzi'] = 999;
-    }
-
-    /* Gacha XXXX */
+    /* usage: !gacha [amount] */
+    /* We are trying to control the inflation. The return, on average should be a loss for users. */
     let gacha_re = /^!gacha\s*(\d*)/;
     let group = message.match(gacha_re);
     if (group) {
@@ -282,6 +293,8 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
+    /* This command let user feed the bot with armcoin. */
+    /* usage: !feed [amount] */
     let feed_re = /^!feed\s*(\d*)/;
     group = message.match(feed_re);
     if (group) {
@@ -291,6 +304,8 @@ client.on('message', (channel, tags, message, self) => {
             feedBot(channel, tags, parseInt(group[1]));
     }
 
+    if (message == '!github')
+        client.say(channel, 'https://github.com/thananon/twitch_tools');
 
     if (message == '!vengeance' && tags.username == 'armzi') {
         if (vengeanceMode == 0) {
@@ -325,6 +340,7 @@ client.on('cheer', (channel, userstate, message) => {
 
 
 // We can do fun thing like bot getting stronger when more ppl join.
-// client.on("join", (channel, username, self) => {
+client.on("join", (channel, username, self) => {
     // console.log(username);
-// });
+    botExp++;
+});
