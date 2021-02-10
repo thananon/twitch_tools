@@ -10,6 +10,7 @@ var dodgeRate = 3;
 var baseTimeoutSeconds = 600;
 var botExp = 0;
 var botLevel = 1;
+var botActive = 0;
 
 const purgeList = new Map();
 
@@ -30,8 +31,16 @@ function deductCoins(user, amount) {
     return true;
 }
 
+function giveCoinsToUser(channel, username, amount) {
+    if (coins[username])
+        coins[username] += amount;
+    else
+        coins[username] = amount;
 
-function giveCoins(users, amount) {
+}
+
+
+function giveCoinsToList(users, amount) {
 
     let len = users.length;
     for (i=0;i<len;i++) {
@@ -73,7 +82,7 @@ function getOnlineUsers (channel) {
 }
 
 function thanos (channel, byUser) {
-    let thanosCost = 30;
+    let thanosCost = 3000;
     let thanosTimeoutSeconds = 300;
     let casualties = 0;
     if (deductCoins(byUser.username, thanosCost) || byUser == 'armzi') {
@@ -82,7 +91,9 @@ function thanos (channel, byUser) {
             if (roll(50)){
                 casualties++;
                 // directly call timeout API as we dont want crit/dodge.
+                console.log(`$list[i] got snapped.`);
                 client.timeout(channel, list[i], thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
+                sleep(200);
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
@@ -103,7 +114,7 @@ function gacha(channel, user, amount) {
             coins[user.username] += amount*3;
             client.say(channel, `@${user.username} ได้รางวัล ${amount*3} armcoin.`);
         } else {
-            client.say(channel, `🧂🧂🧂 @${user.username} 🧂 LUL🧂🧂🧂🧂`);
+            //client.say(channel, `🧂🧂🧂 @${user.username} 🧂 LUL🧂🧂🧂🧂`);
         }
     } else {
         timeoutUser(client.getChannel, user, baseTimeoutSeconds, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
@@ -183,26 +194,41 @@ client.connect();
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
+    if (tags.mod || tags.username == 'armzi') {
+        let active_re = /!bot\s*(on|off)/i;
+        let active = message.match(active_re);
+
+        if (active) {
+            if (active[1] == 'off') {
+                botActive = 0;
+                client.say(channel, 'bot command is now OFF.');
+            } else if (active[1] == 'on') {
+                botActive = 1;
+                client.say(channel, 'bot command is now ON.');
+            }
+        }
+    }
+
+    if (!botActive)
+        return;
+
     let purge = getPurgeList(channel);
 
     /* MESSAGE FILTER:
        I added a low chance for timeout instead of kicking right away as chat will be full with
-       kicking message and it is unpleasant.
+       kicking message and it is unpleasant. */
 
-       However, we want the filter to be active when sentry mode is on or purge mode is on.
-       We also want to get everyone in purgemode, so we ignore the roll when purge is going. */
-
-    if (sentryMode || purge.active) {
+    if (sentryMode && !purge.active) {
         if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
             client.say(channel, '225 ไง Land Protector อะ');
-            if (purge.active || roll (15))
+            if (roll (15))
                 timeoutUser(channel, tags, baseTimeoutSeconds, 'เก่งคณิตศาสตร์');
             return;
         }
 
         let wanttofly = /อยากบิน.*/;
         if (wanttofly.test(message)) {
-            if (purge.active || roll(50))
+            if (roll(50))
                 timeoutUser(channel, tags, baseTimeoutSeconds, 'อยากบิน');
             return;
         }
@@ -238,8 +264,8 @@ client.on('message', (channel, tags, message, self) => {
             }
 
             while (purge.users.length) {
-                let username = purge.users.pop();
-                client.timeout(channel, username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
+                let user = purge.users.pop();
+                client.timeout(channel, user.username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
             }
             client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น ตัวคูณเพิ่มขึ้น ${critUp} จากการชำระล้าง`);
             critMultiplier += critUp;
@@ -256,7 +282,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* for testing purpose */
     if (message == '!give' && tags.username == "armzi") {
-        client.say(channel, `gave ${giveCoins(getOnlineUsers(channel), 50)} users 50 coins.`); 
+        client.say(channel, `gave ${giveCoinsToList(getOnlineUsers(channel), 50)} users 50 coins.`); 
         return;
     }
 
@@ -293,6 +319,14 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
+    let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
+    group = message.match(give_re);
+    if (group && tags.username == 'armzi') {
+        if (group[1] && group[2]) {
+            giveCoinsToUser(channel, group[1], parseInt(group[2]));
+        }
+    }
+
     /* This command let user feed the bot with armcoin. */
     /* usage: !feed [amount] */
     let feed_re = /^!feed\s*(\d*)/;
@@ -322,14 +356,15 @@ client.on('message', (channel, tags, message, self) => {
 client.on('subscription', (channel, username, method, message, userstate) => {
     critRate+=2;
     client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoins(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
-    giveCoins(getOnlineUsers(channel), 1);
+    client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
+    giveCoinsToUser(channel, username, 50);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
     critRate+=2;
     client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoins(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
+    client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
+    giveCoinsToUser(channel, username, 50);
 });
 
 client.on('cheer', (channel, userstate, message) => {
