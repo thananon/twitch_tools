@@ -12,7 +12,7 @@ var botExp = 0;
 var botLevel = 1;
 
 var purgeMode = 0;
-var purgeList = [];
+const purgeList = new Map();
 
 var sentryMode = 1;
 var vengeanceMode=0;
@@ -111,6 +111,21 @@ function gacha(channel, user, amount) {
     }
 }
 
+
+function getPurgeList(channel) {
+    const serverList = purgeList.get(channel);
+    if(!serverList) {
+		const purgeConstruct = {
+            active: 0,
+			users: []
+		};
+		purgeList.set(channel, purgeConstruct);
+        return(purgeConstruct);
+    } else {
+        return(serverList);
+    }
+}
+
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
@@ -125,7 +140,7 @@ function timeoutUser(channel, user, duration, reason) {
         // add username to purge list and return;
         // TODO: This will be a problem when this bot is handling multiple channels.
         // but it will work for now.
-        purgeList.push(user.username);
+        getPurgeList(channel).users.push(user.username);
         return;
     }
 
@@ -165,7 +180,6 @@ const client = new tmi.Client({
         password: oauth_token,
     },
     channels: [ 'armzi' ]
-
 });
 
 client.connect();
@@ -204,21 +218,22 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     if (message == '!purgemode' && tags.username == 'armzi') {
-        if (purgeMode == 0) {
-            purgeMode = 1;
+        let serverList = getPurgeList(channel);
+        if (serverList.active == 0) {
+            serverList.active = 1;
             client.say(channel, '☠️☠️☠️ เปิดโหมดชำระล้าง.. ☠️☠️☠️');
         } else {
             let duration = baseTimeoutSeconds;
-            let critUp = purgeList.length /100;
-            purgeMode = 0;
-            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${purgeList.length} รายการ`);
+            let critUp = serverList.users.length /100;
+            serverList.active = 0;
+            client.say(channel, `☠️☠️เริ่มการชำระล้าง..☠️☠️' มีบันทึกในบัญชีหนังหมา ${serverList.users.length} รายการ`);
             if(roll(critRate)) {
                 duration *= critMultiplier;
                 client.say(channel,`CRITICAL PURGE! พลังโจมตี x${critMultiplier}`);
             }
 
-            while (purgeList.length) {
-                let username = purgeList.pop();
+            while (serverList.users.length) {
+                let username = serverList.users.pop();
                 client.timeout(channel, username, baseTimeoutSeconds, 'ถูกกำจัดในการชำระล้าง');
             }
             client.say(channel, `☠️☠️' ชำระล้างเสร็จสิ้น ตัวคูณเพิ่มขึ้น ${critUp} จากการชำระล้าง`);
