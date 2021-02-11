@@ -309,10 +309,10 @@ client.on('message', (channel, tags, message, self) => {
         }
 
         /* This should be fun, if its not broken. */
-        if (message == '!thanos') {
+        /*if (message == '!thanos') {
             thanos(channel, tags);
             return;
-        }
+        }*/
 
         /* usage: !gacha [amount] */
         /* We are trying to control the inflation. The return, on average should be a loss for users. */
@@ -380,5 +380,4 @@ client.on('connected', (address, port) => {
     restoreBotData();
     setInterval(saveBotData, 180000);
     console.log('Bot data restored...')
-    marketOpen = true;
 });
