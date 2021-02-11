@@ -122,6 +122,7 @@ class Player{
         if(!Number(amount)){
             return
         }
+        amount = Number(amount)
         let player = this.players.find(x=>x.username == username)
         if(player){
             player.coins+=amount
@@ -136,6 +137,7 @@ class Player{
         if(!Number(amount)){
             return false
         }
+        amount = Number(amount)
         let player = this.players.find(x=>x.username == username)
         if(player){
             if(player.coins > amount){
