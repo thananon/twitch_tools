@@ -1,16 +1,17 @@
-require('dotenv').config()
+require('dotenv').config({ path: './../.env'})
 const tmi = require('tmi.js');
 const fs = require('fs');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 const Utils = require('../core/utils')
+const Player = require('./player')
 
 var dodgeRate = 3;
 var marketOpen = false;
 
 var sentryMode = 1;
 
-var coins = {};
+// var coins = {};
 var sessionPayout = 0;
 var sessionIncome = 0;
 
@@ -22,56 +23,26 @@ var botInfo = {
     level : 1
 };
 
-function saveBotData () {
-    let data = JSON.stringify(coins);
-    fs.writeFileSync('coins.json', data, 'utf8');
+let player = new Player()
 
+function saveBotData () {
     data = JSON.stringify(botInfo);
     fs.writeFileSync('botstat.json', data, 'utf8');
 }
 
 function restoreBotData () {
-    let string  = fs.readFileSync('coins.json', 'utf8');
-    coins = JSON.parse(string);
-
     string = fs.readFileSync('botstat.json', 'utf8');
     botInfo = JSON.parse(string);
 }
 
-
-function deductCoins(user, amount) {
-    if (coins[user] == undefined) {
-        return false;
+function giveCoinsToList(amount) {
+   let players = player.getPlayers()
+    for(let user of players){
+        player.giveCoinsToPayer(user.username, amount)
+        console.log(`${user.username} has ${user.coins} coins.`);
     }
-
-    if (coins[user] < amount)
-        return false;
-
-    coins[user] -= amount;
-    return true;
-}
-
-function giveCoinsToUser(channel, username, amount) {
-    if (coins[username])
-        coins[username] += amount;
-    else
-        coins[username] = amount;
-
-}
-
-
-function giveCoinsToList(users, amount) {
-
-    let len = users.length;
-    for (i=0;i<len;i++) {
-        if (coins[users[i]] == undefined)
-            coins[users[i]] = amount;
-        else
-            coins[users[i]] += amount;
-        console.log(`${users[i]} has ${coins[users[i]]} coins.`);
-    }
-    console.log(`Gave out ${amount} coins to ${len} users.`);
-    return len;
+    console.log(`Gave out ${amount} coins to ${players.length} users.`);
+    return players.length;
 }
 
 function feedBot(channel, user, amount) {
@@ -87,33 +58,17 @@ function feedBot(channel, user, amount) {
     }
 }
 
-
-// return JSON: list of viewer's username.
-function getOnlineUsers (channel) {
-    //TODO: channel is currently hard-coded.
-    let query_url = `${process.env.twitch_api}/group/user/armzi/chatters`;
-    let xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", query_url, false); //synchronous
-    xmlhttp.send();
-
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-        chatterJSON = JSON.parse(xmlhttp.responseText);
-        return (chatterJSON['chatters']['viewers']);
-    }
-}
-
 async function thanos (channel, byUser) {
     let thanosCost = 3000;
     let thanosTimeoutSeconds = 300;
     let casualties = 0;
     if (deductCoins(byUser.username, thanosCost) || byUser == 'armzi') {
-        list = getOnlineUsers(channel);
-        for(i=0; i<list.length;i++) {
+        let players = player.getPlayers()
+        for(let user of players){
             if (roll(50)){
                 casualties++;
-                // directly call timeout API as we dont want crit/dodge.
-                console.log(`$list[i] got snapped.`);
-                client.timeout(channel, list[i], thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
+                console.log(`${user.username} got snapped.`);
+                client.timeout(channel, user.username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
                 await new Utils().sleep(2000)
             }
         }
@@ -129,8 +84,10 @@ function gacha(channel, user, amount) {
     let Bonus = 1;
     if (amount == 0) return;
 
-    if (deductCoins(user.username, amount)) {
-        if (coins[user.username] == 0 && amount >= 10) {
+    let _player = player.getPlayerByUsername(user.username)
+    // console.log(_player)
+    if (_player && player.deductCoins(_player.username, amount)) {
+        if (_player.coins == 0 && amount >= 10) {
             // user all-in.
             Bonus = 2;            
         }
@@ -138,22 +95,22 @@ function gacha(channel, user, amount) {
         if (roll(gachaLegendaryRate)) {
             let multiplier = 5+Math.random()*5 + botInfo.level/100 * Bonus;
             let gain =  parseInt(amount*multiplier);
-            coins[user.username] += gain;
+            player.giveCoinsToPayer(_player.username, gain)
             sessionPayout += gain - amount;
             if (Bonus!=1) {
-                client.say(channel, `ALL-IN JACKPOT!! @${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
             } else {
-                client.say(channel, `JACKPOT!! @${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
             }
         } else if (roll(gachaMysticRate)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100 * Bonus;
             let gain =  parseInt(amount*multiplier);
-            coins[user.username] += gain;
-            client.say(channel, `@${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
+            player.giveCoinsToPayer(_player.username, gain)
+            client.say(channel, `@${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
         } else {
             sessionIncome += amount;
-            //client.say(channel, `🧂🧂🧂 @${user.username} 🧂 LUL🧂🧂🧂🧂`);
+            //client.say(channel, `🧂🧂🧂 @${_player.username} 🧂 LUL🧂🧂🧂🧂`);
         }
     } else {
         //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
@@ -231,7 +188,8 @@ client.on('message', (channel, tags, message, self) => {
     group = message.match(give_re);
     if (group && tags.username == 'armzi') {
         if (group[1] && group[2]) {
-            giveCoinsToUser(channel, group[1], parseInt(group[2]));
+            // giveCoinsToUser(channel, group[1], parseInt(group[2]));
+            player.giveCoinsToPayer(group[1], parseInt(group[2]))
         }
     }
 
@@ -289,21 +247,22 @@ client.on('message', (channel, tags, message, self) => {
 
     /* for testing purpose */
     if (message == '!give' && tags.username == "armzi") {
-        client.say(channel, `gave ${giveCoinsToList(getOnlineUsers(channel), 50)} users 50 coins.`); 
+        client.say(channel, `gave ${giveCoinsToList(50)} users 50 coins.`); 
         return;
     }
 
     /* testing purpose, give myself bunch of coins */
     if (message == '!c') {
-        coins['armzi'] = 999999;
+        player.giveCoinsToPayer('armzi', 999999)
         return;
     }
 
     if (marketOpen || tags.subscriber) {
         /* query amount of coin */
         if (message == '!coin') {
-            if (coins[tags.username])
-                client.say(channel, `@${tags.username} มี ${coins[tags.username]} armcoin.`);
+            let _player = player.getPlayerByUsername(tags.username)
+            if (_player)
+                client.say(channel, `@${_player.username} มี ${_player.coins} armcoin.`);
             else
                 client.say(channel, `@${tags.username} มี 0 armcoin.`);
             return;
@@ -328,8 +287,9 @@ client.on('message', (channel, tags, message, self) => {
         }
 
         if (message == '!allin'){
-            if (coins[tags.username]){
-                gacha(channel, tags, coins[tags.username]);
+            let _player = player.getPlayerByUsername(tags.username)
+            if (_player){
+                gacha(channel, tags, _player.coins);
             }
         }
         /* This command let user feed the bot with armcoin. */
@@ -360,15 +320,17 @@ client.on('message', (channel, tags, message, self) => {
 client.on('subscription', (channel, username, method, message, userstate) => {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
-    giveCoinsToUser(channel, username, 10);
+    client.say(channel, `สมาชิก ${giveCoinsToList(1)} รายได้รับ 1 armcoin`);
+    // giveCoinsToUser(channel, username, 10);
+    player.giveCoinsToPayer(username,10)
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
-    giveCoinsToUser(channel, username, 10);
+    client.say(channel, `สมาชิก ${giveCoinsToList(1)} รายได้รับ 1 armcoin`);
+    // giveCoinsToUser(channel, username, 10);
+    player.giveCoinsToPayer(username,10)
 });
 
 client.on('cheer', (channel, userstate, message) => {
