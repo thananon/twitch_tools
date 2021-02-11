@@ -58,9 +58,11 @@ function feedBot(channel, user, amount) {
     if (deductCoins(user.username, amount)) {
         botExp += amount;
         if (botExp >= 500) { // level up
-            botExp -= 500;
-            baseTimeoutSeconds+=10;
-            botLevel++;
+            // prevent feed over 1000 per time
+            levelUp = Math.floor(botExp / 500);
+            botExp = botExp % 500;
+            baseTimeoutSeconds+=10 * levelUp;
+            botLevel += levelUp;
             client.say(channel, `LEVEL UP!! ->${botLevel}`);
         }
     }
