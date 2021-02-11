@@ -46,7 +46,7 @@ function giveCoinsToList(amount) {
 }
 
 function feedBot(channel, user, amount) {
-    if (deductCoins(user.username, amount)) {
+    if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
         if (botInfo.exp >= 500) { // level up
             let levelup = parseInt(botInfo.exp/500);
@@ -62,7 +62,7 @@ async function thanos (channel, byUser) {
     let thanosCost = 3000;
     let thanosTimeoutSeconds = 300;
     let casualties = 0;
-    if (deductCoins(byUser.username, thanosCost) || byUser == 'armzi') {
+    if (player.deductCoins(byUser.username, thanosCost) || byUser == 'armzi') {
         let players = player.getPlayers()
         for(let user of players){
             if (roll(50)){
