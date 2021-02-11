@@ -10,7 +10,7 @@ var dodgeRate = 3;
 var baseTimeoutSeconds = 600;
 var botExp = 0;
 var botLevel = 1;
-var botActive = 0;
+var marketOpen = 0;
 
 var sentryMode = 1;
 
@@ -141,7 +141,6 @@ function timeoutUser(channel, user, duration, reason) {
 
     if (user.subscriber) {
         final_duration /= 2;
-        //client.say(channel, `@${user.username} เป็นนายทุนจึงรับโทษเบา`);
     }
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${critRate})`).catch((err) => {
         console.log(err);
@@ -170,23 +169,40 @@ client.connect();
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
+    /* mod can open/close the market. Allowing people to check/spend their coins. */
     if (tags.mod || tags.username == 'armzi') {
-        let active_re = /!bot\s*(on|off)/i;
-        let active = message.match(active_re);
+        let market_re = /!market\s*(open|close)/i;
+        let market = message.match(market_re);
 
-        if (active) {
-            if (active[1] == 'off') {
-                botActive = 0;
-                client.say(channel, 'bot command is now OFF.');
-            } else if (active[1] == 'on') {
-                botActive = 1;
-                client.say(channel, 'bot command is now ON.');
+        if (market) {
+            if (market[1] == 'open') {
+                marketOpen = 0;
+                client.say(channel, 'market is now OPEN. (!coin,!gacha,!feed)');
+            } else if (market[1] == 'close') {
+                marketOpen = 1;
+                client.say(channel, 'market is now CLOSE.');
             }
+            return;
         }
     }
 
-    if (!botActive)
-        return;
+    /* Give coins to a user. Testing command, only available to me. */
+    let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
+    group = message.match(give_re);
+    if (group && tags.username == 'armzi') {
+        if (group[1] && group[2]) {
+            giveCoinsToUser(channel, group[1], parseInt(group[2]));
+        }
+    }
+
+
+    if (message == '!whisper') {
+        console.log('whisper..');
+        client.whisper(tags.username, 'test');
+    }
+    if (message == '!github')
+        client.say(channel, 'https://github.com/thananon/twitch_tools');
+
 
     /* MESSAGE FILTER:
        I added a low chance for timeout instead of kicking right away as chat will be full with
@@ -241,58 +257,45 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
-    /* query amount of coin */
-    if (message == '!coin') {
-        if (coins[tags.username])
-            client.say(channel, `@${tags.username} มี ${coins[tags.username]} armcoin.`);
-        else
-            client.say(channel, `@${tags.username} มี 0 armcoin.`);
-        return;
-    }
+    if (marketOpen || tags.subscriber) {
+        /* query amount of coin */
+        if (message == '!coin') {
+            if (coins[tags.username])
+                client.say(channel, `@${tags.username} มี ${coins[tags.username]} armcoin.`);
+            else
+                client.say(channel, `@${tags.username} มี 0 armcoin.`);
+            return;
+        }
 
-    /* This should be fun, if its not broken. */
-    if (message == '!thanos') {
-        thanos(channel, tags);
-        return;
-    }
+        /* This should be fun, if its not broken. */
+        if (message == '!thanos') {
+            thanos(channel, tags);
+            return;
+        }
 
-    /* usage: !gacha [amount] */
-    /* We are trying to control the inflation. The return, on average should be a loss for users. */
-    let gacha_re = /^!gacha\s*(\d*)/;
-    let group = message.match(gacha_re);
-    if (group) {
-        if (!group[1])
-            gacha(channel, tags, 1);
-        else
-            gacha(channel, tags, parseInt(group[1]));
-        return;
-    }
+        /* usage: !gacha [amount] */
+        /* We are trying to control the inflation. The return, on average should be a loss for users. */
+        let gacha_re = /^!gacha\s*(\d*)/;
+        let group = message.match(gacha_re);
+        if (group) {
+            if (!group[1])
+                gacha(channel, tags, 1);
+            else
+                gacha(channel, tags, parseInt(group[1]));
+            return;
+        }
 
-    let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
-    group = message.match(give_re);
-    if (group && tags.username == 'armzi') {
-        if (group[1] && group[2]) {
-            giveCoinsToUser(channel, group[1], parseInt(group[2]));
+        /* This command let user feed the bot with armcoin. */
+        /* usage: !feed [amount] */
+        let feed_re = /^!feed\s*(\d*)/;
+        group = message.match(feed_re);
+        if (group) {
+            if (!group[1])
+                feedBot(channel, tags, 1);
+            else
+                feedBot(channel, tags, parseInt(group[1]));
         }
     }
-
-    /* This command let user feed the bot with armcoin. */
-    /* usage: !feed [amount] */
-    let feed_re = /^!feed\s*(\d*)/;
-    group = message.match(feed_re);
-    if (group) {
-        if (!group[1])
-            feedBot(channel, tags, 1);
-        else
-            feedBot(channel, tags, parseInt(group[1]));
-    }
-
-    if (message == '!whisper') {
-        console.log('whisper..');
-        client.whisper(tags.username, 'test');
-    }
-    if (message == '!github')
-        client.say(channel, 'https://github.com/thananon/twitch_tools');
 
 });
 
