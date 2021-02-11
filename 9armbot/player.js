@@ -70,6 +70,7 @@ class Player{
             level: level,
             coins: coins,
             status: status,
+            exp: 0,
             role: "viewer"
         } 
         if(!this.players.find(x=>x.username == player.username)){
@@ -101,6 +102,11 @@ class Player{
             }
         }
         return players
+    }
+
+    getCoinTop(top = 10){
+        let getPlayers = this.getPlayers("coins", "desc")
+        return this.cloneDeep(getPlayers.splice(0,top>0?top:0))
     }
 
 
