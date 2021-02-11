@@ -4,17 +4,39 @@ const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 
-var critRate = 5;
-var critMultiplier = 1.5;
 var dodgeRate = 3;
-var baseTimeoutSeconds = 600;
-var botExp = 0;
-var botLevel = 1;
-var marketOpen = 0;
+var marketOpen = false;
 
 var sentryMode = 1;
 
 var coins = {};
+var sessionPayout = 0;
+var sessionIncome = 0;
+
+var botInfo = {
+    critRate : 5,
+    critMultiplier : 1.5,
+    attackPower : 300,
+    exp : 0,
+    level : 1
+};
+
+function saveBotData () {
+    let data = JSON.stringify(coins);
+    fs.writeFileSync('coins.json', data, 'utf8');
+
+    data = JSON.stringify(botInfo);
+    fs.writeFileSync('botstat.json', data, 'utf8');
+}
+
+function restoreBotData () {
+    let string  = fs.readFileSync('coins.json', 'utf8');
+    coins = JSON.parse(string);
+
+    string = fs.readFileSync('botstat.json', 'utf8');
+    botInfo = JSON.parse(string);
+}
+
 
 function deductCoins(user, amount) {
     if (coins[user] == undefined) {
@@ -53,12 +75,13 @@ function giveCoinsToList(users, amount) {
 
 function feedBot(channel, user, amount) {
     if (deductCoins(user.username, amount)) {
-        botExp += amount;
-        if (botExp >= 500) { // level up
-            botExp -= 500;
-            baseTimeoutSeconds+=10;
-            botLevel++;
-            client.say(channel, `LEVEL UP!! ->${botLevel}`);
+        botInfo.exp += amount;
+        if (botInfo.exp >= 500) { // level up
+            let levelup = parseInt(botInfo.exp/500);
+            botInfo.level += levelup;
+            botInfo.exp %= 500;
+            botInfo.attackPower+=10*levelup;
+            client.say(channel, `LEVEL UP!! ->${botInfo.level}`);
         }
     }
 }
@@ -95,28 +118,44 @@ function thanos (channel, byUser) {
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
     } else {
-        timeoutUser(channel, byUser, baseTimeoutSeconds, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
+        timeoutUser(channel, byUser, botInfo.attackPower, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
     }
 }
 
 function gacha(channel, user, amount) {
-    let gachaLegendaryRate = 5;
-    let gachaMysticRate = 15;
-    console.log(`gacha: ${channel}, ${user.username}, ${amount}`);
+    let gachaLegendaryRate = 2;
+    let gachaMysticRate = 10;
+    let Bonus = 1;
+    if (amount == 0) return;
+
     if (deductCoins(user.username, amount)) {
+        if (coins[user.username] == 0 && amount >= 10) {
+            // user all-in.
+            Bonus = 2;            
+        }
+
         if (roll(gachaLegendaryRate)) {
-            let gain =  parseInt(amount*10 * (1+botLevel/100));
+            let multiplier = 5+Math.random()*5 + botInfo.level/100 * Bonus;
+            let gain =  parseInt(amount*multiplier);
             coins[user.username] += gain;
-            client.say(channel, `@${user.username} ได้รางวัล ${gain} armcoin.`);
+            sessionPayout += gain - amount;
+            if (Bonus!=1) {
+                client.say(channel, `ALL-IN JACKPOT!! @${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+            } else {
+                client.say(channel, `JACKPOT!! @${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+            }
         } else if (roll(gachaMysticRate)) {
-            let gain =  parseInt(amount*Math.floor(1+(Math.random()*2))*(1+botLevel/100));
+            let multiplier = 2+Math.random()*3 + botInfo.level/100 * Bonus;
+            let gain =  parseInt(amount*multiplier);
             coins[user.username] += gain;
-            client.say(channel, `@${user.username} ได้รางวัล ${gain} armcoin.`);
+            client.say(channel, `@${user.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
+            sessionPayout += gain - amount;
         } else {
+            sessionIncome += amount;
             //client.say(channel, `🧂🧂🧂 @${user.username} 🧂 LUL🧂🧂🧂🧂`);
         }
     } else {
-        timeoutUser(client.getChannel, user, baseTimeoutSeconds, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
+        //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
     }
 }
 
@@ -134,22 +173,22 @@ function timeoutUser(channel, user, duration, reason) {
         return;
     }
     // roll crit
-    if (roll(critRate)) {
-        final_duration *= critMultiplier;
-        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${critMultiplier}`);
+    if (roll(botInfo.critRate)) {
+        final_duration *= botInfo.critMultiplier;
+        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
     }
 
     if (user.subscriber) {
         final_duration /= 2;
     }
-    client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${critRate})`).catch((err) => {
+    client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
         console.log(err);
     });
 }
 
-function roll (critrate) {
+function roll (critRate) {
     dice = Math.random() * 100;
-    if (dice < critrate)
+    if (dice < critRate)
         return true;
     return false;
 }
@@ -176,10 +215,10 @@ client.on('message', (channel, tags, message, self) => {
 
         if (market) {
             if (market[1] == 'open') {
-                marketOpen = 0;
+                marketOpen = true;
                 client.say(channel, 'market is now OPEN. (!coin,!gacha,!feed)');
             } else if (market[1] == 'close') {
-                marketOpen = 1;
+                marketOpen = false;
                 client.say(channel, 'market is now CLOSE.');
             }
             return;
@@ -212,29 +251,31 @@ client.on('message', (channel, tags, message, self) => {
         if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
             client.say(channel, '225 ไง Land Protector อะ');
             if (roll (15))
-                timeoutUser(channel, tags, baseTimeoutSeconds, 'เก่งคณิตศาสตร์');
+                timeoutUser(channel, tags, botInfo.attackPower, 'เก่งคณิตศาสตร์');
             return;
         }
 
         let wanttofly = /อยากบิน.*/;
         if (wanttofly.test(message)) {
             if (roll(50))
-                timeoutUser(channel, tags, baseTimeoutSeconds, 'อยากบิน');
+                timeoutUser(channel, tags, botInfo.attackPower, 'อยากบิน');
             return;
         }
     }
 
     if (message == '!botstat') {
-        client.say(channel, `<Level ${botLevel}> <EXP ${botExp}/500> <พลังโจมตี: ${baseTimeoutSeconds}> <%crit: ${critRate}> <ตัวคูณ: ${critMultiplier}>`);
+        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}>`);
         return;
     }
 
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
     if (message == '!reset' && tags.username == 'armzi') {
-        critRate = 10;
-        critMultiplier = 2;
-        baseTimeoutSeconds = 600;
+        botInfo.critRate = 5;
+        botInfo.critMultiplier = 1.5;
+        botInfo.attackPower = 300;
+        botInfo.exp = 0;
+        botInfo.level = 1;
         return;
     }
 
@@ -285,6 +326,11 @@ client.on('message', (channel, tags, message, self) => {
             return;
         }
 
+        if (message == '!allin'){
+            if (coins[tags.username]){
+                gacha(channel, tags, coins[tags.username]);
+            }
+        }
         /* This command let user feed the bot with armcoin. */
         /* usage: !feed [amount] */
         let feed_re = /^!feed\s*(\d*)/;
@@ -297,18 +343,29 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
+    if (message == '!income' && tags.username == 'armzi'){
+        client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
+    }
+
+    if (message == '!save' && tags.username == 'armzi'){
+        saveBotData();
+    }
+
+    if (message == '!load' && tags.username == 'armzi'){
+        restoreBotData();
+    }
 });
 
 client.on('subscription', (channel, username, method, message, userstate) => {
-    critRate+=2;
-    client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
+    botInfo.critRate+=2;
+    client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
     giveCoinsToUser(channel, username, 10);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
-    critRate+=2;
-    client.say(channel, `>> critRate+2% ด้วยพลังแห่งทุนนิยม (${critRate}%) <<`);
+    botInfo.critRate+=2;
+    client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     client.say(channel, `สมาชิก ${giveCoinsToList(getOnlineUsers(channel), 1)} รายได้รับ 1 armcoin`);
     giveCoinsToUser(channel, username, 10);
 });
@@ -316,12 +373,12 @@ client.on('resub', (channel, username, months, message, userstate, method) => {
 client.on('cheer', (channel, userstate, message) => {
     let amt =  userstate.bits/1000;
     client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt} จากพลังของนายทุน <<`);
-    critMultiplier += amt;
+    botInfo.critMultiplier += amt;
 });
 
-
-// We can do fun thing like bot getting stronger when more ppl join.
-client.on("join", (channel, username, self) => {
-    // console.log(username);
-    botExp++;
+client.on('connected', (address, port) => {
+    restoreBotData();
+    setInterval(saveBotData, 180000);
+    console.log('Bot data restored...')
+    marketOpen = true;
 });
