@@ -46,7 +46,7 @@ async function giveCoinsToList(amount) {
 }
 
 function feedBot(channel, user, amount) {
-    if (player.deductCoins(user.username, amount)) {
+   if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
         if (botInfo.exp >= 500) { // level up
             let levelup = parseInt(botInfo.exp/500);
