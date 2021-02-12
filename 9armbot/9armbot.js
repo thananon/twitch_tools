@@ -11,7 +11,6 @@ var marketOpen = false;
 
 var sentryMode = 1;
 
-// var coins = {};
 var sessionPayout = 0;
 var sessionIncome = 0;
 
@@ -36,9 +35,9 @@ function restoreBotData () {
 }
 
 async function giveCoins_allonline(amount) {
-   let players = await player.online();
+   let players = await player.getOnlinePlayers();
     for(let username of players){
-        player.giveCoinsToPlayer(username, amount)
+        player.giveCoins(username, amount)
     }
     console.log(`Gave out ${amount} coins to ${players.length} users.`);
     return players.length;
@@ -84,10 +83,8 @@ function gacha(channel, user, amount) {
     if (amount == 0) return;
 
     let _player = player.getPlayerByUsername(user.username)
-    // console.log(_player)
     if (_player && player.deductCoins(_player.username, amount)) {
         if (_player.coins == 0 && amount >= 10) {
-            // user all-in.
             Bonus = 2;            
         }
 
@@ -102,7 +99,7 @@ function gacha(channel, user, amount) {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
             }
         } else if (roll(gachaMysticRate)) {
-            let multiplier = 2+Math.random()*3 + botInfo.level/100 * Bonus;
+            let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
             client.say(channel, `@${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
@@ -187,16 +184,15 @@ client.on('message', (channel, tags, message, self) => {
     group = message.match(give_re);
     if (group && tags.username == 'armzi') {
         if (group[1] && group[2]) {
-            // giveCoinsToUser(channel, group[1], parseInt(group[2]));
-            player.giveCoinsToPlayer(group[1], parseInt(group[2]))
+            player.giveCoins(group[1], parseInt(group[2]))
         }
     }
-
-
+/*
     if (message == '!whisper') {
         console.log('whisper..');
         client.whisper(tags.username, 'test');
     }
+*/
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
@@ -222,7 +218,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     if (message == '!botstat') {
-        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}>`);
+        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
         return;
     }
 
@@ -253,10 +249,10 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     /* testing purpose, give myself bunch of coins */
-    if (message == '!c') {
-        player.giveCoinsToPlayer('armzi', 999999)
+    /*if (message == '!c') {
+        player.giveCoins('armzi', 999999)
         return;
-    }
+    }*/
 
     if (marketOpen || tags.subscriber) {
         /* query amount of coin */
@@ -318,22 +314,31 @@ client.on('message', (channel, tags, message, self) => {
     }
 });
 
-client.on('subscription', (channel, username, method, message, userstate) => {
+function subscriptionPayout (username) {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
     });
-    player.giveCoinsToPlayer(username,10)
+    player.giveCoins(username,10)
+}
+
+client.on('subscription', (channel, username, method, message, userstate) => {
+    subscriptionPayout(username);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
-    botInfo.critRate+=2;
-    client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
-    giveCoins_allonline(1).then(function (total) {
-        client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
-    });
-    player.giveCoinsToPlayer(username,10)
+    subscriptionPayout(username);
+});
+
+client.on('subgift', (channel, username, streakmonth, recipient, methods, userstate) => {
+    player.giveCoins(username, 10);
+    client.say (channel, `${username} ได้รับ 10 armcoin จากการ Gift ให้ ${recipient} armKraab `);
+});
+
+client.on('submysterygift', (channel, username, streakmonth, num, method, userstate) => {
+    player.giveCoins(username, 10*num);
+    client.say (channel, `${username} ได้รับ ${10*num} armcoin จากการ Gift ให้สมาชิก ${num} คน armKraab `);
 });
 
 client.on('cheer', (channel, userstate, message) => {
@@ -345,6 +350,5 @@ client.on('cheer', (channel, userstate, message) => {
 client.on('connected', (address, port) => {
     restoreBotData();
     setInterval(saveBotData, 60000);
-    setInterval(player.saveData, 30000);
     console.log('Bot data restored...')
 });

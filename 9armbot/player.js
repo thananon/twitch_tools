@@ -7,7 +7,7 @@ class Player{
     options = {
         database_path: "./players.json",
         channel: "armzi",
-        sync_player_time: 6000 // milliseconds
+        sync_player_time: 15000 // milliseconds
     }
     constructor(options = {}) {
         this.options = {
@@ -61,7 +61,7 @@ class Player{
         })
     }
 
-    async online(){
+    async getOnlinePlayers(){
         let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
         return data.chatters.viewers;
     }
@@ -113,7 +113,7 @@ class Player{
         return null
     }
 
-    giveCoinsToPlayer(username, amount){
+    giveCoins(username, amount){
         if(!Number(amount)){
             return
         }
