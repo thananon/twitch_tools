@@ -1,5 +1,5 @@
 const axios = require('axios')
-const fs = require('fs');
+const fs = require('fs')
 
 class Player{
 
@@ -15,8 +15,8 @@ class Player{
             ...options
         }
         try{
-            let save_data = fs.readFileSync(this.options.database_path, 'utf8');
-            this.players = JSON.parse(save_data);
+            let save_data = fs.readFileSync(this.options.database_path, 'utf8')
+            this.players = JSON.parse(save_data)
         }catch(err){
             this.players = []
         }
@@ -32,8 +32,8 @@ class Player{
     }
 
     saveData(){
-        let data = JSON.stringify(this.players);
-        fs.writeFileSync(this.options.database_path, data, 'utf8');
+        let data = JSON.stringify(this.players)
+        fs.writeFileSync(this.options.database_path, data, 'utf8')
     }
 
     syncPlayers(){
@@ -63,7 +63,7 @@ class Player{
 
     async getOnlinePlayers(){
         let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
-        return data.chatters.viewers;
+        return data.chatters.viewers
     }
 
     create(username, level = 1, coins = 0, status = "offline"){
