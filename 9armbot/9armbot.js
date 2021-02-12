@@ -6,7 +6,7 @@ var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 const Utils = require('../core/utils')
 const Player = require('./player')
 
-var dodgeRate = 3;
+var dodgeRate = 1;
 var marketOpen = false;
 
 var sentryMode = 1;
@@ -58,21 +58,22 @@ function feedBot(channel, user, amount) {
 
 async function thanos (channel, byUser) {
     let thanosCost = 3000;
-    let thanosTimeoutSeconds = 300;
+    let thanosTimeoutSeconds = 180;
     let casualties = 0;
-    if (player.deductCoins(byUser.username, thanosCost) || byUser == 'armzi') {
+    console.log(`Thanos: I am inevitible..`)
+    if (player.deductCoins(byUser.username, thanosCost) || byUser.username == 'armzi') {
         let players = player.getPlayers()
         for(let user of players){
             if (roll(50)){
                 casualties++;
                 console.log(`${user.username} got snapped.`);
                 client.timeout(channel, user.username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
-                await new Utils().sleep(2000)
+                await new Utils().sleep(700)
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
     } else {
-        timeoutUser(channel, byUser, botInfo.attackPower, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
+        //timeoutUser(channel, byUser, botInfo.attackPower, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
     }
 }
 
@@ -132,9 +133,6 @@ function timeoutUser(channel, user, duration, reason) {
         client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
     }
 
-    if (user.subscriber) {
-        final_duration /= 2;
-    }
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
         console.log(err);
     });
@@ -176,6 +174,18 @@ client.on('message', (channel, tags, message, self) => {
                 client.say(channel, 'market is now CLOSE.');
             }
             return;
+        }
+
+        let kick_re = /!kick\s*([A-Za-z0-9_]*)/;
+        let kick = message.match(kick_re);
+        if (kick) {
+            if (kick[1]) {
+                let user = {
+                    username: kick[1],
+                    isMod: false
+                };
+                timeoutUser(channel, user, botInfo.attackPower, 'mod สั่งมา');
+            }
         }
     }
 
@@ -254,6 +264,12 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }*/
 
+    /* This should be fun, if its not broken. */
+    if (message == '!thanos' && tags.username == 'armzi') {
+        thanos(channel, tags);
+        return;
+    }
+
     if (marketOpen || tags.subscriber) {
         /* query amount of coin */
         if (message == '!coin') {
@@ -265,11 +281,6 @@ client.on('message', (channel, tags, message, self) => {
             return;
         }
 
-        /* This should be fun, if its not broken. */
-        /*if (message == '!thanos') {
-            thanos(channel, tags);
-            return;
-        }*/
 
         /* usage: !gacha [amount] */
         /* We are trying to control the inflation. The return, on average should be a loss for users. */
@@ -307,6 +318,7 @@ client.on('message', (channel, tags, message, self) => {
 
     if (message == '!save' && tags.username == 'armzi'){
         saveBotData();
+        player.saveData();
     }
 
     if (message == '!load' && tags.username == 'armzi'){
@@ -350,5 +362,6 @@ client.on('cheer', (channel, userstate, message) => {
 client.on('connected', (address, port) => {
     restoreBotData();
     setInterval(saveBotData, 60000);
-    console.log('Bot data restored...')
+    sentryMode = 0;
+    console.log('Bot data restored...');
 });
