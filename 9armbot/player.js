@@ -28,9 +28,6 @@ class Player{
 
     cloneDeep(data){
         let _data = JSON.stringify(data) 
-        // *หมายเหตุ ที่ต้อง stringify ก่อนที่ retrun กลับ 
-        // เพราะต้องการให้ค่า object ที่กลับออกไปไม่ให้มี reference กับ data เดิม
-        // * https://lodash.com/docs/4.17.15#cloneDeep
         return JSON.parse(_data)
     }
 
@@ -66,7 +63,7 @@ class Player{
 
     async online(){
         let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
-        return data.chatters
+        return data.chatters.viewers;
     }
 
     create(username, level = 1, coins = 0, status = "offline"){
@@ -116,7 +113,7 @@ class Player{
         return null
     }
 
-    giveCoinsToPayer(username, amount){
+    giveCoinsToPlayer(username, amount){
         if(!Number(amount)){
             return
         }

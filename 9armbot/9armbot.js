@@ -35,11 +35,10 @@ function restoreBotData () {
     botInfo = JSON.parse(string);
 }
 
-async function giveCoinsToList(amount) {
-   let players = await player.online()
+async function giveCoins_allonline(amount) {
+   let players = await player.online();
     for(let username of players){
-        player.giveCoinsToPayer(username, amount)
-        console.log(`${username} has ${user.coins} coins.`);
+        player.giveCoinsToPlayer(username, amount)
     }
     console.log(`Gave out ${amount} coins to ${players.length} users.`);
     return players.length;
@@ -189,7 +188,7 @@ client.on('message', (channel, tags, message, self) => {
     if (group && tags.username == 'armzi') {
         if (group[1] && group[2]) {
             // giveCoinsToUser(channel, group[1], parseInt(group[2]));
-            player.giveCoinsToPayer(group[1], parseInt(group[2]))
+            player.giveCoinsToPlayer(group[1], parseInt(group[2]))
         }
     }
 
@@ -247,13 +246,15 @@ client.on('message', (channel, tags, message, self) => {
 
     /* for testing purpose */
     if (message == '!give' && tags.username == "armzi") {
-        client.say(channel, `gave ${giveCoinsToList(50)} users 50 coins.`); 
+        giveCoins_allonline(50).then( function (total) {
+            client.say(channel, `gave ${total} users 50 coins.`); 
+        });
         return;
     }
 
     /* testing purpose, give myself bunch of coins */
     if (message == '!c') {
-        player.giveCoinsToPayer('armzi', 999999)
+        player.giveCoinsToPlayer('armzi', 999999)
         return;
     }
 
@@ -320,17 +321,19 @@ client.on('message', (channel, tags, message, self) => {
 client.on('subscription', (channel, username, method, message, userstate) => {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoinsToList(1)} รายได้รับ 1 armcoin`);
-    // giveCoinsToUser(channel, username, 10);
-    player.giveCoinsToPayer(username,10)
+    giveCoins_allonline(1).then(function (total) {
+        client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
+    });
+    player.giveCoinsToPlayer(username,10)
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
-    client.say(channel, `สมาชิก ${giveCoinsToList(1)} รายได้รับ 1 armcoin`);
-    // giveCoinsToUser(channel, username, 10);
-    player.giveCoinsToPayer(username,10)
+    giveCoins_allonline(1).then(function (total) {
+        client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
+    });
+    player.giveCoinsToPlayer(username,10)
 });
 
 client.on('cheer', (channel, userstate, message) => {
@@ -341,6 +344,7 @@ client.on('cheer', (channel, userstate, message) => {
 
 client.on('connected', (address, port) => {
     restoreBotData();
-    setInterval(saveBotData, 180000);
+    setInterval(saveBotData, 60000);
+    setInterval(player.saveData, 30000);
     console.log('Bot data restored...')
 });
