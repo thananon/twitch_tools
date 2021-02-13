@@ -36,10 +36,10 @@ class Player{
         fs.writeFileSync(this.options.database_path, data, 'utf8');
     }
 
-    syncPlayers(){
-        axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`).then((res)=>{
-            let data = res.data
-            // console.log(res)
+    async syncPlayers(){
+        try {
+         const {data} = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`);
+            // console.log(data)
             // let chatter_count = data.chatter_count
             let chatters = data.chatters
             for(let username of chatters.viewers){
@@ -56,9 +56,10 @@ class Player{
             // save
             this.saveData()
 
-        }).catch((err)=>{
+
+        } catch (err) {
             console.error('[syncPlayers] Error', err)
-        })
+        }
     }
 
     async getOnlinePlayers(){
