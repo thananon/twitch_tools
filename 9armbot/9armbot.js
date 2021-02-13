@@ -51,7 +51,7 @@ function feedBot(channel, user, amount) {
             botInfo.level += levelup;
             botInfo.exp %= 500;
             botInfo.attackPower+=10*levelup;
-            client.say(channel, `LEVEL UP!! ->${botInfo.level}`);
+            client.say(channel, `LEVEL UP!! -> ${botInfo.level}`);
         }
     }
 }
@@ -62,7 +62,7 @@ async function thanos (channel, byUser) {
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
     if (player.deductCoins(byUser.username, thanosCost) || byUser.username == 'armzi') {
-        let players = player.getPlayers()
+        let players = player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
                 casualties++;
@@ -95,15 +95,15 @@ function gacha(channel, user, amount) {
             _player.coins+=gain
             sessionPayout += gain - amount;
             if (Bonus!=1) {
-                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             } else {
-                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             }
         } else if (roll(gachaMysticRate)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
-            client.say(channel, `@${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
+            client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
         } else {
             sessionIncome += amount;
@@ -134,15 +134,13 @@ function timeoutUser(channel, user, duration, reason) {
     }
 
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 }
 
 function roll (critRate) {
     dice = Math.random() * 100;
-    if (dice < critRate)
-        return true;
-    return false;
+    return dice < critRate;
 }
 
 const client = new tmi.Client({
@@ -245,8 +243,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* sentry mode is to toggle message filter on/off. */
     if (tags.username == "armzi" && message == '!sentry') {
-        if (sentryMode == 1) sentryMode = 0;
-        else sentryMode = 1;
+        sentryMode = !sentryMode;
         return
     }
 
