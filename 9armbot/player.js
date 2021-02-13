@@ -62,8 +62,8 @@ class Player{
     }
 
     async getOnlinePlayers(){
-            let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
-            return data.chatters.viewers;
+        let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
+        return data.chatters.viewers;
     }
 
     create(username, level = 1, coins = 0, status = "offline"){
