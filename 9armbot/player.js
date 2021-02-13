@@ -57,7 +57,7 @@ class Player{
             this.saveData()
 
         }).catch((err)=>{
-            console.log('[syncPlayers] Error', err)
+            console.error('[syncPlayers] Error', err)
         })
     }
 
@@ -84,16 +84,10 @@ class Player{
         let players = this.players
         if(sortBy){
             sort = sort.toLocaleLowerCase()
-            switch (sort) {
-                case "asc":
-                    players.sort((a,b)=>a[sortBy]-b[sortBy])
-                    break;
-                case "desc":
-                    players.sort((a,b)=>b[sortBy]-a[sortBy])
-                    break;
-                default:
-                    players.sort((a,b)=>a[sortBy]-b[sortBy])
-                    break;
+            if(sort == "desc"){
+                players.sort((a,b)=>b[sortBy]-a[sortBy]);
+            }else{
+                players.sort((a,b)=>a[sortBy]-b[sortBy]);
             }
         }
         return players
@@ -107,10 +101,7 @@ class Player{
 
     getPlayerByUsername(username){
         let player = this.players.find(x=>x.username == username)
-        if(player){
-            return player
-        }
-        return null
+        return player || null;
     }
 
     giveCoins(username, amount){
@@ -127,22 +118,13 @@ class Player{
     }
 
     deductCoins(username, amount) {
-        if(!Number(amount)){
-            return false
-        }
         amount = Number(amount)
         let player = this.players.find(x=>x.username == username)
-        if(player){
-            if (player.coins >= amount) {
-                player.coins-=amount
-            }else{
-                return false
-            }
-        }else{
-            return false
+        if(amount && player && player.coins >= amount){
+            player.coins-=amount
+            return true
         }
-
-        return true
+        return false
     }
 
 }
