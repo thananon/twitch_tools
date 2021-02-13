@@ -2,6 +2,8 @@ import { io } from 'socket.io-client'
 
 import { Payload } from './@types/Payload'
 
+import { playPayload } from './playPayload'
+
 // attempts to connect to 9armbot socket
 const armbotSocket = io('ws://localhost/9armbot')
 
@@ -14,17 +16,5 @@ armbotSocket.on('playMedia', data => {
   const payload: Payload = typeof data === 'string' ? JSON.parse(data) : data
 
   // play media?
+  playPayload(payload)
 })
-
-const mockPayload = {
-  type: 'image',
-  src: 'https://storage.rayriffy.com/files/image/manaka.jpg',
-  size: {
-    width: 125,
-    height: 125,
-  },
-  position: {
-    x: 200,
-    y: 300,
-  },
-}
