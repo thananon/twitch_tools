@@ -1,10 +1,15 @@
 require('dotenv').config({ path: './../.env'})
+
 const tmi = require('tmi.js');
 const fs = require('fs');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-var oauth_token = fs.readFileSync('oauth_token', 'utf8');
+
+const http = require('http')
+const { Server: SocketServer } = require('socket.io');
+
 const Utils = require('../core/utils')
 const Player = require('./player')
+
+var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -145,6 +150,9 @@ function roll (critRate) {
     return false;
 }
 
+/**
+ * Initialize twitch client
+ */
 const client = new tmi.Client({
     options: { debug: true},
     connection: { reconnect: true },
@@ -365,3 +373,50 @@ client.on('connected', (address, port) => {
     sentryMode = 0;
     console.log('Bot data restored...');
 });
+
+/**
+ * Initialize socket server
+ */
+
+// start socket server at port 80 in websocket protocol
+const io = new SocketServer(80, {
+    path: '9armbot'
+})
+
+/**
+ * Send payload to socket client
+ * @param {image | video} type type of media to display, use for choosing <img /> or <video />
+ * @param {string} source valid url to display media, (can be **base64 data** or blob object)
+ * @param {Size} size size of media to display
+ * @param {Position} position the position of media to display
+ */
+
+// in the future, please refactor entire codebase to typescript
+
+// interface Size {
+//   width: number
+//   height: number
+// }
+
+// interface Position {
+//   x: number
+//   y: number
+// }
+
+// interface Payload {
+//   type: 'image' | 'video'
+//   src: string
+//   size: Size
+//   position: Position
+// }
+
+exports.sendSocketPayload = (type, source, size, position) => {
+    const payload = {
+      type,
+      src: source,
+      size,
+      position,
+    }
+
+    io.emit('playMedia', payload)
+}

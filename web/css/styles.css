@@ -1,0 +1,15 @@
+/* Make a green screen! */
+html {
+  background: rgba(0, 255, 0, 1);
+}
+
+/* Extends div#app to full size */
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden
+}
+
+#app {
+  position: relative;
+}

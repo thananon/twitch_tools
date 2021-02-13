@@ -1,0 +1,52 @@
+/**
+* Preflight, to remove all margins and padding to provide more accurate positioning
+* based on @tailwindcss/preflight
+*/
+
+html,
+body,
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+}
+
+*,
+::before,
+::after {
+  border-width: 0;
+  border-style: solid;
+  border-color: theme('borderColor.default', currentColor);
+}
