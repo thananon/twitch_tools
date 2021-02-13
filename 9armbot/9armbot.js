@@ -410,7 +410,7 @@ const io = new SocketServer(80, {
 //   position: Position
 // }
 
-exports.sendSocketPayload = (type, source, size, position) => {
+const sendSocketPayload = (type, source, size, position) => {
     const payload = {
       type,
       src: source,
