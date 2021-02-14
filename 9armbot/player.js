@@ -43,7 +43,7 @@ class Player{
             // let chatter_count = data.chatter_count
             let chatters = data.chatters
             for(let username of chatters.viewers){
-                this.create(username,1,0,"online")
+                this.create(username, 1, 0, "online")
             }
 
             // set offline status
@@ -81,11 +81,10 @@ class Player{
         }
     }
 
-    getPlayers(sortBy = null, sort = "asc"){
+    getPlayers(sortBy = null, reversed = false){
         let players = this.players
         if(sortBy){
-            sort = sort.toLocaleLowerCase()
-            if(sort == "desc"){
+            if (reversed){ //desc
                 players.sort((a,b)=>b[sortBy]-a[sortBy]);
             }else{
                 players.sort((a,b)=>a[sortBy]-b[sortBy]);
@@ -95,8 +94,8 @@ class Player{
     }
 
     getCoinTop(top = 10){
-        let getPlayers = this.getPlayers("coins", "desc")
-        return this.cloneDeep(getPlayers.splice(0,top>0?top:0))
+        let getPlayers = this.getPlayers("coins", true)
+        return this.cloneDeep(getPlayers.splice(0, top>0?top:0))
     }
 
 
@@ -114,7 +113,7 @@ class Player{
         if(player){
             player.coins+=amount
         }else{
-            this.create(username,1,amount, "online")
+            this.create(username, 1, amount, "online")
         }
     }
 
