@@ -3,11 +3,34 @@ const armbotSocket = io('ws://localhost:8085')
 
 armbotSocket.on('connect', () => {
   console.log('conntected!')
-  try {
+
+  if (document.querySelector('#await-conn') !== null)
     document.querySelector('#await-conn').remove()
-  } catch {
-    console.warn('Cannot find #await-conn to remove, maybe it already gone???')
+})
+
+armbotSocket.on('disconnect', reason => {
+  // create element if not exist
+  if (document.querySelector('#await-conn') !== null) {
+    const divElement = document.createElement('div')
+    divElement.id = 'await-conn'
+    document.querySelector('#app').appendChild(divElement)
   }
+
+  // inject message
+  document.querySelector('#await-conn').textContent = `Disconnected! Reason: ${reason}`
+})
+
+armbotSocket.on('connect_error', err => {
+  // create element if not exist
+  if (document.querySelector('#await-conn') !== null) {
+    const divElement = document.createElement('div')
+    divElement.id = 'await-conn'
+    document.querySelector('#app').appendChild(divElement)
+  }
+
+  // inject message
+  document.querySelector('#await-conn').textContent = 'Crash! Look for stacktrace in DevTools'
+  console.error(err)
 })
 
 armbotSocket.on('playMedia', data => {

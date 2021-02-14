@@ -22,4 +22,5 @@ html, body, #app {
   background: white;
   padding: 2rem;
   border-radius: 4px;
+  border: 2px solid #6B7280;
 }

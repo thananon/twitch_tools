@@ -13,7 +13,7 @@ const playPayload = async (payload, duration = 5000) => {
     imageElement.style.transition = 'all 0.6s ease-in-out'
     imageElement.style.opacity = '0'
 
-    document.querySelector('div#app').appendChild(imageElement)
+    document.querySelector('#app').appendChild(imageElement)
     await wait(10)
     imageElement.style.opacity = '1'
 
@@ -40,7 +40,7 @@ const playPayload = async (payload, duration = 5000) => {
     videoElement.muted = true
     videoElement.loop = true
 
-    document.querySelector('div#app').appendChild(videoElement)
+    document.querySelector('#app').appendChild(videoElement)
     await wait(10)
     videoElement.style.opacity = '1'
 
