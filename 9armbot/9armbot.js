@@ -215,6 +215,18 @@ client.on('message', (channel, tags, message, self) => {
         client.whisper(tags.username, 'test');
     }
 */
+
+    // Testing command
+    if(message == '!rich') {
+        let n = 5;
+        let players = player.getCoinTop(n);
+        let msg = "Top " + n + " richest users\n"
+        for (let i=0;i<players.length;i++) {
+            msg += (i+1) + ". " + players[i]["username"] + " - " + players[i]["coins"] + "\n";
+        }
+        client.say(channel, msg);
+    }
+
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
