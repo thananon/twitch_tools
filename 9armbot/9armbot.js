@@ -1,7 +1,6 @@
 require('dotenv').config({ path: './../.env'})
 const tmi = require('tmi.js');
 const fs = require('fs');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 const Utils = require('../core/utils')
 const Player = require('./player')
@@ -30,8 +29,12 @@ function saveBotData () {
 }
 
 function restoreBotData () {
-    string = fs.readFileSync('botstat.json', 'utf8');
-    botInfo = JSON.parse(string);
+    try{
+        string = fs.readFileSync('botstat.json', 'utf8');
+        botInfo = JSON.parse(string);
+    }catch (err) {
+        saveBotData()
+    }
 }
 
 async function giveCoins_allonline(amount) {
@@ -61,7 +64,8 @@ async function thanos (channel, byUser) {
     let thanosTimeoutSeconds = 180;
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
-    if (player.deductCoins(byUser.username, thanosCost) || byUser.username == 'armzi') {
+
+    if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
         let players = await player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
@@ -117,7 +121,7 @@ function gacha(channel, user, amount) {
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
-    if (user.mod || user.username == 'armzi' ) {
+    if (user.mod || player.isAdmin(user.username)) {
         return;
     }
 
@@ -159,7 +163,7 @@ client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
     /* mod can open/close the market. Allowing people to check/spend their coins. */
-    if (tags.mod || tags.username == 'armzi') {
+    if (tags.mod || player.isAdmin(tags.username)) {
         let market_re = /!market\s*(open|close)/i;
         let market = message.match(market_re);
 
@@ -190,7 +194,7 @@ client.on('message', (channel, tags, message, self) => {
     /* Give coins to a user. Testing command, only available to me. */
     let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
     group = message.match(give_re);
-    if (group && tags.username == 'armzi') {
+    if (group &&  player.isAdmin(tags.username)) {
         if (group[1] && group[2]) {
             player.giveCoins(group[1], parseInt(group[2]))
         }
@@ -232,7 +236,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
-    if (message == '!reset' && tags.username == 'armzi') {
+    if (message == '!reset' &&  player.isAdmin(tags.username)) {
         botInfo.critRate = 5;
         botInfo.critMultiplier = 1.5;
         botInfo.attackPower = 300;
@@ -242,13 +246,13 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     /* sentry mode is to toggle message filter on/off. */
-    if (tags.username == "armzi" && message == '!sentry') {
+    if (player.isAdmin(tags.username) && message == '!sentry') {
         sentryMode = !sentryMode;
         return
     }
 
     /* for testing purpose */
-    if (message == '!give' && tags.username == "armzi") {
+    if (message == '!give' && player.isAdmin(tags.username)) {
         giveCoins_allonline(50).then( function (total) {
             client.say(channel, `gave ${total} users 50 coins.`); 
         });
@@ -262,7 +266,7 @@ client.on('message', (channel, tags, message, self) => {
     }*/
 
     /* This should be fun, if its not broken. */
-    if (message == '!thanos' && tags.username == 'armzi') {
+    if (message == '!thanos' &&  player.isAdmin(tags.username)) {
         thanos(channel, tags);
         return;
     }
@@ -309,16 +313,16 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
-    if (message == '!income' && tags.username == 'armzi'){
+    if (message == '!income' && player.isAdmin(tags.username)){
         client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
     }
 
-    if (message == '!save' && tags.username == 'armzi'){
+    if (message == '!save' && player.isAdmin(tags.username)){
         saveBotData();
         player.saveData();
     }
 
-    if (message == '!load' && tags.username == 'armzi'){
+    if (message == '!load' && player.isAdmin(tags.username)){
         restoreBotData();
     }
 });
