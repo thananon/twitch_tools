@@ -11,6 +11,6 @@ services:
         read_only: true
     environment:
     - twitch_api=https://tmi.twitch.tv
-    - tmi_username=aitthiarsa
-    - tmi_channel_name=aitthiarsa
-    - admin_username=aitthiarsa
+    - tmi_username=9armbot
+    - tmi_channel_name=armzi
+    - admin_username=armzi
