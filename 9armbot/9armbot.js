@@ -1,9 +1,16 @@
 require('dotenv').config({ path: './../.env'})
 const tmi = require('tmi.js');
 const fs = require('fs');
-var oauth_token = fs.readFileSync('oauth_token', 'utf8');
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const Utils = require('../core/utils')
 const Player = require('./player')
+
+if(!fs.existsSync('./oauth_token')) {
+    fs.writeFileSync('oauth_token', '');
+    console.log('No oauth_token file ( https://twitchapps.com/tmi/ )');
+    process.exit(0);
+}
+var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -22,6 +29,9 @@ var botInfo = {
 };
 
 let player = new Player()
+
+if(!fs.existsSync('./botstat.json')) 
+    saveBotData();
 
 function saveBotData () {
     data = JSON.stringify(botInfo);
