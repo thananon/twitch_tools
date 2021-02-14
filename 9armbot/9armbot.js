@@ -2,11 +2,16 @@ require('dotenv').config({ path: '../.env' });
 const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const Utils = require('../core/utils')
+const Player = require('./player')
+
+if(!fs.existsSync('./oauth_token')) {
+    fs.writeFileSync('oauth_token', '');
+    console.log('No oauth_token file ( https://twitchapps.com/tmi/ )');
+    process.exit(0);
+}
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-var discord_token = fs.readFileSync('discord_token', 'utf8');
-const { sleep, roll } = require('../core/utils');
-const Player = require('./player');
-const DiscordBot = require('./discord_bot')
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -25,27 +30,11 @@ var botInfo = {
 };
 
 let player = new Player()
-let discordBot = new DiscordBot(player=player)
-discordBot.login(discord_token)
 
-// Graceful Shutdown
-function gracefulShutdown() {
-    console.log('\nPre-Close')
-    saveBotData()
-    player.saveData()
-    setTimeout(() => {
-        console.log('Closed')
-        process.exit(0)
-    }, 1000)
-}
-process.on("SIGINT", () => gracefulShutdown())
-process.on("SIGTERM", () => gracefulShutdown())
-process.on('uncaughtException', (err) => {
-    console.error(err)
-    gracefulShutdown()
-})
+if(!fs.existsSync('./botstat.json')) 
+    saveBotData();
 
-function saveBotData() {
+function saveBotData () {
     data = JSON.stringify(botInfo);
     fs.writeFileSync('botstat.json', data, 'utf8');
 }
