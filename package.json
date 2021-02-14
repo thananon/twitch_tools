@@ -4,7 +4,8 @@
   "description": "Repo to keep my community's twitch gadgeties.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd 9armbot && node 9armbot.js"
   },
   "repository": {
     "type": "git",

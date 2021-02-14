@@ -6,7 +6,7 @@ class Player{
     players = []
     options = {
         database_path: "./players.json",
-        channel: "armzi",
+        channel: `${process.env.tmi_channel_name}`,
         sync_player_time: 15000 // milliseconds
     }
     constructor(options = {}) {
@@ -123,6 +123,13 @@ class Player{
         let player = this.players.find(x=>x.username == username)
         if(amount && player && player.coins >= amount){
             player.coins-=amount
+            return true
+        }
+        return false
+    }
+
+    isAdmin(username){
+        if(username == process.env.admin_username){
             return true
         }
         return false
