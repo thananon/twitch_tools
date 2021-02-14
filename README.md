@@ -20,7 +20,7 @@ $ npm install
 
 **Use through `docker-compose.yml`**
 
-Change the configuration to your channel.
+Change the configuration to your channel and the database path.
 ```diff
 version: "3.9"
 services:
@@ -29,6 +29,8 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
++      - ./9armbot/botstat.json:/twitch_tools/9armbot/botstat.json
++      - ./9armbot/players.json:/twitch_tools/9armbot/players.json
       - type: bind
 +        source: ./9armbot/oauth_token
         target: /twitch_tools/9armbot/oauth_token
