@@ -10,7 +10,7 @@ armbotSocket.on('connect', () => {
 
 armbotSocket.on('disconnect', reason => {
   // create element if not exist
-  if (document.querySelector('#await-conn') !== null) {
+  if (document.querySelector('#await-conn') === null) {
     const divElement = document.createElement('div')
     divElement.id = 'await-conn'
     document.querySelector('#app').appendChild(divElement)
@@ -22,7 +22,7 @@ armbotSocket.on('disconnect', reason => {
 
 armbotSocket.on('connect_error', err => {
   // create element if not exist
-  if (document.querySelector('#await-conn') !== null) {
+  if (document.querySelector('#await-conn') === null) {
     const divElement = document.createElement('div')
     divElement.id = 'await-conn'
     document.querySelector('#app').appendChild(divElement)
