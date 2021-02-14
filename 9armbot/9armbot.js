@@ -3,8 +3,8 @@ require('dotenv').config({ path: './../.env'})
 const tmi = require('tmi.js');
 const fs = require('fs');
 
-const http = require('http')
-const { Server: SocketServer } = require('socket.io');
+const http = require("http")
+const socketServer = require("socket.io")
 
 const Utils = require('../core/utils')
 const Player = require('./player')
@@ -379,9 +379,15 @@ client.on('connected', (address, port) => {
  */
 
 // start socket server at port 80 in websocket protocol
-const io = new SocketServer(80, {
-    path: '9armbot'
+const httpServer = http.createServer()
+const io = socketServer(httpServer, {
+    cors: {
+      origin: "*",
+    },
 })
+httpServer.listen(8085, () =>
+  console.log(`Web socket is ready to emit data from port 8085!`)
+)
 
 /**
  * Send payload to socket client
@@ -390,25 +396,6 @@ const io = new SocketServer(80, {
  * @param {Size} size size of media to display
  * @param {Position} position the position of media to display
  */
-
-// in the future, please refactor entire codebase to typescript
-
-// interface Size {
-//   width: number
-//   height: number
-// }
-
-// interface Position {
-//   x: number
-//   y: number
-// }
-
-// interface Payload {
-//   type: 'image' | 'video'
-//   src: string
-//   size: Size
-//   position: Position
-// }
 
 const sendSocketPayload = (type, source, size, position) => {
     const payload = {

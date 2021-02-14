@@ -1,6 +1,7 @@
 /* Make a green screen! */
 html {
   background: rgba(0, 255, 0, 1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Extends div#app to full size */
@@ -12,4 +13,13 @@ html, body, #app {
 
 #app {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#await-conn {
+  background: white;
+  padding: 2rem;
+  border-radius: 4px;
 }

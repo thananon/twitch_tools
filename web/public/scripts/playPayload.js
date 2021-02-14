@@ -1,8 +1,6 @@
-import { Payload } from './@types/Payload'
-
 const wait = duration => new Promise(res => setTimeout(res, duration))
 
-export const playPayload = async (payload: Payload, duration = 5000) => {
+const playPayload = async (payload, duration = 5000) => {
   if (payload.type === 'image') {
     const imageElement = document.createElement('img')
 
