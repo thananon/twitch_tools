@@ -64,8 +64,9 @@ async function thanos (channel, byUser) {
     let thanosTimeoutSeconds = 180;
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
+
     if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
-        let players = player.getOnlinePlayers()
+        let players = await player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
                 casualties++;
