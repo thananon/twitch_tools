@@ -323,7 +323,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 });
 
-function subscriptionPayout (username) {
+function subscriptionPayout (channel, username) {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
@@ -333,11 +333,11 @@ function subscriptionPayout (username) {
 }
 
 client.on('subscription', (channel, username, method, message, userstate) => {
-    subscriptionPayout(username);
+    subscriptionPayout(channel, username);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
-    subscriptionPayout(username);
+    subscriptionPayout(channel, username);
 });
 
 client.on('subgift', (channel, username, streakmonth, recipient, methods, userstate) => {
@@ -346,6 +346,7 @@ client.on('subgift', (channel, username, streakmonth, recipient, methods, userst
 });
 
 client.on('submysterygift', (channel, username, streakmonth, num, method, userstate) => {
+    if (!num) num = 1;
     player.giveCoins(username, 10*num);
     client.say (channel, `${username} ได้รับ ${10*num} armcoin จากการ Gift ให้สมาชิก ${num} คน armKraab `);
 });
