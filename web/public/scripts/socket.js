@@ -1,5 +1,5 @@
 // attempts to connect to 9armbot socket
-const armbotSocket = io('ws://localhost:8085')
+const armbotSocket = io('ws://#SOCKET_ADDRESS#')
 
 armbotSocket.on('connect', () => {
   console.log('conntected!')
