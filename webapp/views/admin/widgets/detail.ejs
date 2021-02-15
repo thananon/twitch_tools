@@ -1,0 +1,67 @@
+<div class="card">
+    <div class="card-body">
+        <form>
+            <div class="mb-4">
+                Use the URL below in <a href="https://www.youtube.com/watch?v=yffHVAPHR2w&ab_channel=Jamacanbacn"
+                    target="_blank">OBS Studio</a>, <a href="https://www.youtube.com/watch?v=w058zjHfAW0"
+                    target="_blank">XSplit Browser Source</a>, or just launch it using window capture.
+            </div>
+            <div class="form-group row">
+                <label for="staticEmail" class="col-sm-2 col-form-label">Widget URL</label>
+                <div class="col-sm-10">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" readonly id="widget_url" value="<%= widget.url %>">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyUrl()">Copy</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="launch()">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include(widget.viewsPath+"/config") %> 
+
+<script>
+    function Toast(text){
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        })
+
+        Toast.fire({
+            icon: 'success',
+            title: text
+        })
+    }
+
+    function launch(){
+        let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=800,height=400`;
+        var win = window.open("<%= widget.previewUrl %>", '_blank', params);
+        win.focus();
+    }
+
+    function copyUrl() {
+        /* Get the text field */
+        var copyText = document.getElementById("widget_url");
+
+        /* Select the text field */
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+        /* Copy the text inside the text field */
+        document.execCommand("copy");
+
+        /* Alert the copied text */
+        Toast('Copy successfully')
+    }
+</script>

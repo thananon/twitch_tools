@@ -1,0 +1,55 @@
+<style>
+  .widget-item-wrapper a {
+    color: #eee;
+  }
+  .widget-item-wrapper :hover {
+    color: #fff;
+  }
+  .widget-item{
+    height: 100%;
+    min-height: 200px;
+    text-align: left;
+    background-position: center;
+    background-size: cover;
+  }
+  .widget-item .card-body-content{
+    width: 60%;
+  }
+  .widget-item p {
+    margin: 0px;
+    padding: 0px;
+  }
+  .widget-item i{
+    font-size: 40px;
+    margin-bottom: 20px;
+  }
+  .widget-item h4{
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+  }
+
+</style>
+
+<div class="row">
+
+  <% widgets.forEach(widget => { %>
+   
+    <div class="col-md-3 widget-item-wrapper">
+      <a href="<%= widget.configUrl %>">
+        <div class="card widget-item" style="<%= widget.cover ? `background-image: url(${widget.publicUrl}/${widget.cover});` : '' %> <%= widget.bgColor ? `background-color: ${widget.bgColor};` : '' %>">
+          <div class="card-body d-flex  align-items-center">
+            <div class="card-body-content">
+              <i class="<%= widget.icon %>"></i>
+              <h4><%= widget.name %></h4>
+              <p><%= widget.description %></p>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }) %>
+
+
+  </div>
+  

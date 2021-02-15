@@ -1,0 +1,13 @@
+{
+    "icon": "fas fa-snowboarding",
+    "name": "GIF",
+    "description": "Show gif animation and sound",
+    "bgColor": "#ff8383",
+    "public_path": "public",
+    "default_storage": {
+        "background_color": "#00FF00",
+        "alert_delay": "3",
+        "gif":"default.gif",
+        "sound":"default.mp3"
+    }
+}
