@@ -6,6 +6,8 @@ const fs = require('fs');
 const http = require("http")
 const socketServer = require("socket.io")
 
+var oauth_token = fs.readFileSync('oauth_token', 'utf8');
+
 const Utils = require('../core/utils')
 const Player = require('./player')
 
@@ -35,8 +37,12 @@ function saveBotData () {
 }
 
 function restoreBotData () {
-    string = fs.readFileSync('botstat.json', 'utf8');
-    botInfo = JSON.parse(string);
+    try{
+        string = fs.readFileSync('botstat.json', 'utf8');
+        botInfo = JSON.parse(string);
+    }catch (err) {
+        saveBotData()
+    }
 }
 
 async function giveCoins_allonline(amount) {
@@ -56,7 +62,7 @@ function feedBot(channel, user, amount) {
             botInfo.level += levelup;
             botInfo.exp %= 500;
             botInfo.attackPower+=10*levelup;
-            client.say(channel, `LEVEL UP!! ->${botInfo.level}`);
+            client.say(channel, `LEVEL UP!! -> ${botInfo.level}`);
         }
     }
 }
@@ -66,8 +72,9 @@ async function thanos (channel, byUser) {
     let thanosTimeoutSeconds = 180;
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
-    if (player.deductCoins(byUser.username, thanosCost) || byUser.username == 'armzi') {
-        let players = player.getPlayers()
+
+    if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
+        let players = await player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
                 casualties++;
@@ -100,15 +107,15 @@ function gacha(channel, user, amount) {
             _player.coins+=gain
             sessionPayout += gain - amount;
             if (Bonus!=1) {
-                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             } else {
-                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin. armKraab`);
+                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             }
         } else if (roll(gachaMysticRate)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
-            client.say(channel, `@${_player.username} ลงทุน ${amount} ->ได้รางวัล ${gain} armcoin.`);
+            client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
         } else {
             sessionIncome += amount;
@@ -122,7 +129,7 @@ function gacha(channel, user, amount) {
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
-    if (user.mod || user.username == 'armzi' ) {
+    if (user.mod || player.isAdmin(user.username)) {
         return;
     }
 
@@ -139,15 +146,13 @@ function timeoutUser(channel, user, duration, reason) {
     }
 
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 }
 
 function roll (critRate) {
     dice = Math.random() * 100;
-    if (dice < critRate)
-        return true;
-    return false;
+    return dice < critRate;
 }
 
 /**
@@ -169,7 +174,7 @@ client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
     /* mod can open/close the market. Allowing people to check/spend their coins. */
-    if (tags.mod || tags.username == 'armzi') {
+    if (tags.mod || player.isAdmin(tags.username)) {
         let market_re = /!market\s*(open|close)/i;
         let market = message.match(market_re);
 
@@ -200,7 +205,7 @@ client.on('message', (channel, tags, message, self) => {
     /* Give coins to a user. Testing command, only available to me. */
     let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
     group = message.match(give_re);
-    if (group && tags.username == 'armzi') {
+    if (group &&  player.isAdmin(tags.username)) {
         if (group[1] && group[2]) {
             player.giveCoins(group[1], parseInt(group[2]))
         }
@@ -242,7 +247,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
-    if (message == '!reset' && tags.username == 'armzi') {
+    if (message == '!reset' &&  player.isAdmin(tags.username)) {
         botInfo.critRate = 5;
         botInfo.critMultiplier = 1.5;
         botInfo.attackPower = 300;
@@ -252,14 +257,13 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     /* sentry mode is to toggle message filter on/off. */
-    if (tags.username == "armzi" && message == '!sentry') {
-        if (sentryMode == 1) sentryMode = 0;
-        else sentryMode = 1;
+    if (player.isAdmin(tags.username) && message == '!sentry') {
+        sentryMode = !sentryMode;
         return
     }
 
     /* for testing purpose */
-    if (message == '!give' && tags.username == "armzi") {
+    if (message == '!give' && player.isAdmin(tags.username)) {
         giveCoins_allonline(50).then( function (total) {
             client.say(channel, `gave ${total} users 50 coins.`); 
         });
@@ -273,7 +277,7 @@ client.on('message', (channel, tags, message, self) => {
     }*/
 
     /* This should be fun, if its not broken. */
-    if (message == '!thanos' && tags.username == 'armzi') {
+    if (message == '!thanos' &&  player.isAdmin(tags.username)) {
         thanos(channel, tags);
         return;
     }
@@ -320,21 +324,21 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
-    if (message == '!income' && tags.username == 'armzi'){
+    if (message == '!income' && player.isAdmin(tags.username)){
         client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
     }
 
-    if (message == '!save' && tags.username == 'armzi'){
+    if (message == '!save' && player.isAdmin(tags.username)){
         saveBotData();
         player.saveData();
     }
 
-    if (message == '!load' && tags.username == 'armzi'){
+    if (message == '!load' && player.isAdmin(tags.username)){
         restoreBotData();
     }
 });
 
-function subscriptionPayout (username) {
+function subscriptionPayout (channel, username) {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
@@ -344,11 +348,11 @@ function subscriptionPayout (username) {
 }
 
 client.on('subscription', (channel, username, method, message, userstate) => {
-    subscriptionPayout(username);
+    subscriptionPayout(channel, username);
 });
 
 client.on('resub', (channel, username, months, message, userstate, method) => {
-    subscriptionPayout(username);
+    subscriptionPayout(channel, username);
 });
 
 client.on('subgift', (channel, username, streakmonth, recipient, methods, userstate) => {
@@ -357,6 +361,7 @@ client.on('subgift', (channel, username, streakmonth, recipient, methods, userst
 });
 
 client.on('submysterygift', (channel, username, streakmonth, num, method, userstate) => {
+    if (!num) num = 1;
     player.giveCoins(username, 10*num);
     client.say (channel, `${username} ได้รับ ${10*num} armcoin จากการ Gift ให้สมาชิก ${num} คน armKraab `);
 });

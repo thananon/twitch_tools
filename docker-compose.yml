@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  9armbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./9armbot/botstat.json:/twitch_tools/9armbot/botstat.json
+      - ./9armbot/players.json:/twitch_tools/9armbot/players.json
+      - type: bind
+        source: ./9armbot/oauth_token
+        target: /twitch_tools/9armbot/oauth_token
+        read_only: true
+    environment:
+    - twitch_api=https://tmi.twitch.tv
+    - tmi_username=9armbot
+    - tmi_channel_name=armzi
+    - admin_username=armzi
