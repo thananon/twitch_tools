@@ -20,6 +20,10 @@
   "dependencies": {
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "multer": "^1.4.2",
+    "socket.io": "^3.1.1",
     "tmi.js": "^1.7.1"
   }
 }
