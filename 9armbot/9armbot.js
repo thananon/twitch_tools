@@ -90,7 +90,7 @@ function gacha(channel, user, amount) {
     let _player = player.getPlayerByUsername(user.username)
     if (_player && player.deductCoins(_player.username, amount)) {
         if (_player.coins == 0 && amount >= 10) {
-            Bonus = 2;
+            Bonus = 2;            
         }
 
         if (roll(gachaLegendaryRate)) {
@@ -254,7 +254,7 @@ client.on('message', (channel, tags, message, self) => {
     /* for testing purpose */
     if (message == '!give' && player.isAdmin(tags.username)) {
         giveCoins_allonline(50).then( function (total) {
-            client.say(channel, `gave ${total} users 50 coins.`);
+            client.say(channel, `gave ${total} users 50 coins.`); 
         });
         return;
     }
@@ -271,7 +271,7 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
-    if (marketOpen || player.isSubscriber(tags.username)) {
+    if (marketOpen || tags.subscriber) {
         /* query amount of coin */
         if (message == '!coin') {
             let _player = player.getPlayerByUsername(tags.username)
