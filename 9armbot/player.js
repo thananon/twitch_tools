@@ -27,7 +27,7 @@ class Player{
     }
 
     cloneDeep(data){
-        let _data = JSON.stringify(data) 
+        let _data = JSON.stringify(data)
         return JSON.parse(_data)
     }
 
@@ -75,7 +75,7 @@ class Player{
             status: status,
             exp: 0,
             role: "viewer"
-        } 
+        }
         if(!this.players.find(x=>x.username == player.username)){
             this.players.push(player)
         }
@@ -133,6 +133,10 @@ class Player{
             return true
         }
         return false
+    }
+
+    isSubscriber(username){
+        return (username == process.env.tags.subscriber || context.badges.founder )
     }
 
 }
