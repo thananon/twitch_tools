@@ -19,12 +19,42 @@ Twitch Tool WebApp is a tool like streamlabs
 
 ## Widgets
 
-### GIF Widget
-display GIF on screen and play sound
+## Alerts Widget
+display multiple GIF on screen and play sound
+
+### Usage
+example "9armbot.js"
+```javascript
+const webapp = require("../webapp");
+
+//show GIF
+webapp.socket.io().emit("widget::alerts", {
+    itemKey: 0 //<-- GIF #0
+})
+
+webapp.socket.io().emit("widget::alerts", {
+    itemKey: 1 //<-- GIF #1
+})
+
+//show GIF and Text
+webapp.socket.io().emit("widget::alerts", {
+    itemKey: 0, //<-- GIF #0
+    message: "Hello"
+})
+``` 
+
+or another example in `/webapp/example_alerts.js`
+```shell
+node webapp/example_alerts.js
+```
+see GIF at http://localhost:3000/widgets/alerts click -> "Launch" 
+
+## GIF Widget
+display single GIF on screen and play sound
 
 ![screenshot](screenshot/screenshot2.jpg)
 
-## Usage
+### Usage
 example "9armbot.js"
 ```javascript
 const webapp = require("../webapp");

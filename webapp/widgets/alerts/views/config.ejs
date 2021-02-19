@@ -1,0 +1,249 @@
+<% 
+var files = {}
+var storage = widget.storage
+%>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.js" integrity="sha512-UZAFKlbB343VyEfCComsVIxp836iYUvHyAuRYFoVN4LTNB6mpM+8EgKW8ymIV2qLZQsIiNdbpmJuA8y6IKzOow==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/mode/htmlmixed/htmlmixed.min.js" integrity="sha512-IC+qg9ITjo2CLFOTQcO6fBbvisTeJmiT5D5FnXsCptqY8t7/UxWhOorn2X+GHkoD1FNkyfnMJujt5PcB7qutyA==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/mode/javascript/javascript.min.js" integrity="sha512-+tn2IYnLwD2J9p6Nrn/Dl7ag9lluHA0GAblT/vnMiJV8DU/iDsldgf+9XbEqZUee2ThyDtfmSDb+IDZ9u7jrSA==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.css" integrity="sha512-MWdvo/Qqcf4pY1ecQUB1uBn0qLp19U/qJ1Rpp2BDZeuBA7YsFEwkvqR/+aG4BroPiAYDunKJ6X8R/Pmdt3p7oA==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" />
+<style>
+.CodeMirror {
+  height: auto;
+}
+</style>
+
+
+<form method="post" enctype="multipart/form-data">
+    
+    <div id="app">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group row mb-0">
+                    <label class="col-sm-2 col-form-label">Test</label>
+                    <div class="col-sm-10">
+                        <button type="button" class="btn btn-primary mr-2" @click="Test(item, key)" v-for="(item, key) in items" :key="key">Test #{{key}} {{item.name ? `- ${item.name}` : ''}}</button>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-sm-2 col-form-label"></label>
+                    <div class="col-sm-10">
+                        <input type="text" id="message" class="form-control" placeholder="Message">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group row mb-0">
+                    <label class="col-sm-2 col-form-label">Code Example</label>
+                    <div class="col-sm-10">
+<textarea id="codeMirrorDemo" class="p-3">
+const webapp = require("../webapp");
+//show GIF #0
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    itemKey: 0,
+})
+
+//show GIF #1
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    itemKey: 1,
+})
+
+//show GIF and Text
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    itemKey: 0,
+    message: "Hello"
+})</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Config</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Background Color</label>
+                    <div class="col-sm-10">
+                        <div class="input-group background_color">
+                            <input type="text" class="form-control" name="background_color" v-model="background_color">
+    
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-square" :style="{color:background_color}"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <button type="button" class="btn btn-primary btn-block pb-2 pt-2" @click="addItems()">Add GIFs</button>
+            </div>
+        </div>
+
+        <div class="card" v-for="(item, key) in items" :key="key">
+            <div class="card-header">
+                <h3 class="card-title">#{{key}} {{item.name ? `- ${item.name}` : ''}}</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" @click="removeItems(item, key)" v-if="key != 0">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                        <input id="alert_delay" type="text" :name="`items[${key}][name]`" class="form-control" v-model="item.name">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Alert Delay</label>
+                    <div class="col-sm-10">
+                        <input id="alert_delay" type="number" :name="`items[${key}][alert_delay]`" class="form-control" v-model="item.alert_delay">
+                    </div>
+                </div>
+
+                <!-- <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" for="upload">Upload or Link</label>
+                    <div class="col-sm-10">
+                        <select class="custom-select form-control-border" :name="`items[${key}][upload]`" v-model="item.upload">
+                            <option value="upload">Upload</option>
+                            <option value="url">Url</option>
+                        </select>
+                    </div>
+                </div> -->
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">GIF Upload</label>
+                    <div class="col-sm-10">
+
+                        <input type="file" class="form-control  h-auto" :name="`gif_${key}`" accept="image/*" v-if="!getFile('gif', key)">
+
+                        <div class="input-group mt-2" v-if="getFile('gif', key)">
+                            <input type="text" class="form-control" :name="`gif_${key}`" :value="getFile('gif', key)">
+                            <span class="input-group-append">
+                                <button type="button" class="btn btn-danger btn-flat" @click="deleteFile('gif', key)"><i class="far fa-trash-alt"></i></button>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- <div class="form-group row" v-if="item.upload == 'url'">
+                    <label class="col-sm-2 col-form-label">GIF Url</label>
+                    <div class="col-sm-10">
+                        <input id="gif_url" type="text" :name="`items[${key}][gif_url]`" class="form-control" placeholder="http://..." v-model="item.gif_url">
+                    </div>
+                </div> -->
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Sound Upload</label>
+                    <div class="col-sm-10">
+                        <input type="file" class="form-control  h-auto" :name="`sound_${key}`" accept="audio/*,video/*" v-if="!getFile('sound', key)">
+
+                        <div class="input-group mt-2" v-if="getFile('sound', key)">
+                            <input type="text" class="form-control" :name="`sound_${key}`" :value="getFile('sound', key)">
+                            <span class="input-group-append">
+                                <button type="button" class="btn btn-danger btn-flat" @click="deleteFile('sound', key)"><i class="far fa-trash-alt"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="form-group row" v-if="item.upload == 'url'">
+                    <label class="col-sm-2 col-form-label">Sound Url</label>
+                    <div class="col-sm-10">
+                        <input id="sound_url" type="text" :name="`items[${key}][sound_url]`" class="form-control" placeholder="http://..." v-model="item.sound_url">
+                    </div>
+                </div> -->
+
+            </div>
+        </div>
+
+    </div><!-- end app -->
+
+    <div class="card">
+        <div class="card-footer text-center">
+            <button type="submit" class="btn btn-primary">Save Setting</button>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: <%- JSON.stringify(storage) %>,
+        mounted: function(){
+            
+        },
+        methods : {
+            addItems: function(){
+                this.items.push({
+                    name : `GIF Name ${this.items.length+1}`,
+                    alert_delay : 3,
+                    upload : 'upload'
+                })
+                this['gif_'+(this.items.length-1)] = ""
+                this['sound_'+(this.items.length-1)] = ""
+            },
+            confirmDelete: function(){
+                return Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You want to delete this item?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                    })
+            },
+            removeItems: function(item, key){
+                _this = this
+                this.confirmDelete().then(function (result) {
+                    if (result.isConfirmed) {
+                        _this.items.splice(key, 1)
+                    }
+                })
+            },
+            getFile: function(type, index){
+                return this[`${type}_${index}`]
+            },
+            deleteFile: function(type, index){
+                _this = this
+                this.confirmDelete().then(function (result) {
+                    if (result.isConfirmed) {
+                        _this[`${type}_${index}`] = null
+                    }
+                })
+            },
+            Test: function(item, key){
+
+                console.log(item, key)
+
+                socket.emit('widget', {
+                    id: "<%=widget.id%>",
+                    itemKey: key,
+                    message: $("#message").val()
+                });
+            }
+        }
+    })
+
+    $(function () {
+        // CodeMirror
+        CodeMirror.fromTextArea(document.getElementById("codeMirrorDemo"), {
+            mode: "javascript",
+            theme: "monokai"
+        });
+    })
+</script>

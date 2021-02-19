@@ -42,9 +42,15 @@ exports.saveSetting = [
         let widget = widgets.find(o => o.id == id);
 
         //merge object
-        let data = {
-            ...widget.storage,
-            ...req.body
+        let data = req.body
+
+        if(req.body._method){
+            if(req.body._method.toLocaleUpperCase() =="PATCH"){
+                data = {
+                    ...widget.storage,
+                    ...req.body
+                }
+            }
         }
 
         req.files.forEach(file => {
