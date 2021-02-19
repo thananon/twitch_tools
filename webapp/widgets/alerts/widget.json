@@ -1,0 +1,30 @@
+{
+    "icon": "fas fa-exclamation-triangle",
+    "name": "Alerts",
+    "description": "Show multiple gif",
+    "bgColor": "#72d5ff",
+    "public_path": "public",
+    "default_storage": {
+        "background_color": "#00FF00",
+        "items": [
+            {
+                "name": "GIF Name 1",
+                "alert_delay": "3"
+            },
+            {
+                "name": "GIF Name 2",
+                "alert_delay": "4"
+            },
+            {
+                "name": "GIF Name 3",
+                "alert_delay": "5"
+            }
+        ],
+        "gif_0": "default.gif",
+        "sound_0": "default.mp3",
+        "gif_1": "default.gif",
+        "sound_1": "default.mp3",
+        "gif_2": "default.gif",
+        "sound_2": "default.mp3"
+    }
+}

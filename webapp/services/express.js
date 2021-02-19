@@ -39,5 +39,6 @@ app.get('/', dashboardController.index)
 app.get('/widgets', widgetsController.index)
 app.get('/widgets/:id', widgetsController.detail)
 app.post('/widgets/:id', widgetsController.saveSetting)
+app.patch('/widgets/:id', widgetsController.saveSetting)
 
 module.exports = app;
