@@ -1,11 +1,22 @@
-require('dotenv').config({ path: '.env' })
+// require('dotenv').config({ path: '.env' })
 const tmi = require('tmi.js');
 // const fs = require('fs');
 // var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 // const Utils = require('../core/utils')
 // const Player = require('./player')
 
-import { path, permission, status, session, mode, botInfo, botDialogue, client} from '9armbot/Variable.js'
+const { pathDB, permission, status } = require("./Variable.js");
+var { session, mode, botInfo, botDialogue } = require("./Variable.js");
+
+const client = new tmi.Client({
+    options: { debug: true },
+    connection: { reconnect: true },
+    identity: {
+        username: process.env.TWITCH_BOT_USERNAME,
+        password: process.env.TWITCH_BOT_OAUTH_TOKEN,
+    },
+    channels: [process.env.TWITCH_BOT_CHANNEL]
+});
 
 client.on('message', onMessageHandler);
 client.on('cheer', onCheerHandler);
@@ -15,6 +26,8 @@ client.on('subgift', onSubGiftHandler);
 client.on('submysterygift', onSubGiftMysteryHandler);
 client.on('connected', onConnectedHandler);
 
+client.connect();
+
 const command = {
     "!market": setMarket,
     "!kick": kickUser
@@ -22,6 +35,7 @@ const command = {
 
 // client event 
 function onMessageHandler(channel, userstate, message, self) {
+    console.log(`${userstate["display-name"]} : ${message}`);
 }
 
 function onCheerHandler(channel, userstate, message) {
@@ -33,10 +47,10 @@ function onSubHandler(channel, username, method, message, userstate) {
 function onReSubHandler(channel, username, months, message, userstate, method) {
 }
 
-function onSubGiftHandler(channel, username, streakMonths, recipient, methods, userstate){
+function onSubGiftHandler(channel, username, streakMonths, recipient, methods, userstate) {
 }
 
-function onSubGiftMysteryHandler(channel, username, numbOfSubs, methods, userstate){
+function onSubGiftMysteryHandler(channel, username, numbOfSubs, methods, userstate) {
 }
 
 function onConnectedHandler(addr, port) {

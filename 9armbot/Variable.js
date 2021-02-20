@@ -1,9 +1,9 @@
 require('dotenv').config({ path: '.env' })
 const tmi = require('tmi.js');
 
-const path = {
-    bot = "9armbot/db/botstat.json",
-    user = "9armbot/db/players.json"
+const pathDB = {
+    bot: "./9armbot/db/botstat.json",
+    user: "./9armbot/db/players.json"
 }
 
 const permission = {
@@ -14,8 +14,8 @@ const permission = {
 }
 
 const status = {
-    OPEN = true,
-    CLOSE = false
+    OPEN: true,
+    CLOSE: false
 };
 
 var session = {
@@ -24,7 +24,9 @@ var session = {
 };
 
 var mode = {
-    market: status.CLOSE,
+    market: {
+        mode: status.CLOSE
+    },
     sentry: {
         mode: status.CLOSE,
         dodgeRate: 1
@@ -40,20 +42,13 @@ var botInfo = {
     },
     exp: {
         current: 0,
-        max = 500
+        max: 500
     }
 };
 
 var botDialogue = {
-    "temp" : "temp"
+    "temp": "temp"
 };
 
-const client = new tmi.Client({
-    options: { debug: true },
-    connection: { reconnect: true },
-    identity: {
-        username: process.env.tmi_username,
-        password: oauth_token,
-    },
-    channels: [process.env.tmi_channel_name]
-});
+module.exports = { pathDB, permission, status };
+module.exports = { session, mode, botInfo, botDialogue };
