@@ -65,7 +65,7 @@ async function thanos (channel, byUser) {
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
 
-    if (player.deductCoins(byUser.username, thanosCost) || checkBroadcaster(tags)) {
+    if (player.deductCoins(byUser.username, thanosCost) || checkBroadcaster(byUser)) {
         let players = await player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
@@ -121,7 +121,7 @@ function gacha(channel, user, amount) {
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
-    if (user.mod || checkBroadcaster(tags)) {
+    if (user.mod || checkBroadcaster(user)) {
         return;
     }
 
