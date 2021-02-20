@@ -1,6 +1,0 @@
-Class Session
-{
-    constructor(){
-        
-    }
-}
