@@ -271,7 +271,7 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
-    if (marketOpen || tags.subscriber) {
+    if (marketOpen || isSubscriber(tags)) {
         /* query amount of coin */
         if (message == '!coin') {
             let _player = player.getPlayerByUsername(tags.username)
@@ -334,6 +334,10 @@ function subscriptionPayout (channel, username) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
     });
     player.giveCoins(username,10)
+}
+
+function isSubscriber (userStat) {
+    return "founder" in userStat.badges || userStat.subscriber
 }
 
 client.on('subscription', (channel, username, method, message, userstate) => {
