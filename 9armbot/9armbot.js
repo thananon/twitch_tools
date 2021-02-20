@@ -65,7 +65,7 @@ async function thanos (channel, byUser) {
     let casualties = 0;
     console.log(`Thanos: I am inevitible..`)
 
-    if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
+    if (player.deductCoins(byUser.username, thanosCost) || checkBroadcaster(tags)) {
         let players = await player.getOnlinePlayers()
         for(let user of players){
             if (roll(50)){
@@ -121,7 +121,7 @@ function gacha(channel, user, amount) {
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
-    if (user.mod || player.isAdmin(user.username)) {
+    if (user.mod || checkBroadcaster(tags)) {
         return;
     }
 
@@ -163,7 +163,7 @@ client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
     /* mod can open/close the market. Allowing people to check/spend their coins. */
-    if (tags.mod || player.isAdmin(tags.username)) {
+    if (tags.mod || checkBroadcaster(tags)) {
         let market_re = /!market\s*(open|close)/i;
         let market = message.match(market_re);
 
@@ -194,7 +194,7 @@ client.on('message', (channel, tags, message, self) => {
     /* Give coins to a user. Testing command, only available to me. */
     let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
     group = message.match(give_re);
-    if (group &&  player.isAdmin(tags.username)) {
+    if (group &&  checkBroadcaster(tags)) {
         if (group[1] && group[2]) {
             player.giveCoins(group[1], parseInt(group[2]))
         }
@@ -236,7 +236,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
-    if (message == '!reset' &&  player.isAdmin(tags.username)) {
+    if (message == '!reset' &&  checkBroadcaster(tags)) {
         botInfo.critRate = 5;
         botInfo.critMultiplier = 1.5;
         botInfo.attackPower = 300;
@@ -246,13 +246,13 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     /* sentry mode is to toggle message filter on/off. */
-    if (player.isAdmin(tags.username) && message == '!sentry') {
+    if (checkBroadcaster(tags) && message == '!sentry') {
         sentryMode = !sentryMode;
         return
     }
 
     /* for testing purpose */
-    if (message == '!give' && player.isAdmin(tags.username)) {
+    if (message == '!give' && checkBroadcaster(tags)) {
         giveCoins_allonline(50).then( function (total) {
             client.say(channel, `gave ${total} users 50 coins.`); 
         });
@@ -266,7 +266,7 @@ client.on('message', (channel, tags, message, self) => {
     }*/
 
     /* This should be fun, if its not broken. */
-    if (message == '!thanos' &&  player.isAdmin(tags.username)) {
+    if (message == '!thanos' &&  checkBroadcaster(tags)) {
         thanos(channel, tags);
         return;
     }
@@ -313,22 +313,26 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
-    if (message == '!income' && player.isAdmin(tags.username)){
+    if (message == '!income' && checkBroadcaster(tags)){
         client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
     }
 
-    if (message == '!save' && player.isAdmin(tags.username)){
+    if (message == '!save' && checkBroadcaster(tags)){
         saveBotData();
         player.saveData();
     }
 
-    if (message == '!load' && player.isAdmin(tags.username)){
+    if (message == '!load' && checkBroadcaster(tags)){
         restoreBotData();
     }
 });
 
-function checkSubscriber(userstat){
-    return "founder" in userstat.badges || userstate.subscriber
+function checkBroadcaster(userstate) {
+    return "broadcaster" in userstate.badges
+}
+
+function checkSubscriber(userstate){
+    return "founder" in userstate.badges || userstate.subscriber
 }
 
 function subscriptionPayout (channel, username) {
