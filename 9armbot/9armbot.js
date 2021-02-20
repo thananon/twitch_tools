@@ -68,13 +68,15 @@ async function thanos (channel, byUser) {
 
     if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
         let players = await player.getOnlinePlayers()
-        console.log(players);
+        webapp.socket.io().emit("widget::alerts", {
+            itemKey: 1
+        });
         for(let username of players){
             if (roll(50)){
                 casualties++;
                 console.log(`${username} got snapped.`);
                 client.timeout(channel, username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
-                await new Utils().sleep(700)
+                await new Utils().sleep(620)
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
@@ -105,7 +107,7 @@ function gacha(channel, user, amount) {
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             }
-            str_out =  player.username + " ได้รางวัล "+ gain +" armcoin";
+            str_out =  _player.username + " ได้รางวัล "+ gain +" armcoin";
             webapp.socket.io().emit("widget::alerts", {
                 itemKey: 0,
                 message: str_out
@@ -120,7 +122,7 @@ function gacha(channel, user, amount) {
             sessionIncome += amount;
             webapp.socket.io().emit("widget::saltalerts", {
                 itemKey: 0,
-                message: _player.username+ "🧂🧂🧂🧂"
+                message: _player.username
             });
             //client.say(channel, `🧂🧂🧂 @${_player.username} 🧂 LUL🧂🧂🧂🧂`);
         }
@@ -355,10 +357,11 @@ client.on('resub', (channel, username, months, message, userstate, method) => {
 
 client.on('subgift', (channel, username, streakmonth, recipient, methods, userstate) => {
     player.giveCoins(username, 10);
+    subscriptionPayout(channel, recipient);
     client.say (channel, `${username} ได้รับ 10 armcoin จากการ Gift ให้ ${recipient} armKraab `);
 });
 
-client.on('submysterygift', (channel, username, streakmonth, num, method, userstate) => {
+client.on('submysterygift', (channel, username, num, method, userstate) => {
     if (!num) num = 1;
     player.giveCoins(username, 10*num);
     client.say (channel, `${username} ได้รับ ${10*num} armcoin จากการ Gift ให้สมาชิก ${num} คน armKraab `);
