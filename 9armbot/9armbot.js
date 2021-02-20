@@ -5,11 +5,13 @@ const tmi = require('tmi.js');
 // const Utils = require('../core/utils')
 // const Player = require('./player')
 
+// .toLocaleString()
+
 const { pathDB, permission, status } = require("./Variable.js");
 var { session, mode, botInfo, botDialogue } = require("./Variable.js");
 
 const client = new tmi.Client({
-    options: { debug: true },
+    options: { debug: false },
     connection: { reconnect: true },
     identity: {
         username: process.env.TWITCH_BOT_USERNAME,
@@ -17,6 +19,7 @@ const client = new tmi.Client({
     },
     channels: [process.env.TWITCH_BOT_CHANNEL]
 });
+
 
 client.on('message', onMessageHandler);
 client.on('cheer', onCheerHandler);
@@ -35,10 +38,23 @@ const command = {
 
 // client event 
 function onMessageHandler(channel, userstate, message, self) {
-    console.log(`${userstate["display-name"]} : ${message}`);
+    const state = {
+        channel: channel,
+        userstate: userstate,
+        message: message,
+        self: self
+    };
+
+    let userCommand = message.split(" ")[0]
+
+    if (userCommand in command)
+        console.log(`${getPermissionOf(userstate)}`);
 }
 
 function onCheerHandler(channel, userstate, message) {
+    let amount = userstate.bits / 1000;
+    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amount.toFixed(2)} จากพลังของนายทุน <<`);
+    botInfo.crit.multiplier += amount;
 }
 
 function onSubHandler(channel, username, method, message, userstate) {
@@ -60,10 +76,21 @@ function onConnectedHandler(addr, port) {
 
 function roll(change) {
     const dice = Math.random() * 100;
-    return dice < change;
+    return dice <= change;
 }
 
 function getPermissionOf(userstate) {
+    /**
+     ***************************
+     * role        *    return *
+     ***************************
+     * owner       *         0 *
+     * mod         *         1 *
+     * subscriber  *         2 *
+     * viewer      *         3 *
+     ***************************
+     */
+
     if ("broadcaster" in userstate.badges)
         return permission.ONWER;
     if (userstate.mod)

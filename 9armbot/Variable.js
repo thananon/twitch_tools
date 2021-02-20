@@ -1,5 +1,4 @@
 require('dotenv').config({ path: '.env' })
-const tmi = require('tmi.js');
 
 const pathDB = {
     bot: "./9armbot/db/botstat.json",
@@ -7,15 +6,15 @@ const pathDB = {
 }
 
 const permission = {
-    ONWER: 0,
-    MOD: 1,
-    SUBSCRIBER: 2,
-    VIEWER: 3
+    "ONWER": 0,
+    "MOD": 1,
+    "SUBSCRIBER": 2,
+    "VIEWER": 3
 }
 
 const status = {
-    OPEN: true,
-    CLOSE: false
+    "OPEN": true,
+    "CLOSE": false
 };
 
 var session = {
@@ -47,8 +46,8 @@ var botInfo = {
 };
 
 var botDialogue = {
-    "temp": "temp"
+    "Cheer": (temp => `>> ตัวคูณเพิ่มขึ้น ${temp.toFixed(2)} จากพลังของนายทุน <<`)
 };
 
-module.exports = { pathDB, permission, status };
-module.exports = { session, mode, botInfo, botDialogue };
+
+module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status };
