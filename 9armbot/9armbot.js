@@ -1,9 +1,10 @@
-require('dotenv').config({ path: './../.env'})
+require('dotenv').config({ path: './../.env'});
+const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-const Utils = require('../core/utils')
-const Player = require('./player')
+const Utils = require('../core/utils');
+const Player = require('./player');
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -67,11 +68,12 @@ async function thanos (channel, byUser) {
 
     if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
         let players = await player.getOnlinePlayers()
-        for(let user of players){
+        console.log(players);
+        for(let username of players){
             if (roll(50)){
                 casualties++;
-                console.log(`${user.username} got snapped.`);
-                client.timeout(channel, user.username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
+                console.log(`${username} got snapped.`);
+                client.timeout(channel, username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
                 await new Utils().sleep(700)
             }
         }
@@ -103,6 +105,11 @@ function gacha(channel, user, amount) {
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
             }
+            str_out =  player.username + " ได้รางวัล "+ gain +" armcoin";
+            webapp.socket.io().emit("widget::alerts", {
+                itemKey: 0,
+                message: str_out
+            });
         } else if (roll(gachaMysticRate)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
@@ -111,6 +118,10 @@ function gacha(channel, user, amount) {
             sessionPayout += gain - amount;
         } else {
             sessionIncome += amount;
+            webapp.socket.io().emit("widget::saltalerts", {
+                itemKey: 0,
+                message: _player.username+ "🧂🧂🧂🧂"
+            });
             //client.say(channel, `🧂🧂🧂 @${_player.username} 🧂 LUL🧂🧂🧂🧂`);
         }
     } else {
@@ -258,12 +269,6 @@ client.on('message', (channel, tags, message, self) => {
         });
         return;
     }
-
-    /* testing purpose, give myself bunch of coins */
-    /*if (message == '!c') {
-        player.giveCoins('armzi', 999999)
-        return;
-    }*/
 
     /* This should be fun, if its not broken. */
     if (message == '!thanos' &&  player.isAdmin(tags.username)) {
