@@ -271,7 +271,7 @@ client.on('message', (channel, tags, message, self) => {
         return;
     }
 
-    if (marketOpen || tags.subscriber) {
+    if (marketOpen || checkSubscriber(tags)) {
         /* query amount of coin */
         if (message == '!coin') {
             let _player = player.getPlayerByUsername(tags.username)
@@ -326,6 +326,10 @@ client.on('message', (channel, tags, message, self) => {
         restoreBotData();
     }
 });
+
+function checkSubscriber(userstat){
+    return "founder" in userstat.badges || userstate.subscriber
+}
 
 function subscriptionPayout (channel, username) {
     botInfo.critRate+=2;
