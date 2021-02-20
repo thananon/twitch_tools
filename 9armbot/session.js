@@ -1,0 +1,6 @@
+Class Session
+{
+    constructor(){
+        
+    }
+}
