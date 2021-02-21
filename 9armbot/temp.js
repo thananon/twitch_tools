@@ -15,18 +15,7 @@ async function giveCoins_allonline(amount) {
     return players.length;
 }
 
-function feedBot(channel, user, amount) {
-    if (player.deductCoins(user.username, amount)) {
-        botInfo.exp += amount;
-        if (botInfo.exp >= 500) { // level up
-            let levelup = parseInt(botInfo.exp / 500);
-            botInfo.level += levelup;
-            botInfo.exp %= 500;
-            botInfo.attackPower += 10 * levelup;
-            client.say(channel, `LEVEL UP!! -> ${botInfo.level}`);
-        }
-    }
-}
+
 
 async function thanos(channel, byUser) {
     let thanosCost = 3000;
@@ -49,31 +38,6 @@ async function thanos(channel, byUser) {
         //timeoutUser(channel, byUser, botInfo.attackPower, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
     }
 }
-
-function timeoutUser(channel, user, duration, reason) {
-
-    // hard coded again. Need priviledge check.
-    if (user.mod || player.isAdmin(user)) {
-        return;
-    }
-
-    let final_duration = duration;
-    // roll perfect-dodge
-    if (roll(dodgeRate)) {
-        client.say(channel, `MISS!! ${user.username} หลบหลีกการโจมตี!`);
-        return;
-    }
-    // roll crit
-    if (roll(botInfo.critRate)) {
-        final_duration *= botInfo.critMultiplier;
-        client.say(channel, );
-    }
-
-    client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
-        console.error(err);
-    });
-}
-
 
 
 
@@ -104,20 +68,7 @@ function onMessageHandle(channel, userstate, message, self) {
 
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
-    if (message == '!reset' && checkBroadcaster(userstate)) {
-        botInfo.critRate = 5;
-        botInfo.critMultiplier = 1.5;
-        botInfo.attackPower = 300;
-        botInfo.exp = 0;
-        botInfo.level = 1;
-        return;
-    }
 
-    /* sentry mode is to toggle message filter on/off. */
-    if (checkBroadcaster(userstate) && message == '!sentry') {
-        sentryMode = !sentryMode;
-        return
-    }
 
     /* for testing purpose */
     if (message == '!give' && checkBroadcaster(userstate)) {
@@ -151,34 +102,6 @@ function onMessageHandle(channel, userstate, message, self) {
         }
 
 
-        /* usage: !gacha [amount] */
-        /* We are trying to control the inflation. The return, on average should be a loss for users. */
-        let gacha_re = /^!gacha\s*(\d*)/;
-        let group = message.match(gacha_re);
-        if (group) {
-            if (!group[1])
-                gacha(channel, userstate, 1);
-            else
-                gacha(channel, userstate, parseInt(group[1]));
-            return;
-        }
-
-        if (message == '!allin') {
-            let _player = player.getPlayerByUsername(userstate.username)
-            if (_player) {
-                gacha(channel, userstate, _player.coins);
-            }
-        }
-        /* This command let user feed the bot with armcoin. */
-        /* usage: !feed [amount] */
-        let feed_re = /^!feed\s*(\d*)/;
-        group = message.match(feed_re);
-        if (group) {
-            if (!group[1])
-                feedBot(channel, userstate, 1);
-            else
-                feedBot(channel, userstate, parseInt(group[1]));
-        }
     }
 
     if (message == '!income' && checkBroadcaster(userstate)) {

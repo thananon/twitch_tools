@@ -33,12 +33,14 @@ client.connect();
 
 const command = {
     "!c": checkCoin,
+    "!f": feedBot,
     "!g": gacha,
     "!git": githubLink,
 
     "!allin": gacha,
     "!botstat": getBotStat,
     "!coin": checkCoin,
+    "!feed": feedBot,
     "!gacha": gacha,
     "!github": githubLink,
     "!reset": resetBot,
@@ -119,7 +121,8 @@ function checkNewUser(userstate, amount = 0) {
 
         user[username] = {
             "amount": amount,
-            "user-id": id
+            "user-id": id,
+            "feed" : 0
         };
     } else if (!(username in user)) {
         // user changes their name swap to new username.
@@ -313,11 +316,45 @@ function toggleStateSentry(state) {
             mode.sentry.status = status.OPEN;
 
         const tempText = {
-            username : username, 
+            username: username,
             state: mode.sentry.status ? "เปิด" : "ปิด"
         };
         client.say(state.channel, botDialogue["sentry_mode"](tempText));
     }
+}
+
+function feedBot(state) {
+    const username = state.userstate["display-name"];
+    const message = state.message;
+
+    const regexFeed = /^!feed\s*(\d*)/;
+    const group = message.match(regexFeed);
+
+    let amount = 0;
+    if (group) {
+        if (!group[1])
+            amount = 1;
+        else
+            amount = parseInt(group[1]);
+    }
+    const sufficient = user[username].amount >= amount && amount > 0;
+    const levelUP = botInfo.exp.current + amount >= botInfo.exp.max;
+
+    if (sufficient){
+        botInfo.exp.current += amount;
+        user[username].feed += amount;
+        user[username].amount -= amount;
+        // lever up
+        if (levelUP){
+            const levelGain = parseInt(botInfo.exp.current / 500)
+
+            botInfo.level += levelGain;
+            botInfo.exp.current %= 500;
+            botInfo.attackPower += 10 * levelGain;
+            client.say(state.channel, botDialogue["feed_bot_level_up"](botInfo.level));
+        }
+    }
+
 }
 
 
