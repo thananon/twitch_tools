@@ -1,9 +1,10 @@
 require('dotenv').config({ path: '.env' })
 
-const pathDB = {
-    bot: "./9armbot/db/botstat.json",
-    user: "./9armbot/db/players.json"
-}
+const address = {
+    "bot": "./9armbot/db/botstat.json",
+    "URLchatter": (_ => `http://tmi.twitch.tv/group/user/${_}/chatters`),
+    "user": "./9armbot/db/players.json"  
+};
 
 // enum permission, status
 const permission = {
@@ -11,7 +12,7 @@ const permission = {
     "MOD": 1,
     "SUBSCRIBER": 2,
     "VIEWER": 3
-}
+};
 
 const status = {
     "OPEN": true,
@@ -75,6 +76,11 @@ var user = {
 var userID = { 85745201: "LCKYN" };
 const coinName = "armcoin";
 
+const thanos= {
+    Cost : 3000,
+    Duration : 5
+};
+
 var botDialogue = {
     "bot_stat": (_ => `<Level ${_.level.toLocaleString()}> <EXP ${_.exp}/500> <พลังโจมตี: ${_.attackPower.toLocaleString()}> <%crit: ${_.critRate}> <ตัวคูณ: ${_.critMultiplier}> <Gacha Bonus +${_.level.toLocaleString()}%>`),
     "check_coin": (_ => `@${_.username} มี ${_.amount.toLocaleString()} ${coinName}.`),
@@ -89,8 +95,10 @@ var botDialogue = {
     "sentry_dodge": (_ => `MISS!! ${_} หลบหลีกการโจมตี!`),
     "sentry_mode": (_ => `${_.username} ${_.state}การทำงานของ sentry`),
     "sentry_timeout": (_ => `${_} (critRate = ${_.critRate})`),
-    "sentry_timeout_crit": (_ => `@${_.username} ⚔️⚔️ CRITICAL!! รับโทษ x${_.critMultiplier}`)
+    "sentry_timeout_crit": (_ => `@${_.username} ⚔️⚔️ CRITICAL!! รับโทษ x${_.critMultiplier}`),
+    "thanos_activated": "ข้าคือชะตาที่ไม่อาจหลีกเลี่ยง",
+    "thanos_inevitible": "คุณสตาร์ค ผมรู้สึกไม่ค่อยสบาย "
 };
 
 
-module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID, gachaRate };
+module.exports = { session, mode, botInfo, botDialogue, address, permission, status, user, userID, gachaRate, thanos};

@@ -2,12 +2,12 @@
 const tmi = require('tmi.js');
 // const fs = require('fs');
 // var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-// const Utils = require('../core/utils')
+const Utils = require('../core/utils')
 // const Player = require('./player')
 
 // .toLocaleString()
 
-const { pathDB, permission, status, gachaRate } = require("./Variable.js");
+const { address, permission, status, gachaRate, thanos } = require("./Variable.js");
 var { session, mode, botInfo, botDialogue, user, userID } = require("./Variable.js");
 
 const client = new tmi.Client({
@@ -45,7 +45,8 @@ const command = {
     "!github": githubLink,
     "!income": getIncome,
     "!reset": resetBot,
-    "!sentry": toggleStateSentry
+    "!sentry": toggleStateSentry,
+    "!thanos": thanosClick
 }
 
 // client event 
@@ -370,72 +371,44 @@ function getIncome(state) {
     }
 }
 
+async function thanosClick(state) {
 
 
 
+    const username = state.userstate["display-name"];
+    const userAmount = user[username].amount;
+
+    const isOwner = getPermissionOf(state.userstate) == 0;
+    const powerfulEnough = (isOwner || userAmount >= thanos.Cost);
 
 
+    if (powerfulEnough) {
+        console.log(`Thanos: I am inevitible..`);
+        client.say(state.channel, botDialogue["thanos_activated"]);
+
+        if (!isOwner)
+            user[username].amount -= thanos.Cost;
+
+        client.api({
+            // url: address.URLchatter(state.channel.slice(1))
+            url: address.URLchatter("armzi")
+        }, async (err, res, body) => {
+            let disappear = 0;
+            const viewerList = body.chatters.viewers;
 
 
-
-
-
-
-
-
-
-
-
-
-
-function kickUser(state) {
-    const message = state.message;
-    const userId = state.userstate["display-name"];
-
-    let kick_re = /!kick\s*([A-Za-z0-9_]*)/;
-    let kick = message.match(kick_re);
-
-    if (checkMod(state.userstate)) {
-        if (kick && kick[1]) {
-            let user = {
-                username: kick[1],
-                isMod: false
-            };
-            timeoutUser(channel, user, botInfo.attackPower, `${userId} สั่งมา`);
-        }
-    }
-}
-
-function setMarket(state) {
-    /* mod can open/close the market. Allowing people to check/spend their coins. */
-    const message = state.message;
-
-    const market_re = /!market\s*(open|close)/i;
-
-    if (checkMod(state.userstate)) {
-        const market = message.test(market_re)
-        if (market) {
-            if (market[1] == 'open') {
-                if (!marketOpen) {
-                    marketOpen = true;
-                    client.say(channel, 'market is now OPEN. (!coin,!gacha,!feed)');
+            for (let i in viewerList) {
+                const inevitible = Math.random() * 100 < 50;
+                if (inevitible) {
+                    disappear += 1;
+                    client.say(state.channel, viewerList[i]);
+                    console.log(viewerList[i]);
+                    await new Utils().sleep(700);
                 }
-                else {
-                    client.say(channel, 'market is already OPEN.');
-                }
-            } else if (market[1] == 'close') {
-                if (marketOpen) {
-                    marketOpen = false;
-                    client.say(channel, 'market is now CLOSE.');
-                }
-                else {
-                    client.say(channel, 'market is already CLOSE.');
-                }
+
             }
-            return;
-        }
+            client.say(state.channel, `@${username} ใช้งาน Thanos Mode มี ${disappear} คนในแชทหายตัวไป....`);
+
+        });
     }
 }
-
-
-

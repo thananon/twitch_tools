@@ -34,8 +34,6 @@ async function thanos(channel, byUser) {
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
-    } else {
-        //timeoutUser(channel, byUser, botInfo.attackPower, `ค่าจ้างทานอส ${thanosCost} armcoin โว้ย..`);
     }
 }
 
@@ -59,16 +57,6 @@ function onMessageHandle(channel, userstate, message, self) {
             player.giveCoins(group[1], parseInt(group[2]))
         }
     }
-    /*
-        if (message == '!whisper') {
-            console.log('whisper..');
-            client.whisper(tags.username, 'test');
-        }
-    */
-
-    /* reset bot stat */
-    // Hard coded command for me. We will have to handle priviledge later.
-
 
     /* for testing purpose */
     if (message == '!give' && checkBroadcaster(userstate)) {
@@ -78,34 +66,10 @@ function onMessageHandle(channel, userstate, message, self) {
         return;
     }
 
-    /* testing purpose, give myself bunch of coins */
-    /*if (message == '!c') {
-        player.giveCoins('armzi', 999999)
-        return;
-    }*/
-
     /* This should be fun, if its not broken. */
     if (message == '!thanos' && checkBroadcaster(userstate)) {
         thanos(channel, userstate);
         return;
-    }
-
-    if (marketOpen || checkSubscriber(userstate)) {
-        /* query amount of coin */
-        if (message == '!coin') {
-            let _player = player.getPlayerByUsername(userstate.username)
-            if (_player)
-                client.say(channel, `@${_player.username} มี ${_player.coins} armcoin.`);
-            else
-                client.say(channel, `@${userstate.username} มี 0 armcoin.`);
-            return;
-        }
-
-
-    }
-
-    if (message == '!income' && checkBroadcaster(userstate)) {
-        client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
     }
 
     if (message == '!save' && checkBroadcaster(userstate)) {
