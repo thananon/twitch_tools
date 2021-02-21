@@ -84,6 +84,7 @@ var botDialogue = {
     "gacha_legendary": (_ => `JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
     "gacha_mystic": (_ => `@${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}.`),
     "github": "https://github.com/thananon/twitch_tools",
+    "income": (_ => `Payout Total: ${_.Payout.toLocaleString()} ${coinName}. Gacha Total = ${_.Income.toLocaleString()} ${coinName}. Net: ${_.diff.toLocaleString()} ${coinName}.`),
     "sentry25": "225 ไง Land Protector อะ",
     "sentry_dodge": (_ => `MISS!! ${_} หลบหลีกการโจมตี!`),
     "sentry_mode": (_ => `${_.username} ${_.state}การทำงานของ sentry`),

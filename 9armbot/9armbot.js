@@ -43,6 +43,7 @@ const command = {
     "!feed": feedBot,
     "!gacha": gacha,
     "!github": githubLink,
+    "!income": getIncome,
     "!reset": resetBot,
     "!sentry": toggleStateSentry
 }
@@ -122,7 +123,7 @@ function checkNewUser(userstate, amount = 0) {
         user[username] = {
             "amount": amount,
             "user-id": id,
-            "feed" : 0
+            "feed": 0
         };
     } else if (!(username in user)) {
         // user changes their name swap to new username.
@@ -340,12 +341,12 @@ function feedBot(state) {
     const sufficient = user[username].amount >= amount && amount > 0;
     const levelUP = botInfo.exp.current + amount >= botInfo.exp.max;
 
-    if (sufficient){
+    if (sufficient) {
         botInfo.exp.current += amount;
         user[username].feed += amount;
         user[username].amount -= amount;
         // lever up
-        if (levelUP){
+        if (levelUP) {
             const levelGain = parseInt(botInfo.exp.current / 500)
 
             botInfo.level += levelGain;
@@ -357,6 +358,17 @@ function feedBot(state) {
 
 }
 
+function getIncome(state) {
+    // only owner
+    if (getPermissionOf(state.userstate) == 0) {
+        const tempParameter = {
+            Payout: session.Payout,
+            Income: session.Income,
+            diff: session.Income - session.Payout
+        };
+        client.say(state.channel, botDialogue["income"](tempParameter));
+    }
+}
 
 
 
