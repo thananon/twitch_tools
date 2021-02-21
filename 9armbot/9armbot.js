@@ -37,6 +37,7 @@ const command = {
     "!git": githubLink,
 
     "!allin": gacha,
+    "!botstat": getBotStat,
     "!coin": checkCoin,
     "!gacha": gacha,
     "!github": githubLink
@@ -142,7 +143,7 @@ function checkCoin(state) {
         amount: amount
     };
 
-    client.say(state.channel, botDialogue["checkCoin"](tempParameter));
+    client.say(state.channel, botDialogue["check_coin"](tempParameter));
 }
 
 function gacha(state) {
@@ -253,7 +254,7 @@ function sentryMode(state) {
     if (reason == "") return;
 
     const tempParameter = {
-        username : username,
+        username: username,
         critMultiplier: botInfo.crit.multiplier,
         critRate: botInfo.crit.rate
     };
@@ -261,12 +262,24 @@ function sentryMode(state) {
     // get perfect-dodge ?
     if (dodge) {
         client.say(state.channel, botDialogue["sentry_dodge"](username));
-    }else if (crit) {
+    } else if (crit) {
         duration *= botInfo.crit.multiplier;
-        client.timeout(state.channel, username, duration, botDialogue["sentry_timeout_crit"](tempParameter)).catch((err) => {console.error(err);});
+        client.timeout(state.channel, username, duration, botDialogue["sentry_timeout_crit"](tempParameter)).catch((err) => { console.error(err); });
     } else {
         client.timeout(state.channel, username, duration, botDialogue["sentry_timeout"](tempParameter)).catch((err) => { console.error(err); });
     }
+}
+
+function getBotStat(state) {
+    const tempParameter = {
+        level : botInfo.level,
+        exp: botInfo.exp.current,
+        attackPower: botInfo.attackPower,
+        critRate: botInfo.crit.rate,
+        critMultiplier : botInfo.crit.multiplier
+    }
+
+    client.say(state.channel, botDialogue["bot_stat"](tempParameter));
 }
 
 
