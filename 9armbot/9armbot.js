@@ -8,7 +8,7 @@ const tmi = require('tmi.js');
 // .toLocaleString()
 
 const { pathDB, permission, status } = require("./Variable.js");
-var { session, mode, botInfo, botDialogue } = require("./Variable.js");
+var { session, mode, botInfo, botDialogue, user, userID } = require("./Variable.js");
 
 const client = new tmi.Client({
     options: { debug: false },
@@ -32,8 +32,9 @@ client.on('connected', onConnectedHandler);
 client.connect();
 
 const command = {
-    "!market": setMarket,
-    "!kick": kickUser
+    "!c": checkCoin,
+    
+    "!coin": checkCoin
 }
 
 // client event 
@@ -44,16 +45,17 @@ function onMessageHandler(channel, userstate, message, self) {
         message: message,
         self: self
     };
-
     let userCommand = message.split(" ")[0]
 
+    checkNewUser(userstate);
+
     if (userCommand in command)
-        console.log(`${getPermissionOf(userstate)}`);
+        command[userCommand](state);
 }
 
 function onCheerHandler(channel, userstate, message) {
     let amount = userstate.bits / 1000;
-    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amount.toFixed(2)} จากพลังของนายทุน <<`);
+    client.say(channel, botDialogue["Cheer"](amount));
     botInfo.crit.multiplier += amount;
 }
 
@@ -99,6 +101,63 @@ function getPermissionOf(userstate) {
         return permission.SUBSCRIBER;
     return permission.VIEWER;
 }
+
+function checkNewUser(userstate, amount = 0) {
+    let id = parseInt(userstate["user-id"]);
+    let username = userstate["display-name"];
+
+    if (!(id in userID)) {
+        // new user
+        userID[id] = username;
+
+        user[username] = {
+            "amount": amount,
+            "user-id": id
+        };
+    } else if (!(username in user)) {
+        // user has rename
+        let oldUserName = userID[id];
+        userID[id] = username;
+        user[username] = user[oldUserName];
+
+        delete user[oldUserName];
+        console.log(`rename ${oldUserName} to ${username}`);
+    }
+}
+
+function checkCoin(state) {
+    let username = state.userstate["display-name"];
+
+    checkNewUser(state.userstate);
+
+    const amount = user[username]["amount"];
+
+    let tempParameter = {
+        username: username,
+        amount: amount
+    };
+
+    client.say(state.channel, botDialogue["checkCoin"](tempParameter));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function kickUser(state) {
     const message = state.message;

@@ -45,9 +45,20 @@ var botInfo = {
     }
 };
 
+var user = {
+    "LCKYN": {
+        "amount": 100000000,
+        "user-id": 85745201
+    }
+};
+
+var userID = { 85745201: "LCKYN" };
+const coinName = "armcoin";
+
 var botDialogue = {
-    "Cheer": (temp => `>> ตัวคูณเพิ่มขึ้น ${temp.toFixed(2)} จากพลังของนายทุน <<`)
+    "Cheer": (_ => `>> ตัวคูณเพิ่มขึ้น ${_.toFixed(2)} จากพลังของนายทุน <<`),
+    "checkCoin": (_ => `@${_.username} มี ${_.amount.toLocaleString()} ${coinName}.`)
 };
 
 
-module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status };
+module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID };
