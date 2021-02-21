@@ -85,6 +85,7 @@ var botDialogue = {
     "github": "https://github.com/thananon/twitch_tools",
     "sentry25": "225 ไง Land Protector อะ",
     "sentry_dodge": (_ => `MISS!! ${_} หลบหลีกการโจมตี!`),
+    "sentry_mode": (_ => `${_.username} ${_.state}การทำงานของ sentry`),
     "sentry_timeout": (_ => `${_} (critRate = ${_.critRate})`),
     "sentry_timeout_crit": (_ => `@${_.username} ⚔️⚔️ CRITICAL!! รับโทษ x${_.critMultiplier}`)
 };

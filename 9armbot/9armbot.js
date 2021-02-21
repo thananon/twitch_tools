@@ -41,7 +41,8 @@ const command = {
     "!coin": checkCoin,
     "!gacha": gacha,
     "!github": githubLink,
-    "!reset" : resetBot
+    "!reset": resetBot,
+    "!sentry": toggleStateSentry
 }
 
 // client event 
@@ -134,7 +135,7 @@ function checkNewUser(userstate, amount = 0) {
 function checkCoin(state) {
     // allow owner mod sub or market is open
     if (!(getPermissionOf(state.userstate) < 3 || mode.market.status == status.OPEN)) return;
-    let username = state.userstate["display-name"];
+    const username = state.userstate["display-name"];
 
     checkNewUser(state.userstate);
 
@@ -273,17 +274,17 @@ function sentryMode(state) {
 
 function getBotStat(state) {
     const tempParameter = {
-        level : botInfo.level,
+        level: botInfo.level,
         exp: botInfo.exp.current,
         attackPower: botInfo.attackPower,
         critRate: botInfo.crit.rate,
-        critMultiplier : botInfo.crit.multiplier
+        critMultiplier: botInfo.crit.multiplier
     }
 
     client.say(state.channel, botDialogue["bot_stat"](tempParameter));
 }
 
-function resetBot(state){
+function resetBot(state) {
     // only owner
     if (getPermissionOf(state.userstate) == 0) {
         botInfo = {
@@ -299,6 +300,23 @@ function resetBot(state){
             }
         };
         getBotStat(state);
+    }
+}
+
+function toggleStateSentry(state) {
+    // only owner
+    const username = state.userstate["display-name"];
+    if (getPermissionOf(state.userstate) == 0) {
+        if (mode.sentry.status == status.OPEN)
+            mode.sentry.status = status.CLOSE;
+        else
+            mode.sentry.status = status.OPEN;
+
+        const tempText = {
+            username : username, 
+            state: mode.sentry.status ? "เปิด" : "ปิด"
+        };
+        client.say(state.channel, botDialogue["sentry_mode"](tempText));
     }
 }
 
