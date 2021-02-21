@@ -50,43 +50,6 @@ async function thanos(channel, byUser) {
     }
 }
 
-function gacha(channel, user, amount) {
-    let gachaLegendaryRate = 2;
-    let gachaMysticRate = 10;
-    let Bonus = 1;
-    if (amount == 0) return;
-
-    let _player = player.getPlayerByUsername(user.username)
-    if (_player && player.deductCoins(_player.username, amount)) {
-        if (_player.coins == 0 && amount >= 10) {
-            Bonus = 2;
-        }
-
-        if (roll(gachaLegendaryRate)) {
-            let multiplier = 5 + Math.random() * 5 + botInfo.level / 100 * Bonus;
-            let gain = parseInt(amount * multiplier);
-            _player.coins += gain
-            sessionPayout += gain - amount;
-            if (Bonus != 1) {
-                client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
-            } else {
-                client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
-            }
-        } else if (roll(gachaMysticRate)) {
-            let multiplier = 2 + Math.random() * 3 + botInfo.level / 100;
-            let gain = parseInt(amount * multiplier);
-            _player.coins += gain
-            client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
-            sessionPayout += gain - amount;
-        } else {
-            sessionIncome += amount;
-            //client.say(channel, `🧂🧂🧂 @${_player.username} 🧂 LUL🧂🧂🧂🧂`);
-        }
-    } else {
-        //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
-    }
-}
-
 function timeoutUser(channel, user, duration, reason) {
 
     // hard coded again. Need priviledge check.
@@ -150,9 +113,6 @@ function onMessageHandle(channel, userstate, message, self) {
             client.whisper(tags.username, 'test');
         }
     */
-    if (message == '!github')
-        client.say(channel, 'https://github.com/thananon/twitch_tools');
-
 
     /* MESSAGE FILTER:
        I added a low chance for timeout instead of kicking right away as chat will be full with

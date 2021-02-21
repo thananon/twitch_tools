@@ -34,10 +34,12 @@ client.connect();
 const command = {
     "!c": checkCoin,
     "!g": gacha,
+    "!git": githubLink,
 
     "!allin": gacha,
     "!coin": checkCoin,
-    "!gacha": gacha
+    "!gacha": gacha,
+    "!github" : githubLink
 }
 
 // client event 
@@ -78,11 +80,6 @@ function onConnectedHandler(addr, port) {
     console.log(`* Connected to ${addr}:${port}`);
 }
 
-
-function roll(change) {
-    let dice = Math.random() * 100;
-    return dice <= change;
-}
 
 function getPermissionOf(userstate) {
     /**
@@ -214,6 +211,10 @@ function gacha(state) {
             client.say(state.channel, botDialogue["gacha_mystic"](tempParameter));
         }
     }
+}
+
+function githubLink(state){
+    client.say(state.channel, botDialogue["github"]);
 }
 
 

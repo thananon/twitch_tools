@@ -78,7 +78,8 @@ var botDialogue = {
     "cheer": (_ => `>> ตัวคูณเพิ่มขึ้น ${_.toFixed(2)} จากพลังของนายทุน <<`),
     "gacha_all-in": (_ => `ALL-IN JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
     "gacha_legendary": (_ => `JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
-    "gacha_mystic": (_ => `@${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}.`)
+    "gacha_mystic": (_ => `@${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}.`),
+    "github" : "https://github.com/thananon/twitch_tools"
 };
 
 
