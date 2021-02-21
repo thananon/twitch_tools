@@ -40,7 +40,8 @@ const command = {
     "!botstat": getBotStat,
     "!coin": checkCoin,
     "!gacha": gacha,
-    "!github": githubLink
+    "!github": githubLink,
+    "!reset" : resetBot
 }
 
 // client event 
@@ -280,6 +281,25 @@ function getBotStat(state) {
     }
 
     client.say(state.channel, botDialogue["bot_stat"](tempParameter));
+}
+
+function resetBot(state){
+    // only owner
+    if (getPermissionOf(state.userstate) == 0) {
+        botInfo = {
+            level: 1,
+            attackPower: 300,
+            crit: {
+                rate: 5,
+                multiplier: 1.5
+            },
+            exp: {
+                current: 0,
+                max: 500
+            }
+        };
+        getBotStat(state);
+    }
 }
 
 

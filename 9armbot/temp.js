@@ -102,11 +102,6 @@ function onMessageHandle(channel, userstate, message, self) {
         }
     */
 
-    if (message == '!botstat') {
-        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
-        return;
-    }
-
     /* reset bot stat */
     // Hard coded command for me. We will have to handle priviledge later.
     if (message == '!reset' && checkBroadcaster(userstate)) {
