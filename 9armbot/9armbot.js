@@ -126,6 +126,8 @@ function checkNewUser(userstate, amount = 0) {
 }
 
 function checkCoin(state) {
+    // allow owner mod sub or market is open
+    if (!(getPermissionOf(state.userstate) < 3 || mode.market == status.OPEN)) return;
     let username = state.userstate["display-name"];
 
     checkNewUser(state.userstate);
