@@ -61,7 +61,7 @@ from the main (upstream) repository:
     git push origin --delete fix/my-fix-branch
     ```
 
-* Check out the master branch:
+* Check out the main branch:
 
     ```shell
     git checkout main -f
@@ -73,10 +73,10 @@ from the main (upstream) repository:
     git branch -D fix/my-fix-branch
     ```
 
-* Update your master with the latest upstream version:
+* Update your main with the latest upstream version:
 
     ```shell
-    git pull --ff upstream master
+    git pull --ff upstream main
     ```
 
 
