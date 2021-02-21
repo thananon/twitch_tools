@@ -2,9 +2,15 @@ require('dotenv').config({ path: '.env' })
 
 const address = {
     "bot": "./9armbot/db/botstat.json",
-    "URLchatter": (_ => `http://tmi.twitch.tv/group/user/${_}/chatters`),
+    "URL_chatter": (_ => `http://tmi.twitch.tv/group/user/${_}/chatters`),
+    "URL_get_user_id": (_ =>`https://api.twitch.tv/helix/users?=&${_}`),
     "user": "./9armbot/db/players.json"  
 };
+
+const headers = {
+    'Authorization': process.env.TWITCH_API_AUTHORIZATION,
+    'Client-Id': process.env.TWITCH_API_CLIENT_ID
+}
 
 // enum permission, status
 const permission = {
@@ -101,4 +107,4 @@ var botDialogue = {
 };
 
 
-module.exports = { session, mode, botInfo, botDialogue, address, permission, status, user, userID, gachaRate, thanos};
+module.exports = { session, mode, botInfo, botDialogue, address, permission, status, user, userID, gachaRate, thanos, headers};

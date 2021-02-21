@@ -3,11 +3,12 @@ const tmi = require('tmi.js');
 // const fs = require('fs');
 // var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 const Utils = require('../core/utils')
+const util = require('util')
 // const Player = require('./player')
 
 // .toLocaleString()
 
-const { address, permission, status, gachaRate, thanos } = require("./Variable.js");
+const { address, permission, status, gachaRate, thanos, headers } = require("./Variable.js");
 var { session, mode, botInfo, botDialogue, user, userID } = require("./Variable.js");
 
 const client = new tmi.Client({
@@ -375,11 +376,12 @@ function getIncome(state) {
 async function thanosClick(state) {
     const username = state.userstate["display-name"];
     const userAmount = user[username].amount;
+    const channel = state.channel.slice(1);
 
     const isOwner = getPermissionOf(state.userstate) == 0;
     const powerfulEnough = (isOwner || userAmount >= thanos.Cost);
 
-
+    // ข้าคือชะตาที่ไม่อาจหลีกเลี่ยง
     if (powerfulEnough) {
         console.log(`Thanos: I am inevitible..`);
         client.say(state.channel, botDialogue["thanos_activated"]);
@@ -387,33 +389,34 @@ async function thanosClick(state) {
         if (!isOwner)
             user[username].amount -= thanos.Cost;
 
+        let disappear = 0;
+        const listChatter = await getChatter(channel);
 
-        // callback ไอ้เวร เขียน promise ซิไอ้เวร 
-        client.api({
-            url: address.URLchatter(state.channel.slice(1))
-        }, async (err, res, body) => {
-            let disappear = 0;
-            const viewerList = body.chatters.viewers;
+        for (let i in listChatter) {
+            const inevitible = Math.random() * 100 < 50;
+            const userTarget = listChatter[i];
 
+            // คุณสตาร์ค ผมรู้สึกไม่ค่อยสบาย
+            if (inevitible) {
+                disappear += 1;
+                client.timeout(state.channel, userTarget, thanos.Duration, botDialogue["thanos_inevitible"]).catch((err) => { console.error(err); });
 
-            for (let i in viewerList) {
-                const inevitible = Math.random() * 100 < 50;
-                if (inevitible) {
-                    disappear += 1;
-
-                    client.timeout(state.channel, viewerList[i], thanos.Duration, botDialogue["thanos_inevitible"]).catch((err) => { console.error(err); });
-                    await new Utils().sleep(700);
-                }
-
+                // thanos < twitch irc limit
+                await new Utils().sleep(700);
             }
-            client.say(state.channel, `@${username} ใช้งาน Thanos Mode มี ${disappear} คนในแชทหายตัวไป....`);
-        });
+        }
+        client.say(state.channel, `@${username} ใช้งาน Thanos Mode มี ${disappear} คนในแชทหายตัวไป....`);
     }
 }
 
-function giveMode(state){
+async function giveMode(state) {
+    getUserId();
+
+    console.log("a");
+    console.log("b");
+
     const message = state.message.split(" ");
-    
+
     if (message.length == 3){
         giveTo(state);
     }else{
@@ -424,21 +427,21 @@ function giveMode(state){
 }
 
 
-async function givrAll(state){
+async function givrAll(state) {
     if (getPermissionOf(state.userstate) == 0) {
         // ยังไม่ทำ 
     }
 
-    
+
 
 }
 
 function giveTo(state) {
     const message = state.message.split(" ");
     const regexDigit = /\d+/
-    
+
     if (getPermissionOf(state.userstate) == 0) {
-        if (regexDigit.test(message[2])){
+        if (regexDigit.test(message[2])) {
             const amount = parseInt(message[2]);
 
             if (message[1] in user)
@@ -448,3 +451,36 @@ function giveTo(state) {
         }
     }
 }
+
+async function getChatter(channel) {
+    let promise = new Promise((resolve, reject) => {
+        client.api({
+            url: address.URL_chatter(channel)
+        }, async (err, res, body) => {
+            if (err)
+                reject(error);
+            resolve(body);
+        });
+    });
+
+    let result = await promise;
+
+    return result.chatters.viewers;
+}
+
+async function getUserId(listUser) {
+    let promise = new Promise((resolve, reject) => {
+        client.api({
+            url: address.URL_get_user_id(listUser),
+            headers: headers
+        }, async (err, res, body) => {
+            if (err)
+                reject(error);
+            resolve(body);
+        });
+    });
+
+    let result = await promise;
+    return result.data;
+}
+
