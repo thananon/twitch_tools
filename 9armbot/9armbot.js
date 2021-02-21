@@ -43,6 +43,7 @@ const command = {
     "!feed": feedBot,
     "!gacha": gacha,
     "!github": githubLink,
+    "!give": giveMode,
     "!income": getIncome,
     "!reset": resetBot,
     "!sentry": toggleStateSentry,
@@ -389,8 +390,7 @@ async function thanosClick(state) {
 
         // callback ไอ้เวร เขียน promise ซิไอ้เวร 
         client.api({
-            // url: address.URLchatter(state.channel.slice(1))
-            url: address.URLchatter("armzi")
+            url: address.URLchatter(state.channel.slice(1))
         }, async (err, res, body) => {
             let disappear = 0;
             const viewerList = body.chatters.viewers;
@@ -408,5 +408,43 @@ async function thanosClick(state) {
             }
             client.say(state.channel, `@${username} ใช้งาน Thanos Mode มี ${disappear} คนในแชทหายตัวไป....`);
         });
+    }
+}
+
+function giveMode(state){
+    const message = state.message.split(" ");
+    
+    if (message.length == 3){
+        giveTo(state);
+    }else{
+        givrAll(state);
+    }
+
+
+}
+
+
+async function givrAll(state){
+    if (getPermissionOf(state.userstate) == 0) {
+        // ยังไม่ทำ 
+    }
+
+    
+
+}
+
+function giveTo(state) {
+    const message = state.message.split(" ");
+    const regexDigit = /\d+/
+    
+    if (getPermissionOf(state.userstate) == 0) {
+        if (regexDigit.test(message[2])){
+            const amount = parseInt(message[2]);
+
+            if (message[1] in user)
+                user[message[1]].amount += amount;
+            else
+                console.log(`${message[1]} not found`);
+        }
     }
 }

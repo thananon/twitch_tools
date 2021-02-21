@@ -17,28 +17,6 @@ async function giveCoins_allonline(amount) {
 
 
 
-async function thanos(channel, byUser) {
-    let thanosCost = 3000;
-    let thanosTimeoutSeconds = 180;
-    let casualties = 0;
-    console.log(`Thanos: I am inevitible..`)
-
-    if (player.deductCoins(byUser.username, thanosCost) || checkBroadcaster(byUser)) {
-        let players = await player.getOnlinePlayers()
-        for (let user of players) {
-            if (roll(50)) {
-                casualties++;
-                console.log(`${user.username} got snapped.`);
-                client.timeout(channel, user.username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
-                await new Utils().sleep(700)
-            }
-        }
-        client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
-    }
-}
-
-
-
 
 client.connect();
 
