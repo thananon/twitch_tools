@@ -5,6 +5,7 @@ const pathDB = {
     user: "./9armbot/db/players.json"
 }
 
+// enum permission, status
 const permission = {
     "ONWER": 0,
     "MOD": 1,
@@ -32,6 +33,7 @@ var mode = {
     }
 };
 
+// bad naming?
 const gachaRate = {
     legendary: {
         rate: 2,

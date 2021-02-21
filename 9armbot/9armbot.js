@@ -150,11 +150,12 @@ function gacha(state) {
     let userId = state.userstate["user-id"];
     let username = state.userstate["display-name"];
 
+    const message = state.message.toLowerCase();
     let allIn = false;
 
     // do nothing when bad command 
     const regex = /^!(g|gacha) (\d+)$/i;
-    if (state.message == "!allin") {
+    if (message == "!allin") {
         allIn = true;
     } else if (!regex.test(state.message)) return;
 
@@ -174,6 +175,7 @@ function gacha(state) {
     let multiplier = 0;
     let chance = Math.random() * 100;
 
+    // calculate multiplier
     // legendary
     if (chance < gachaRate.legendary.rate) {
         multiplier = gachaRate.legendary.initMultiplier;
@@ -184,12 +186,14 @@ function gacha(state) {
         multiplier += Math.random() * gachaRate.mystic.multiplier;
     }
 
+    // store value and display result
     // get jeckpot
     if (multiplier != 0) {
         // all in multiplier
         if (allIn) multiplier *= gachaRate.allin.multiplier;
         let gain = parseInt(betAmount * multiplier + (botInfo.level / 100));
 
+        // store value
         user[username].amount += gain;
         session.Payout += gain;
 
@@ -199,6 +203,7 @@ function gacha(state) {
             gain: gain
         };
 
+        // display result
         if (chance < gachaRate.legendary.rate) {
             if (allIn)
                 client.say(state.channel, botDialogue["gacha_all-in"](tempParameter));
