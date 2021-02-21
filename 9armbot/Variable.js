@@ -32,6 +32,22 @@ var mode = {
     }
 };
 
+const gachaRate = {
+    legendary: {
+        rate: 2,
+        initMultiplier: 5,
+        multiplier: 5
+    },
+    mystic: {
+        rate: 10,
+        initMultiplier: 2,
+        multiplier: 3
+    },
+    allin :{
+        multiplier: 2
+    }
+};
+
 var botInfo = {
     level: 1,
     attackPower: 300,
@@ -56,9 +72,12 @@ var userID = { 85745201: "LCKYN" };
 const coinName = "armcoin";
 
 var botDialogue = {
-    "Cheer": (_ => `>> ตัวคูณเพิ่มขึ้น ${_.toFixed(2)} จากพลังของนายทุน <<`),
-    "checkCoin": (_ => `@${_.username} มี ${_.amount.toLocaleString()} ${coinName}.`)
+    "checkCoin": (_ => `@${_.username} มี ${_.amount.toLocaleString()} ${coinName}.`),
+    "cheer": (_ => `>> ตัวคูณเพิ่มขึ้น ${_.toFixed(2)} จากพลังของนายทุน <<`),
+    "gacha_all-in": (_ => `ALL-IN JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
+    "gacha_legendary": (_ => `JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
+    "gacha_mystic": (_ => `@${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}.`)
 };
 
 
-module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID };
+module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID, gachaRate};

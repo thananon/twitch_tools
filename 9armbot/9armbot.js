@@ -7,7 +7,7 @@ const tmi = require('tmi.js');
 
 // .toLocaleString()
 
-const { pathDB, permission, status } = require("./Variable.js");
+const { pathDB, permission, status, gachaRate } = require("./Variable.js");
 var { session, mode, botInfo, botDialogue, user, userID } = require("./Variable.js");
 
 const client = new tmi.Client({
@@ -33,8 +33,11 @@ client.connect();
 
 const command = {
     "!c": checkCoin,
-    
-    "!coin": checkCoin
+    "!g": gacha,
+
+    "!allin": gacha,
+    "!coin": checkCoin,
+    "!gacha": gacha
 }
 
 // client event 
@@ -45,7 +48,7 @@ function onMessageHandler(channel, userstate, message, self) {
         message: message,
         self: self
     };
-    let userCommand = message.split(" ")[0]
+    let userCommand = message.split(" ")[0].toLowerCase();
 
     checkNewUser(userstate);
 
@@ -55,7 +58,7 @@ function onMessageHandler(channel, userstate, message, self) {
 
 function onCheerHandler(channel, userstate, message) {
     let amount = userstate.bits / 1000;
-    client.say(channel, botDialogue["Cheer"](amount));
+    client.say(channel, botDialogue["cheer"](amount));
     botInfo.crit.multiplier += amount;
 }
 
@@ -77,7 +80,7 @@ function onConnectedHandler(addr, port) {
 
 
 function roll(change) {
-    const dice = Math.random() * 100;
+    let dice = Math.random() * 100;
     return dice <= change;
 }
 
@@ -115,7 +118,7 @@ function checkNewUser(userstate, amount = 0) {
             "user-id": id
         };
     } else if (!(username in user)) {
-        // user has rename
+        // user changes their name swap to new username.
         let oldUserName = userID[id];
         userID[id] = username;
         user[username] = user[oldUserName];
@@ -133,7 +136,6 @@ function checkCoin(state) {
     checkNewUser(state.userstate);
 
     const amount = user[username]["amount"];
-
     let tempParameter = {
         username: username,
         amount: amount
@@ -142,6 +144,72 @@ function checkCoin(state) {
     client.say(state.channel, botDialogue["checkCoin"](tempParameter));
 }
 
+function gacha(state) {
+    // allow owner mod sub or market is open
+    if (!(getPermissionOf(state.userstate) < 3 || mode.market == status.OPEN)) return;
+    let userId = state.userstate["user-id"];
+    let username = state.userstate["display-name"];
+
+    let allIn = false;
+
+    // do nothing when bad command 
+    const regex = /^!(g|gacha) (\d+)$/i;
+    if (state.message == "!allin") {
+        allIn = true;
+    } else if (!regex.test(state.message)) return;
+
+    const messageSplit = state.message.split(" ");
+    // all in betAmount = user coin
+    const betAmount = allIn ? user[username].amount : parseInt(messageSplit[1]);
+
+    // do nothing when betting < 1 or coins are insufficient.
+    if (betAmount < 1 || user[username].amount < betAmount) return;
+
+    // !gacha all-in
+    if (user[username].amount == betAmount) allIn = true;
+
+    user[username].amount -= betAmount;
+    session.Income += betAmount;
+
+    let multiplier = 0;
+    let chance = Math.random() * 100;
+
+    // legendary
+    if (chance < gachaRate.legendary.rate) {
+        multiplier = gachaRate.legendary.initMultiplier;
+        multiplier += Math.random() * gachaRate.legendary.multiplier;
+    }// mystic
+    else if (chance < gachaRate.mystic.rate) {
+        multiplier = gachaRate.mystic.initMultiplier;
+        multiplier += Math.random() * gachaRate.mystic.multiplier;
+    }
+
+    // get jeckpot
+    if (multiplier != 0) {
+        // all in multiplier
+        if (allIn) multiplier *= gachaRate.allin.multiplier;
+        let gain = parseInt(betAmount * multiplier + (botInfo.level / 100));
+
+        user[username].amount += gain;
+        session.Payout += gain;
+
+        let tempParameter = {
+            username: username,
+            amount: betAmount,
+            gain: gain
+        };
+
+        if (chance < gachaRate.legendary.rate) {
+            if (allIn)
+                client.say(state.channel, botDialogue["gacha_all-in"](tempParameter));
+            else
+                client.say(state.channel, botDialogue["gacha_legendary"](tempParameter));
+        }
+        else if (chance < gachaRate.mystic.rate) {
+            client.say(state.channel, botDialogue["gacha_mystic"](tempParameter));
+        }
+    }
+}
 
 
 
