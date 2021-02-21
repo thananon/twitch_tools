@@ -410,16 +410,11 @@ async function thanosClick(state) {
 }
 
 async function giveMode(state) {
-    getUserId();
-
-    console.log("a");
-    console.log("b");
-
     const message = state.message.split(" ");
 
-    if (message.length == 3){
+    if (message.length == 3) {
         giveTo(state);
-    }else{
+    } else {
         givrAll(state);
     }
 
@@ -436,7 +431,7 @@ async function givrAll(state) {
 
 }
 
-function giveTo(state) {
+async function giveTo(state) {
     const message = state.message.split(" ");
     const regexDigit = /\d+/
 
@@ -444,10 +439,23 @@ function giveTo(state) {
         if (regexDigit.test(message[2])) {
             const amount = parseInt(message[2]);
 
-            if (message[1] in user)
-                user[message[1]].amount += amount;
-            else
-                console.log(`${message[1]} not found`);
+            const mention = message[1][0] == "@"
+            const name = mention ? [message[1].slice(1)]:[message[1]];
+
+            const userstate = await getUserId(name);
+
+            const username = userstate[0].display_name;
+
+            if (username in user)
+                user[username].amount += amount;
+            else {
+                const tempParameter = {
+                    "user-id": userstate[0].id,
+                    "display-name": userstate[0].display_name
+                };
+                checkNewUser(tempParameter, amount)
+            }
+
         }
     }
 }
@@ -469,6 +477,10 @@ async function getChatter(channel) {
 }
 
 async function getUserId(listUser) {
+
+    listUser = listUser.map(_ => (`login=${_}`))
+    listUser = listUser.join("&")
+
     let promise = new Promise((resolve, reject) => {
         client.api({
             url: address.URL_get_user_id(listUser),
@@ -483,4 +495,6 @@ async function getUserId(listUser) {
     let result = await promise;
     return result.data;
 }
+
+
 

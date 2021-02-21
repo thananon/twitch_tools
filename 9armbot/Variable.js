@@ -75,7 +75,8 @@ var botInfo = {
 var user = {
     "LCKYN": {
         "amount": 100000000,
-        "user-id": 85745201
+        "user-id": 85745201,
+        "feed": 0
     }
 };
 
