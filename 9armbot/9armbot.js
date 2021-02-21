@@ -372,9 +372,6 @@ function getIncome(state) {
 }
 
 async function thanosClick(state) {
-
-
-
     const username = state.userstate["display-name"];
     const userAmount = user[username].amount;
 
@@ -389,6 +386,8 @@ async function thanosClick(state) {
         if (!isOwner)
             user[username].amount -= thanos.Cost;
 
+
+        // callback ไอ้เวร เขียน promise ซิไอ้เวร 
         client.api({
             // url: address.URLchatter(state.channel.slice(1))
             url: address.URLchatter("armzi")
@@ -401,14 +400,13 @@ async function thanosClick(state) {
                 const inevitible = Math.random() * 100 < 50;
                 if (inevitible) {
                     disappear += 1;
-                    client.say(state.channel, viewerList[i]);
-                    console.log(viewerList[i]);
+
+                    client.timeout(state.channel, viewerList[i], thanos.Duration, botDialogue["thanos_inevitible"]).catch((err) => { console.error(err); });
                     await new Utils().sleep(700);
                 }
 
             }
             client.say(state.channel, `@${username} ใช้งาน Thanos Mode มี ${disappear} คนในแชทหายตัวไป....`);
-
         });
     }
 }
