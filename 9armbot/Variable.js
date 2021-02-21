@@ -25,10 +25,12 @@ var session = {
 
 var mode = {
     market: {
-        mode: status.CLOSE
+        status: status.CLOSE
     },
     sentry: {
-        mode: status.CLOSE,
+        status: status.CLOSE,
+        chance25: 15,
+        chanceFly: 50,
         dodgeRate: 1
     }
 };
@@ -45,7 +47,7 @@ const gachaRate = {
         initMultiplier: 2,
         multiplier: 3
     },
-    allin :{
+    allin: {
         multiplier: 2
     }
 };
@@ -79,8 +81,12 @@ var botDialogue = {
     "gacha_all-in": (_ => `ALL-IN JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
     "gacha_legendary": (_ => `JACKPOT!! @${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}. armKraab`),
     "gacha_mystic": (_ => `@${_.username} ลงทุน ${_.amount.toLocaleString()} -> ได้รางวัล ${_.gain.toLocaleString()} ${coinName}.`),
-    "github" : "https://github.com/thananon/twitch_tools"
+    "github": "https://github.com/thananon/twitch_tools",
+    "sentry25": "225 ไง Land Protector อะ",
+    "sentry_dodge": (_ => `MISS!! ${_} หลบหลีกการโจมตี!`),
+    "sentry_timeout": (_ => `${_} (critRate = ${_.critRate})`),
+    "sentry_timeout_crit": (_ => `@${_.username} ⚔️⚔️ CRITICAL!! รับโทษ x${_.critMultiplier}`)
 };
 
 
-module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID, gachaRate};
+module.exports = { session, mode, botInfo, botDialogue, pathDB, permission, status, user, userID, gachaRate };

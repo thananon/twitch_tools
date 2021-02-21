@@ -66,7 +66,7 @@ function timeoutUser(channel, user, duration, reason) {
     // roll crit
     if (roll(botInfo.critRate)) {
         final_duration *= botInfo.critMultiplier;
-        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
+        client.say(channel, );
     }
 
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
@@ -85,19 +85,7 @@ client.on("message", onMessageHandle);
 
 
 function onMessageHandle(channel, userstate, message, self) {
-    if (self) return;
 
-    const messageCommand = message.spit(" ")[0]
-
-    if (messageCommand in command) {
-        tempParameter = {
-            channel: channel,
-            userstate: userstate,
-            message: message,
-            self: self
-        };
-        command[messageCommand](tempParameter);
-    }
 
     /* Give coins to a user. Testing command, only available to me. */
     let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
@@ -113,26 +101,6 @@ function onMessageHandle(channel, userstate, message, self) {
             client.whisper(tags.username, 'test');
         }
     */
-
-    /* MESSAGE FILTER:
-       I added a low chance for timeout instead of kicking right away as chat will be full with
-       kicking message and it is unpleasant. */
-
-    if (sentryMode) {
-        if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
-            client.say(channel, '225 ไง Land Protector อะ');
-            if (roll(15))
-                timeoutUser(channel, userstate, botInfo.attackPower, 'เก่งคณิตศาสตร์');
-            return;
-        }
-
-        let wanttofly = /อยากบิน.*/;
-        if (wanttofly.test(message)) {
-            if (roll(50))
-                timeoutUser(channel, userstate, botInfo.attackPower, 'อยากบิน');
-            return;
-        }
-    }
 
     if (message == '!botstat') {
         client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);

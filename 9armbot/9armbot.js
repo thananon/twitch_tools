@@ -39,11 +39,13 @@ const command = {
     "!allin": gacha,
     "!coin": checkCoin,
     "!gacha": gacha,
-    "!github" : githubLink
+    "!github": githubLink
 }
 
 // client event 
 function onMessageHandler(channel, userstate, message, self) {
+    if (self) return;
+
     const state = {
         channel: channel,
         userstate: userstate,
@@ -56,6 +58,8 @@ function onMessageHandler(channel, userstate, message, self) {
 
     if (userCommand in command)
         command[userCommand](state);
+    else if (mode.sentry.status == status.OPEN)
+        sentryMode(state);
 }
 
 function onCheerHandler(channel, userstate, message) {
@@ -127,7 +131,7 @@ function checkNewUser(userstate, amount = 0) {
 
 function checkCoin(state) {
     // allow owner mod sub or market is open
-    if (!(getPermissionOf(state.userstate) < 3 || mode.market == status.OPEN)) return;
+    if (!(getPermissionOf(state.userstate) < 3 || mode.market.status == status.OPEN)) return;
     let username = state.userstate["display-name"];
 
     checkNewUser(state.userstate);
@@ -143,7 +147,7 @@ function checkCoin(state) {
 
 function gacha(state) {
     // allow owner mod sub or market is open
-    if (!(getPermissionOf(state.userstate) < 3 || mode.market == status.OPEN)) return;
+    if (!(getPermissionOf(state.userstate) < 3 || mode.market.status == status.OPEN)) return;
     let userId = state.userstate["user-id"];
     let username = state.userstate["display-name"];
 
@@ -172,13 +176,16 @@ function gacha(state) {
     let multiplier = 0;
     let chance = Math.random() * 100;
 
+    const getLegendary = chance < gachaRate.legendary.rate;
+    const getMystic = chance < gachaRate.mystic.rate;
+
     // calculate multiplier
     // legendary
-    if (chance < gachaRate.legendary.rate) {
+    if (getLegendary) {
         multiplier = gachaRate.legendary.initMultiplier;
         multiplier += Math.random() * gachaRate.legendary.multiplier;
     }// mystic
-    else if (chance < gachaRate.mystic.rate) {
+    else if (getMystic) {
         multiplier = gachaRate.mystic.initMultiplier;
         multiplier += Math.random() * gachaRate.mystic.multiplier;
     }
@@ -213,9 +220,55 @@ function gacha(state) {
     }
 }
 
-function githubLink(state){
+function githubLink(state) {
     client.say(state.channel, botDialogue["github"]);
 }
+
+function sentryMode(state) {
+    const message = state.message;
+    let username = state.userstate["display-name"];
+
+    const regex25 = /[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i;
+    const regexfly = /อยากบิน.*/;
+
+    const chance25 = Math.random() * 100 < mode.sentry.chance25;
+    const chanceFly = Math.random() * 100 < mode.sentry.chanceFly;
+    const dodge = Math.random() * 100 < mode.sentry.dodgeRate;
+    const crit = Math.random() * 100 < botInfo.crit.rate;
+    let duration = botInfo.attackPower;
+    let reason = "";
+
+    // filter message
+    if (regex25.test(message)) {
+        client.say(state.channel, botDialogue["sentry25"]);
+
+        if (chance25)
+            reason = "เก่งคณิตศาสตร์";
+    }
+    if (regexfly.test(message)) {
+        if (chanceFly)
+            reason = "อยากบิน";
+    }
+
+    if (reason == "") return;
+
+    const tempParameter = {
+        username : username,
+        critMultiplier: botInfo.crit.multiplier,
+        critRate: botInfo.crit.rate
+    };
+
+    // get perfect-dodge ?
+    if (dodge) {
+        client.say(state.channel, botDialogue["sentry_dodge"](username));
+    }else if (crit) {
+        duration *= botInfo.crit.multiplier;
+        client.timeout(state.channel, username, duration, botDialogue["sentry_timeout_crit"](tempParameter)).catch((err) => {console.error(err);});
+    } else {
+        client.timeout(state.channel, username, duration, botDialogue["sentry_timeout"](tempParameter)).catch((err) => { console.error(err); });
+    }
+}
+
 
 
 
