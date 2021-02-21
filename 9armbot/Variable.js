@@ -76,7 +76,7 @@ var userID = { 85745201: "LCKYN" };
 const coinName = "armcoin";
 
 var botDialogue = {
-    "bot_stat": (_ => `<Level ${_.level}> <EXP ${_.exp}/500> <พลังโจมตี: ${_.attackPower}> <%crit: ${_.critRate}> <ตัวคูณ: ${_.critMultiplier}> <Gacha Bonus +${_.level}%>`),
+    "bot_stat": (_ => `<Level ${_.level.toLocaleString()}> <EXP ${_.exp}/500> <พลังโจมตี: ${_.attackPower.toLocaleString()}> <%crit: ${_.critRate}> <ตัวคูณ: ${_.critMultiplier}> <Gacha Bonus +${_.level.toLocaleString()}%>`),
     "check_coin": (_ => `@${_.username} มี ${_.amount.toLocaleString()} ${coinName}.`),
     "cheer": (_ => `>> ตัวคูณเพิ่มขึ้น ${_.toFixed(2)} จากพลังของนายทุน <<`),
     "feed_bot_level_up": (_ => `LEVEL UP!! -> ${_}`),
