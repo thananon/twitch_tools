@@ -1,29 +1,4 @@
 
-
-
-let player = new Player();
-
-
-
-
-async function giveCoins_allonline(amount) {
-    let players = await player.getOnlinePlayers();
-    for (let username of players) {
-        player.giveCoins(username, amount)
-    }
-    console.log(`Gave out ${amount} coins to ${players.length} users.`);
-    return players.length;
-}
-
-
-
-
-client.connect();
-
-client.on("message", onMessageHandle);
-
-
-
 function onMessageHandle(channel, userstate, message, self) {
 
 
@@ -41,12 +16,6 @@ function onMessageHandle(channel, userstate, message, self) {
         giveCoins_allonline(50).then(function (total) {
             client.say(channel, `gave ${total} users 50 coins.`);
         });
-        return;
-    }
-
-    /* This should be fun, if its not broken. */
-    if (message == '!thanos' && checkBroadcaster(userstate)) {
-        thanos(channel, userstate);
         return;
     }
 

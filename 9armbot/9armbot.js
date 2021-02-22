@@ -1,9 +1,9 @@
 // require('dotenv').config({ path: '.env' })
 const tmi = require('tmi.js');
+const Utils = require('../core/utils');
 // const fs = require('fs');
 // var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-const Utils = require('../core/utils')
-const util = require('util')
+
 // const Player = require('./player')
 
 // .toLocaleString()
@@ -20,7 +20,6 @@ const client = new tmi.Client({
     },
     channels: [process.env.TWITCH_BOT_CHANNEL]
 });
-
 
 client.on('message', onMessageHandler);
 client.on('cheer', onCheerHandler);
@@ -417,14 +416,30 @@ async function giveMode(state) {
     } else {
         givrAll(state);
     }
-
-
 }
 
 
 async function givrAll(state) {
     if (getPermissionOf(state.userstate) == 0) {
-        // ยังไม่ทำ 
+        // const channel = state.channel.slice(1);
+        const channel = "Blinkx_".toLowerCase();
+        const listChatter = await getChatter(channel);
+
+        console.log("start");
+        const start = Date.now();
+
+        console.log(listChatter.length);
+        
+        while (listChatter.length){
+            const subListChatter = listChatter.splice(0, 90);
+            const listUserstate = await getUserId(subListChatter);
+            // console.log(listUserstate);
+            
+        }
+
+        const millis = Date.now() - start;
+        console.log(`seconds elapsed = ${(millis / 1000)}`);
+        console.log("done");
     }
 
 
@@ -440,7 +455,7 @@ async function giveTo(state) {
             const amount = parseInt(message[2]);
 
             const mention = message[1][0] == "@"
-            const name = mention ? [message[1].slice(1)]:[message[1]];
+            const name = mention ? [message[1].slice(1)] : [message[1]];
 
             const userstate = await getUserId(name);
 
@@ -466,7 +481,7 @@ async function getChatter(channel) {
             url: address.URL_chatter(channel)
         }, async (err, res, body) => {
             if (err)
-                reject(error);
+                reject(err);
             resolve(body);
         });
     });
@@ -487,7 +502,7 @@ async function getUserId(listUser) {
             headers: headers
         }, async (err, res, body) => {
             if (err)
-                reject(error);
+                reject(err);
             resolve(body);
         });
     });
