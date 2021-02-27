@@ -1,0 +1,9 @@
+{
+    "icon": "fas fa-chart-line",
+    "name": "Market Dashboard",
+    "description": "Show salty players pool",
+    "bgColor": "#1dd1a1",
+    "public_path": "public",
+    "default_storage": {
+    }
+}
