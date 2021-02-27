@@ -5,5 +5,6 @@
     "bgColor": "#1dd1a1",
     "public_path": "public",
     "default_storage": {
+        "background_color": "#151238"
     }
 }

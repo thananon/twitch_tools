@@ -1,140 +1,157 @@
-<% 
-var storage = widget.storage
-%>
+<% var storage = widget.storage %>
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Market Dashboard</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+      crossorigin="anonymous"
+    ></script>
     <style>
-        html, body {
-            height: 100%;
-            width: 100%;
-            margin: 0;   
-            margin: 0px;
-            padding: 0px;    
-            font-family: 'Prompt', sans-serif;
-            overflow: hidden;
-        }
-        .box {
-            text-align: center;
-        }
-        .wrapper{
-            height: 100%;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        #alert-image {
-            text-align: center;
-            height: 100%;
-            width: 100%;
-            display: table-cell;
-            background-position: center bottom;
-            background-repeat: no-repeat;
-            background-size: contain;
-        }
-        body{
-            <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
-        }
+      html, body {
+          height: 100%;
+          width: 100%;
+          margin: 0;
+          margin: 0px;
+          padding: 0px;
+          font-family: 'Prompt', sans-serif;
+          overflow: hidden;
+      }
+      .box {
+          text-align: center;
+      }
+      .wrapper{
+          height: 100%;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+      }
+      #alert-image {
+          text-align: center;
+          height: 100%;
+          width: 100%;
+          display: table-cell;
+          background-position: center bottom;
+          background-repeat: no-repeat;
+          background-size: contain;
+      }
+      body{
+          <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
+      }
 
-        .ml2 {
-            font-weight: 900;
-            font-size: 3.5em;
-            color: #FFF;
-        }
+      .ml2 {
+          font-weight: 900;
+          font-size: 3.5em;
+          color: #FFF;
+      }
 
-        .ml2 .letter {
-            display: inline-block;
-            line-height: 1em;
-            text-shadow: 0px 0px 10px #000000;
-        }
+      .ml2 .letter {
+          display: inline-block;
+          line-height: 1em;
+          text-shadow: 0px 0px 10px #000000;
+      }
+      .dashboard-container {
+          height:100vh;
+          padding: 18px 0px 18px 0px;
+      }
+      .card {
+          background-color: #273050;
+          color: #e0e1e6;
+          margin-bottom: 1rem;
+      }
+      .flex-column {
+          display: flex;
+          flex-direction: column;
+      }
+      .flex-1 {
+          flex: 1;
+      }
+      .flex-2 {
+          flex: 2;
+      }
     </style>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
     <script>
-        const socket = io();
+      const socket = io();
 
-        socket.on('widget::<%= widget.id %>', (data) => {
-            show(data);
-        });
-        socket.on('widget::<%= widget.id %>:reload', () => {
-            window.location.reload()
-        });
+      socket.on("widget::<%= widget.id %>", (data) => {
+        console.log("🚀 Market Dashboard: ", data);
+        show(data);
+      });
+      socket.on("widget::<%= widget.id %>:reload", () => {
+        window.location.reload();
+      });
     </script>
-</head>
+  </head>
 
-<body>
-<!-- 
+  <body>
+    <div class="container">
+      <div class="row dashboard-container">
+        <div class="col-md-5 flex-column">
+          <div class="card flex-2">
+            <div class="card-body">
+              <h5 class="card-title">Sign ups</h5>
+              <div id="sign-up-data"></div>
+            </div>
+          </div>
+          <div class="card flex-1">
+            <div class="card-body">
+              <h5 class="card-title">Widget Added</h5>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 flex-column">
+          <div class="card flex-1">
+            <div class="card-body">
+              <h5 class="card-title">MRR</h5>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 flex-column">
+          <div class="card flex-1">
+            <div class="card-body">
+              <h5 class="card-title">Stat</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
 
-        var time = <%= parseInt(storage.alert_delay)*1000 %>;
+      var widgetStorage = <%- JSON.stringify(storage) %>;
 
-        var ani
-        var ani2
-        var to
+      var ani
+      var ani2
+      var to
+      var url = "/upload/widgets/<%= widget.id %>/"
 
-        function show(data) {
-
-            if(ani){
-                ani.restart()
-                ani2.restart()
-                clearTimeout(to)
-            }
-
-            $(".ml2").hide().text("")
-
-            if(data.message){
-                $(".ml2").show().text(data.message)
-            }
-
-            ani = anime.timeline()
-            .add({
-                targets: '.wrapper',
-                opacity: 1,
-                duration: 1000,
-                easing: "easeOutExpo",
-            });
-            
-            var textWrapper = document.querySelector('.ml2');
-            textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
-
-            ani2 = anime.timeline()
-            .add({
-                targets: '.ml2 .letter',
-                scale: [2,1],
-                opacity: [0,1],
-                translateZ: 0,
-                easing: "easeOutExpo",
-                duration: 950,
-                delay: (el, i) => 70*i
-            })
-
-            to = setTimeout(function () {
-
-                anime.timeline()
-                .add({
-                    targets: '.wrapper',
-                    opacity: 0,
-                    duration: 1000,
-                    easing: "easeOutExpo",
-                });
-
-            }, time)
-
-            audio.play();
-        }
-
-    </script> -->
-</body>
-
+      function show(data) {
+        console.log("🚀 ~ file: show.ejs ~ line 154 ~ show ~ data", data)
+        var item = widgetStorage.items[data.itemKey];
+      }
+    </script>
+  </body>
 </html>
