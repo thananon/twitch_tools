@@ -96,12 +96,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
     <script>
       const socket = io();
-
-      socket.on("widget::<%= widget.id %>", (data) => {
+      // should use <%= widget.id %> channel
+      socket.on("widget::alerts", (data) => {
         console.log("🚀 Market Dashboard: ", data);
         show(data);
       });
-      socket.on("widget::<%= widget.id %>:reload", () => {
+      socket.on("widget::alerts:reload", () => {
         window.location.reload();
       });
     </script>
@@ -150,7 +150,9 @@
 
       function show(data) {
         console.log("🚀 ~ file: show.ejs ~ line 154 ~ show ~ data", data)
-        var item = widgetStorage.items[data.itemKey];
+        if(data.message){
+            $("#sign-up-data").show().text(data.message)
+        }
       }
     </script>
   </body>
