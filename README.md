@@ -12,7 +12,7 @@ Repo to keep my community's twitch gadgetries. Join me at [www.twitch.tv/armzi](
 ## 📦 Installation
 
 ```bash
-$ git close https://github.com/thananon/twitch_tools.git
+$ git clone https://github.com/thananon/twitch_tools.git
 $ cd twitch_tools
 $ npm install
 ```
