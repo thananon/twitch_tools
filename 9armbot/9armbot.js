@@ -1,6 +1,7 @@
 // require('dotenv').config({ path: '.env' })
 const tmi = require('tmi.js');
 const Utils = require('../core/utils');
+require('dotenv').config({ path: '.env' })
 // const fs = require('fs');
 // var oauth_token = fs.readFileSync('oauth_token', 'utf8');
 
@@ -31,6 +32,7 @@ client.on('connected', onConnectedHandler);
 
 client.connect();
 
+
 const command = {
     "!c": checkCoin,
     "!f": feedBot,
@@ -60,6 +62,7 @@ function onMessageHandler(channel, userstate, message, self) {
         message: message,
         self: self
     };
+    
     let userCommand = message.split(" ")[0].toLowerCase();
 
     checkNewUser(userstate);
@@ -71,9 +74,9 @@ function onMessageHandler(channel, userstate, message, self) {
 }
 
 function onCheerHandler(channel, userstate, message) {
-    let amount = userstate.bits / 1000;
-    client.say(channel, botDialogue["cheer"](amount));
-    botInfo.crit.multiplier += amount;
+    // let amount = userstate.bits / 1000;
+    // // client.say(channel, botDialogue["cheer"](amount));
+    // botInfo.crit.multiplier += amount;
 }
 
 function onSubHandler(channel, username, method, message, userstate) {
@@ -105,18 +108,22 @@ function getPermissionOf(userstate) {
      ***************************
      */
 
+    if (!userstate.badges)
+        return permission.VIEWER;
+
     if ("broadcaster" in userstate.badges)
         return permission.ONWER;
     if (userstate.mod)
         return permission.MOD;
     if ("founder" in userstate.badges || userstate.subscriber)
         return permission.SUBSCRIBER;
+
     return permission.VIEWER;
 }
 
 function checkNewUser(userstate, amount = 0) {
     let id = parseInt(userstate["user-id"]);
-    let username = userstate["display-name"];
+    let username = userstate.username;
 
     if (!(id in userID)) {
         // new user
@@ -141,7 +148,7 @@ function checkNewUser(userstate, amount = 0) {
 function checkCoin(state) {
     // allow owner mod sub or market is open
     if (!(getPermissionOf(state.userstate) < 3 || mode.market.status == status.OPEN)) return;
-    const username = state.userstate["display-name"];
+    const username = state.userstate.username;
 
     checkNewUser(state.userstate);
 
@@ -158,7 +165,7 @@ function gacha(state) {
     // allow owner mod sub or market is open
     if (!(getPermissionOf(state.userstate) < 3 || mode.market.status == status.OPEN)) return;
     let userId = state.userstate["user-id"];
-    let username = state.userstate["display-name"];
+    let username = state.userstate.username;
 
     const message = state.message.toLowerCase();
     let allIn = false;
@@ -235,7 +242,7 @@ function githubLink(state) {
 
 function sentryMode(state) {
     const message = state.message;
-    let username = state.userstate["display-name"];
+    let username = state.userstate.username;
 
     const regex25 = /[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i;
     const regexfly = /อยากบิน.*/;
@@ -311,7 +318,7 @@ function resetBot(state) {
 
 function toggleStateSentry(state) {
     // only owner
-    const username = state.userstate["display-name"];
+    const username = state.userstate.username;
     if (getPermissionOf(state.userstate) == 0) {
         if (mode.sentry.status == status.OPEN)
             mode.sentry.status = status.CLOSE;
@@ -327,7 +334,7 @@ function toggleStateSentry(state) {
 }
 
 function feedBot(state) {
-    const username = state.userstate["display-name"];
+    const username = state.userstate.username;
     const message = state.message;
 
     const regexFeed = /^!feed\s*(\d*)/;
@@ -509,6 +516,10 @@ async function getUserId(listUser) {
 
     let result = await promise;
     return result.data;
+}
+
+function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
 }
 
 
