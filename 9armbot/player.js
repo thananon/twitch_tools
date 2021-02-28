@@ -129,10 +129,7 @@ class Player {
     }
 
     isAdmin(username) {
-        if (username == process.env.admin_username) {
-            return true;
-        }
-        return false;
+        return username == process.env.admin_username;
     }
 
 }
