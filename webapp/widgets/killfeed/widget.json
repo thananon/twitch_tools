@@ -3,7 +3,7 @@
     "name": "Killfeed",
     "cover": "cover.gif",
     "description": "Events stream",
-    "bgColor": "#5e3bec",
+    "bgColor": "#000",
     "public_path": "public",
     "default_storage": {
         "font": "Sarabun",
