@@ -1,4 +1,4 @@
-const socketIO = require('socket.io')
+const socketIO = require('socket.io');
 
 var io;
 const options = {
@@ -14,13 +14,13 @@ module.exports = {
         io.on('connection', socket => {
 
             socket.on('widget', (msg) => {
-                io.emit(`widget::${msg.id}`, msg)
+                io.emit(`widget::${msg.id}`, msg);
             });
 
         });
 
     },
     io: function () {
-        return io
+        return io;
     }
 }

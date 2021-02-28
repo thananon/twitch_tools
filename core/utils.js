@@ -1,17 +1,17 @@
 
 class Utils {
 
-    constructor(){}
+    constructor() {}
 
 
-    sleep(ms = 0){
-        return new Promise((resolve, reject)=>{
-            setTimeout(()=>{
+    sleep(ms = 0) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
                 resolve(true)
-            },ms)
-        })
+            }, ms);
+        });
     }
 
 }
 
-module.exports = Utils
+module.exports = Utils;

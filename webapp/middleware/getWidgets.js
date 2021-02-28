@@ -2,13 +2,13 @@
 
 const path = require('path');
 const fs = require('fs');
-const express = require('express')
+const express = require('express');
 
 module.exports = function (app) {
 
     let views = [
         app.get('views'),
-    ]
+    ];
     let widgetsPath = path.join(__dirname, '..', 'widgets');
     let files = fs.readdirSync(widgetsPath);
     let widgets = files.map(file => {
@@ -26,32 +26,32 @@ module.exports = function (app) {
         var viewsPath = path.join(widgetPath, 'views');
 
         /** read widget config file */
-        let config
+        let config;
         try {
             let widgetConfig = fs.readFileSync(configPath);
             config = JSON.parse(widgetConfig);
         } catch (error) {
-            throw new Error(`Please create "widget.json" in widget directory "${widgetPath}"`)
+            throw new Error(`Please create "widget.json" in widget directory "${widgetPath}"`);
         }
 
         /** read widget storage file */
         try {
             let storageConfig = fs.readFileSync(storagePath);
             let storage = JSON.parse(storageConfig);
-            config.storage = storage
+            config.storage = storage;
         } catch (error) {
             /** storage not found */
 
-            let storage = {}
+            let storage = {};
 
             /** set default storage */
-            if(config.default_storage){
-                storage = config.default_storage
+            if (config.default_storage) {
+                storage = config.default_storage;
                 fs.writeFileSync(storagePath, JSON.stringify(storage, null, "\t"));
             }
 
             // init storage
-            config.storage = storage
+            config.storage = storage;
         }
 
         /** set public path of widget */
@@ -59,15 +59,15 @@ module.exports = function (app) {
             var publicPath = path.join(widgetPath, config.public_path);
             app.use(`/upload/widgets/${file}`, express.static(publicPath));
         }
-        views.push(viewsPath)
+        views.push(viewsPath);
 
         /** set widget parameter */
-        config.id = file
-        config.configUrl = `/widgets/${config.id}`
-        config.widgetPath = widgetPath
-        config.viewsPath = viewsPath
+        config.id = file;
+        config.configUrl = `/widgets/${config.id}`;
+        config.widgetPath = widgetPath;
+        config.viewsPath = viewsPath;
 
-        return config
+        return config;
     });
 
     app.set('views', views);
@@ -77,18 +77,18 @@ module.exports = function (app) {
 
         /** add link to widget */
         widgets = widgets.map(widget => {
-            widget.url = req.getUrl(`/widget/${widget.id}`)
-            widget.publicUrl = req.getUrl(`/widget/${widget.id}/public`)
-            widget.previewUrl = req.getUrl(`/widget/${widget.id}/preview`)
-            return widget
+            widget.url = req.getUrl(`/widget/${widget.id}`);
+            widget.publicUrl = req.getUrl(`/widget/${widget.id}/public`);
+            widget.previewUrl = req.getUrl(`/widget/${widget.id}/preview`);
+            return widget;
         });
 
         /** pass variable to controller */
-        req.widgets = widgets
-        req.widgetsPath = widgetsPath
+        req.widgets = widgets;
+        req.widgetsPath = widgetsPath;
         res.locals.widgets = widgets;
 
         return next();
-    }
+    };
 
-}
+};

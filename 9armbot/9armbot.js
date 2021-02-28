@@ -22,26 +22,26 @@ var botInfo = {
     level : 1
 };
 
-let player = new Player()
+let player = new Player();
 
-function saveBotData () {
+function saveBotData() {
     data = JSON.stringify(botInfo);
     fs.writeFileSync('botstat.json', data, 'utf8');
 }
 
-function restoreBotData () {
+function restoreBotData() {
     try{
         string = fs.readFileSync('botstat.json', 'utf8');
         botInfo = JSON.parse(string);
     }catch (err) {
-        saveBotData()
+        saveBotData();
     }
 }
 
 async function giveCoins_allonline(amount) {
-   let players = await player.getOnlinePlayers();
-    for(let username of players){
-        player.giveCoins(username, amount)
+    let players = await player.getOnlinePlayers();
+    for (let username of players) {
+        player.giveCoins(username, amount);
     }
     console.log(`Gave out ${amount} coins to ${players.length} users.`);
     return players.length;
@@ -60,23 +60,23 @@ function feedBot(channel, user, amount) {
     }
 }
 
-async function thanos (channel, byUser) {
+async function thanos(channel, byUser) {
     let thanosCost = 3000;
     let thanosTimeoutSeconds = 180;
     let casualties = 0;
-    console.log(`Thanos: I am inevitible..`)
+    console.log(`Thanos: I am inevitible..`);
 
     if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
-        let players = await player.getOnlinePlayers()
+        let players = await player.getOnlinePlayers();
         webapp.socket.io().emit("widget::alerts", {
             itemKey: 1
         });
-        for(let username of players){
-            if (roll(50)){
+        for (let username of players) {
+            if (roll(50)) {
                 casualties++;
                 console.log(`${username} got snapped.`);
                 client.timeout(channel, username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
-                await new Utils().sleep(620)
+                await new Utils().sleep(620);
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
@@ -91,7 +91,7 @@ function gacha(channel, user, amount) {
     let Bonus = 1;
     if (amount == 0) return;
 
-    let _player = player.getPlayerByUsername(user.username)
+    let _player = player.getPlayerByUsername(user.username);
     if (_player && player.deductCoins(_player.username, amount)) {
         if (_player.coins == 0 && amount >= 10) {
             Bonus = 2;            
@@ -100,7 +100,7 @@ function gacha(channel, user, amount) {
         if (roll(gachaLegendaryRate)) {
             let multiplier = 5+Math.random()*5 + botInfo.level/100 * Bonus;
             let gain =  parseInt(amount*multiplier);
-            _player.coins+=gain
+            _player.coins+=gain;
             sessionPayout += gain - amount;
             if (Bonus!=1) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
@@ -115,7 +115,7 @@ function gacha(channel, user, amount) {
         } else if (roll(gachaMysticRate)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
-            _player.coins+=gain
+            _player.coins+=gain;
             client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
         } else {
@@ -155,7 +155,7 @@ function timeoutUser(channel, user, duration, reason) {
     });
 }
 
-function roll (critRate) {
+function roll(critRate) {
     dice = Math.random() * 100;
     return dice < critRate;
 }
@@ -209,7 +209,7 @@ client.on('message', (channel, tags, message, self) => {
     group = message.match(give_re);
     if (group &&  player.isAdmin(tags.username)) {
         if (group[1] && group[2]) {
-            player.giveCoins(group[1], parseInt(group[2]))
+            player.giveCoins(group[1], parseInt(group[2]));
         }
     }
 /*
@@ -261,7 +261,7 @@ client.on('message', (channel, tags, message, self) => {
     /* sentry mode is to toggle message filter on/off. */
     if (player.isAdmin(tags.username) && message == '!sentry') {
         sentryMode = !sentryMode;
-        return
+        return;
     }
 
     /* for testing purpose */
@@ -302,9 +302,9 @@ client.on('message', (channel, tags, message, self) => {
             return;
         }
 
-        if (message == '!allin'){
-            let _player = player.getPlayerByUsername(tags.username)
-            if (_player){
+        if (message == '!allin') {
+            let _player = player.getPlayerByUsername(tags.username);
+            if (_player) {
                 gacha(channel, tags, _player.coins);
             }
         }
@@ -320,31 +320,31 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
-    if (message == '!income' && player.isAdmin(tags.username)){
+    if (message == '!income' && player.isAdmin(tags.username)) {
         client.say(channel, `Payout Total: ${sessionPayout} armcoin. Gacha Total = ${sessionIncome} Net: ${sessionIncome - sessionPayout}`);
     }
 
-    if (message == '!save' && player.isAdmin(tags.username)){
+    if (message == '!save' && player.isAdmin(tags.username)) {
         saveBotData();
         player.saveData();
     }
 
-    if (message == '!load' && player.isAdmin(tags.username)){
+    if (message == '!load' && player.isAdmin(tags.username)) {
         restoreBotData();
     }
 });
 
-function subscriptionPayout (channel, username) {
+function subscriptionPayout(channel, username) {
     botInfo.critRate+=2;
     client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
     });
-    player.giveCoins(username,10)
+    player.giveCoins(username, 10);
 }
 
-function isSubscriber (userStat) {
-    return "founder" in userStat.badges || userStat.subscriber
+function isSubscriber(userStat) {
+    return "founder" in userStat.badges || userStat.subscriber;
 }
 
 client.on('subscription', (channel, username, method, message, userstate) => {

@@ -4,9 +4,9 @@ const socketIO = require('./services/socket.io');
 
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || "localhost";
-const url = `http://${host}:${port}`
+const url = `http://${host}:${port}`;
 
-const server = require('http').createServer(express)
+const server = require('http').createServer(express);
 socketIO.listen(server);
 
 server.listen(port, host, ()=>{
@@ -19,4 +19,4 @@ module.exports = {
     port,
     host,
     url
-}
+};
