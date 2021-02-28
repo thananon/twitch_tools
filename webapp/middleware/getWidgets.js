@@ -78,7 +78,7 @@ module.exports = function (app) {
         /** add link to widget */
         widgets = widgets.map(widget => {
             widget.url = req.getUrl(`/widget/${widget.id}`)
-            widget.publicUrl = req.getUrl(`/widget/${widget.id}/public`)
+            widget.publicUrl = req.getUrl(`/upload/widgets/${widget.id}`)
             widget.previewUrl = req.getUrl(`/widget/${widget.id}/preview`)
             return widget
         });

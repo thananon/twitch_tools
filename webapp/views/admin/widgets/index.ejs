@@ -1,3 +1,18 @@
+<%
+var convertHexToRGBA = (hexCode, opacity) => {
+    let hex = hexCode.replace('#', '');
+    
+    if (hex.length === 3) {
+        hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+    }    
+    
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return `rgba(${r},${g},${b},${opacity / 100})`;
+}
+%>
 <style>
   .widget-item-wrapper a {
     color: #eee;
@@ -35,10 +50,10 @@
 
   <% widgets.forEach(widget => { %>
    
-    <div class="col-md-3 widget-item-wrapper">
+    <div class="col-md-3 widget-item-wrapper mt-sm-2">
       <a href="<%= widget.configUrl %>">
         <div class="card widget-item" style="<%= widget.cover ? `background-image: url(${widget.publicUrl}/${widget.cover});` : '' %> <%= widget.bgColor ? `background-color: ${widget.bgColor};` : '' %>">
-          <div class="card-body d-flex  align-items-center">
+          <div class="card-body d-flex  align-items-center" <%- widget.cover ? `style='background-image:linear-gradient(90deg, ${convertHexToRGBA(widget.bgColor, 70)} 40%, rgba(0,0,0,0) 100%)'` : '' %>>
             <div class="card-body-content">
               <i class="<%= widget.icon %>"></i>
               <h4><%= widget.name %></h4>

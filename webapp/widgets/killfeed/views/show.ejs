@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=K2D:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            margin: 0px;
+            padding: 0px;
+            /* font-family: 'Prompt', sans-serif; */
+            /* font-family: 'Sarabun', sans-serif; */
+            /* font-family: 'K2D', sans-serif; */
+            <%- widget.storage.font ? `font-family:'${widget.storage.font}', sans-serif;` : '' %>
+            overflow: hidden;
+        }
+
+        body{
+            <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('widget::<%= widget.id %>', (data) => {
+            console.log(data)
+            show(data);
+        });
+        socket.on('widget::<%= widget.id %>:reload', () => {
+            window.location.reload()
+        });
+    </script>
+    <style>
+        .event-item {
+            <%= widget.storage.text_size ? `font-size:${widget.storage.text_size}px;` : '' %>
+            <%= widget.storage.text_size ? `height:${(widget.storage.text_size*2)}px;` : '' %>
+            <%= widget.storage.text_color ? `color:${widget.storage.text_color};` : '' %>
+            /* padding-left: 10px; */
+            /* background-color: black; */
+            position: relative;
+            animation-name: example;
+            animation-duration: 0.2s;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+        .event-item.out {
+            animation-name: example-out;
+            animation-duration: 2s;
+        }
+        .event-item-inner{
+            <%= widget.storage.text_background_color ? `background-color:${widget.storage.text_background_color};` : '' %>
+            padding: 2px 5px;
+        }
+        @keyframes example {
+            0%      {top:-40px; opacity: 0;height: 0px;}
+            100%    {top:0px; opacity: 1;}
+        }
+        @keyframes example-out {
+            0%      {top:0px;opacity: 1;}
+            10%     {top:40px;opacity: 0;height: 0px;}
+            100%    {top:40px;opacity: 0;height: 0px;}
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="event-items"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <script>
+        var storage = <%-JSON.stringify(widget.storage)%>
+        var i = 0
+        function show(data){
+
+            // var message = '<b class="text-danger">username</b> : <i class="fas fa-dollar-sign"></i> สวัสดี ' + i;
+            var message = data.message
+            var position = storage.position=="right" ? 'justify-content-end' : '';
+            
+            i++
+
+            var el = $('<div class="event-item d-flex '+ position +'"><div class="event-item-inner">'+message+'</div></div>')
+            
+            $("#event-items").prepend(el)
+
+            var $el = $(el.get(0))
+
+            setTimeout(function(){
+                
+                $el.addClass("out");
+
+                setTimeout(function(){
+                    $el.remove()
+                }, 1000)
+
+            }, parseInt(storage.alert_delay)*1000)
+        }
+    </script>
+</body>
+
+</html>
