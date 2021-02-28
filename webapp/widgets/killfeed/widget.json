@@ -9,7 +9,8 @@
         "font": "Sarabun",
         "text_size": "20",
         "text_color": "white",
-        "background_color": "rgba(0, 0, 0, 0.7)",
+        "background_color": "#00FF00",
+        "text_background_color": "rgba(0, 0, 0, 0.7)",
         "alert_delay": "3",
         "position": "right"
     }

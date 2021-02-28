@@ -121,6 +121,13 @@ webapp.socket.io().emit("widget::<%=widget.id%>", {
         </div>
         <div class="card-body">
             <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Background Color</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="background_color" name="background_color" value="<%= storage.background_color %>">
+                </div>
+            </div>
+            <hr>
+            <div class="form-group row mt-4">
                 <label class="col-sm-2 col-form-label">Font</label>
                 <div class="col-sm-10">
                     <select name="font" id="font" class="form-control">
@@ -148,7 +155,7 @@ webapp.socket.io().emit("widget::<%=widget.id%>", {
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Text Background Color</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="background_color" name="background_color" value="<%= storage.background_color %>">
+                    <input type="text" class="form-control" id="text_background_color" name="text_background_color" value="<%= storage.text_background_color %>">
                 </div>
             </div>
 
@@ -189,6 +196,9 @@ webapp.socket.io().emit("widget::<%=widget.id%>", {
             type: "component"
         });
         $('#background_color').spectrum({
+            type: "component"
+        });
+        $('#text_background_color').spectrum({
             type: "component"
         });
 

@@ -34,7 +34,7 @@
         }
 
         body{
-            /* <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %> */
+            <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -70,7 +70,7 @@
             animation-duration: 2s;
         }
         .event-item-inner{
-            <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
+            <%= widget.storage.text_background_color ? `background-color:${widget.storage.text_background_color};` : '' %>
             padding: 2px 5px;
         }
         @keyframes example {
