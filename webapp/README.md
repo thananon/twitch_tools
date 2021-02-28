@@ -19,6 +19,9 @@ Twitch Tool WebApp is a tool like streamlabs
 
 ## Widgets
 
+## Create Widgets
+[Document](DOC.md)
+
 ## Alerts Widget
 display multiple GIF on screen and play sound
 
