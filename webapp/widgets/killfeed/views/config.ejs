@@ -1,0 +1,264 @@
+<% 
+var files = {}
+var storage = widget.storage
+%>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.js" integrity="sha512-UZAFKlbB343VyEfCComsVIxp836iYUvHyAuRYFoVN4LTNB6mpM+8EgKW8ymIV2qLZQsIiNdbpmJuA8y6IKzOow==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/mode/htmlmixed/htmlmixed.min.js" integrity="sha512-IC+qg9ITjo2CLFOTQcO6fBbvisTeJmiT5D5FnXsCptqY8t7/UxWhOorn2X+GHkoD1FNkyfnMJujt5PcB7qutyA==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/mode/javascript/javascript.min.js" integrity="sha512-+tn2IYnLwD2J9p6Nrn/Dl7ag9lluHA0GAblT/vnMiJV8DU/iDsldgf+9XbEqZUee2ThyDtfmSDb+IDZ9u7jrSA==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.css" integrity="sha512-MWdvo/Qqcf4pY1ecQUB1uBn0qLp19U/qJ1Rpp2BDZeuBA7YsFEwkvqR/+aG4BroPiAYDunKJ6X8R/Pmdt3p7oA==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" />
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=K2D:wght@100;300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2/dist/spectrum.min.css">
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="form-group row mb-0">
+            <label class="col-sm-2 col-form-label">Test</label>
+            <div class="col-sm-10">
+
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Text</a>
+                        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Text and Icon</a>
+                        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Emoji</a>
+                        <a class="nav-item nav-link" id="nav-color-tab" data-toggle="tab" href="#nav-color" role="tab" aria-controls="nav-color" aria-selected="false">Color & Style</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                        <button type="button" class="btn btn-primary" onclick="Test1()">Test</button>
+                        <input type="text" id="message1" class="form-control" placeholder="Message" value='<b>username</b> ทดสอบ'>
+
+
+
+                    </div>
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                        <button type="button" class="btn btn-primary" onclick="Test2()">Test</button>
+                        <input type="text" id="message2" class="form-control" placeholder="Message" value='<b>username</b> <i class="fas fa-dollar-sign"></i> ทดสอบ'>
+                        <div>
+                            See Icon <a href="https://fontawesome.com/icons?d=gallery&p=2" target="_blank">Font Awesome 5</a>
+                        </div> 
+                    </div>
+                    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                        <button type="button" class="btn btn-primary" onclick="Test3()">Test</button>
+                        <input type="text" id="message3" class="form-control" placeholder="Message" value='<b>username</b> 💲💲💲 ทดสอบ'>
+                    </div>
+                    <div class="tab-pane fade" id="nav-color" role="tabpanel" aria-labelledby="nav-color-tab">
+
+                        <button type="button" class="btn btn-primary" onclick="Test4_1()">Test</button>
+                        <input type="text" id="message4_1" class="form-control mb-4" placeholder="Message" value='<b class="text-primary">username</b> ทดสอบ'>
+
+                        <button type="button" class="btn btn-primary" onclick="Test4_2()">Test</button>
+                        <input type="text" id="message4_2" class="form-control mb-4" placeholder="Message" value='<b class="text-danger">username</b> ทดสอบ'>
+
+                        <button type="button" class="btn btn-primary" onclick="Test4_3()">Test</button>
+                        <input type="text" id="message4_3" class="form-control mb-4" placeholder="Message" value='<b class="badge bg-primary">username</b> ทดสอบ'>
+
+                        <div>
+                            See Color <a href="https://getbootstrap.com/docs/5.0/utilities/colors/" target="_blank">Bootstrap 4</a>
+                        </div> 
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="form-group row mb-0">
+            <label class="col-sm-2 col-form-label">Code Example</label>
+            <div class="col-sm-10">
+<textarea id="codeMirrorDemo" class="p-3">
+const webapp = require("../webapp");
+
+//Text
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<b>username</b> ทดสอบ`,
+})
+
+//Text and Icon
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<i class="fas fa-dollar-sign"></i> ทดสอบ`,
+})
+
+//Emoji
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<b>username</b> 💲💲💲 ทดสอบ`,
+})
+
+//Color & Style
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<b class="text-primary">username</b> ทดสอบ`,
+})
+
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<b class="text-danger">username</b> ทดสอบ`,
+})
+
+webapp.socket.io().emit("widget::<%=widget.id%>", {
+    message: `<b class="badge bg-primary">username</b> ทดสอบ`,
+})</textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Config</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Font</label>
+                <div class="col-sm-10">
+                    <select name="font" id="font" class="form-control">
+                        <option value="Prompt" <%= storage.font == "Prompt" ? "selected" : "" %> style="font-family: 'Prompt', sans-serif;">Prompt (Test Text ทดสอบ ข้อความ)</option>
+                        <option value="Sarabun" <%= storage.font == "Sarabun" ? "selected" : "" %> style="font-family: 'Sarabun', sans-serif;">Sarabun (Test Text ทดสอบ ข้อความ)</option>
+                        <option value="K2D" <%= storage.font == "K2D" ? "selected" : "" %> style="font-family: 'K2D', sans-serif;">K2D (Test Text ทดสอบ ข้อความ)</option>
+                        <option value="Mali" <%= storage.font == "Mali" ? "selected" : "" %> style="font-family: 'Mali', sans-serif;">Mali (Test Text ทดสอบ ข้อความ)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Text Size</label>
+                <div class="col-sm-10">
+                    <input id="text_size" type="text" name="text_size" value="<%= storage.text_size %>">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Text Color</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="text_color" name="text_color" value="<%= storage.text_color %>">
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Text Background Color</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="background_color" name="background_color" value="<%= storage.background_color %>">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Alert Delay</label>
+                <div class="col-sm-10">
+                    <input id="alert_delay" type="text" name="alert_delay" value="<%= storage.alert_delay %>">
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Position</label>
+                <div class="col-sm-10">
+                    <select name="position" id="position" class="form-control">
+                        <option value="left" <%= storage.position == "left" ? "selected" : "" %> style="font-family: 'Prompt', sans-serif;">Left</option>
+                        <option value="right" <%= storage.position == "right" ? "selected" : "" %> style="font-family: 'Sarabun', sans-serif;">Right</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer text-center">
+            <button type="submit" class="btn btn-primary">Save Setting</button>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2/dist/spectrum.min.js">
+</script>
+<script>
+    $(function(){
+        CodeMirror.fromTextArea($("#codeMirrorDemo").get(0), {
+            mode: "javascript",
+            theme: "monokai"
+        });
+
+        $('#text_color').spectrum({
+            type: "component"
+        });
+        $('#background_color').spectrum({
+            type: "component"
+        });
+
+        $('#text_size').ionRangeSlider({
+            min     : 10,
+            max     : 60,
+            type    : 'single',
+            step    : 1,
+            postfix : 's',
+            prettify: false,
+            hasGrid : true
+        })
+
+        $('#alert_delay').ionRangeSlider({
+            min     : 0,
+            max     : 30,
+            type    : 'single',
+            step    : 1,
+            postfix : 's',
+            prettify: false,
+            hasGrid : true
+        })
+
+        $("#font").change(function(){
+            $(this).css({"font-family": $(this).val()})
+        })
+
+        $("#font").css({"font-family": $("#font").val()})
+    })
+    
+    function Test1() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message1").val()
+        });
+    }
+    function Test2() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message2").val()
+        });
+    }
+    function Test3() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message3").val()
+        });
+    }
+    function Test4() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message4").val()
+        });
+    }
+    function Test4_1() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message4_1").val()
+        });
+    }
+    function Test4_2() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message4_2").val()
+        });
+    }
+    function Test4_3() {
+        socket.emit('widget', {
+            id: "<%=widget.id%>",
+            message: $("#message4_3").val()
+        });
+    }
+</script>

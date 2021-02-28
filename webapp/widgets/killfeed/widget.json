@@ -1,0 +1,16 @@
+{
+    "icon": "fas fa-stream",
+    "name": "Killfeed",
+    "cover": "cover.gif",
+    "description": "Events stream",
+    "bgColor": "#5e3bec",
+    "public_path": "public",
+    "default_storage": {
+        "font": "Sarabun",
+        "text_size": "20",
+        "text_color": "white",
+        "background_color": "rgba(0, 0, 0, 0.7)",
+        "alert_delay": "3",
+        "position": "right"
+    }
+}
