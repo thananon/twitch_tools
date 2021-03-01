@@ -1,4 +1,5 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config({ path: '../.env'});
+var dayjs = require('dayjs')
 const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -7,7 +8,7 @@ var discord_token = fs.readFileSync('discord_token', 'utf8');
 const { sleep, roll } = require('../core/utils');
 const Player = require('./player');
 const DiscordBot = require('./discord_bot')
-const { MARKET_KEY } = require('../core/market_dashboard')
+const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -137,6 +138,7 @@ function gacha(channel, user, amount) {
     let gachaMysticRate = 10;
     let Bonus = 1;
     let killfeed_msg = "";
+    let gachaRateType = GACHA_RATE_TYPE.SALT
     if (amount == 0) return;
 
     let _player = player.getPlayerByUsername(user.username)
@@ -153,11 +155,11 @@ function gacha(channel, user, amount) {
             if (Bonus != 1) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
-                discordBot.sendEmbed("ALL-IN JACKPOT", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
+                gachaRateType = GACHA_RATE_TYPE.ALL_IN_JACKPOT
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
-                discordBot.sendEmbed("JACKPOT", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
+                gachaRateType = GACHA_RATE_TYPE.JACKPOT
             }
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2 + Math.random() * 3 + botInfo.level / 100;
@@ -167,6 +169,7 @@ function gacha(channel, user, amount) {
             sessionPayout += gain - amount;
             killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
             discordBot.sendEmbed("LUCKY!", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
+            gachaRateType = GACHA_RATE_TYPE.MYSTIC
         } else {
             sessionIncome += amount;
             if (_player.coins == 0) {
@@ -179,6 +182,17 @@ function gacha(channel, user, amount) {
 
         webapp.socket.io().emit("widget::killfeed", {
             message: killfeed_msg,
+        });
+
+        webapp.socket.io().emit("widget::market_dashboard", {
+            key: MARKET_KEY.TRANSACTION,
+            data: {
+                username: _player.username,
+                amount: amount,
+                gain: gain || 0,
+                rate: gachaRateType,
+                txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
+            }
         });
     } else {
         //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);

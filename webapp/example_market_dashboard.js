@@ -2,10 +2,11 @@
  * Test send message every 3s and display GIF
  */
 
+var dayjs = require('dayjs')
 const webapp = require('.')
 const Emitter = require('events');
 const client = new Emitter();
-const { MARKET_KEY } = require('../core/market_dashboard')
+const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 
 
 
@@ -14,12 +15,25 @@ client.on('message', (channel, tags, message, self) => {
 
     console.log(message)
     
-    /** display gif, sound, message */
     webapp.socket.io().emit("widget::market_dashboard", {
         key: MARKET_KEY.STATUS,
         data: {
             marketOpen:  message["itemKey"] % 2 === 0
           }
+    })
+
+    let amount = Math.floor(Math.random() * 10000) + 1;
+    let gain = Math.round(Math.random() * 10000 + 1 * (Math.random()));
+
+    webapp.socket.io().emit("widget::market_dashboard", {
+        key: MARKET_KEY.TRANSACTION,
+        data: {
+            username: players[message["itemKey"]],
+            amount,
+            gain: gain,
+            rate: gachaRate[message["itemKey"]],
+            txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
+        }
     })
 
 });
@@ -30,17 +44,23 @@ client.on('message', (channel, tags, message, self) => {
 let messages = [
     {
         itemKey : 0,
-        message : "Hello"
     },
     {
         itemKey : 1,
-        message : "สวัสดี"
     },
     {
         itemKey : 2,
-        message : ""
     }
 ];
+
+let players = ["Peter", "Victor", "Mario"]
+let gachaRate = [
+    GACHA_RATE_TYPE.SALT,
+    GACHA_RATE_TYPE.ALL_IN_JACKPOT,
+    GACHA_RATE_TYPE.MYSTIC
+]
+
+
 
 let i = 0
 setInterval(()=>{

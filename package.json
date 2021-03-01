@@ -20,6 +20,7 @@
   "homepage": "https://github.com/thananon/twitch_tools#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "dayjs": "^1.10.4",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
