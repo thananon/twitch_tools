@@ -160,7 +160,7 @@ function roll(critRate, mysticRoll = false, _player = null) {
     if (!mysticRoll) {
         return dice < critRate;
     } else {
-        _player.rollCount++;
+        _player.rollCounter++;
         if (_player.rollCounter == 100) {
             _player.rollCounter = 0;
             return true; // 100% guarantee rate
