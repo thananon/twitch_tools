@@ -163,7 +163,7 @@ function roll(critRate, mysticRoll = false, _player = null) {
         _player.rollCount++;
         if (_player.rollCounter == 100) {
             _player.rollCounter = 0;
-            return 100; // 100% guarantee rate
+            return true; // 100% guarantee rate
         }
         let rateUp = 0;
         if (_player.rollCounter >= 80) {
