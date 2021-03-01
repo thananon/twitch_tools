@@ -112,7 +112,7 @@ function gacha(channel, user, amount) {
                 itemKey: 0,
                 message: str_out
             });
-        } else if (roll(gachaMysticRate)) {
+        } else if (roll(gachaMysticRate, true, _player)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
@@ -155,9 +155,27 @@ function timeoutUser(channel, user, duration, reason) {
     });
 }
 
-function roll (critRate) {
+function roll(critRate, mysticRoll = false, _player = null) {
     dice = Math.random() * 100;
-    return dice < critRate;
+    if (!mysticRoll) {
+        return dice < critRate;
+    } else {
+        _player.rollCount++;
+        if (_player.rollCounter == 100) {
+            _player.rollCounter = 0;
+            return 100; // 100% guarantee rate
+        }
+        let rateUp = 0;
+        if (_player.rollCounter >= 80) {
+            rateUp = _player.rollCounter / 10;
+        }
+        let catchIt = dice < (critRate + rateUp);
+        if (catchIt) {
+            // reset roll counter
+            _player.rollCounter = 0;
+        }
+        return catchIt;
+    }
 }
 
 const client = new tmi.Client({

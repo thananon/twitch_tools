@@ -74,6 +74,7 @@ class Player{
             coins: coins,
             status: status,
             exp: 0,
+            rollCounter: 0,
             role: "viewer"
         } 
         if(!this.players.find(x=>x.username == player.username)){
