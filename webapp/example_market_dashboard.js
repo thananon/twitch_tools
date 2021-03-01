@@ -2,10 +2,10 @@
  * Test send message every 3s and display GIF
  */
 
-const webapp = require(".")
+const webapp = require('.')
 const Emitter = require('events');
 const client = new Emitter();
-
+const { MARKET_KEY } = require('../core/market_dashboard')
 
 
 
@@ -15,7 +15,12 @@ client.on('message', (channel, tags, message, self) => {
     console.log(message)
     
     /** display gif, sound, message */
-    webapp.socket.io().emit("widget::alerts", message)
+    webapp.socket.io().emit("widget::market_dashboard", {
+        key: MARKET_KEY.STATUS,
+        data: {
+            marketOpen:  message["itemKey"] % 2 === 0
+          }
+    })
 
 });
 

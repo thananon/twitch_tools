@@ -7,6 +7,7 @@ var discord_token = fs.readFileSync('discord_token', 'utf8');
 const { sleep, roll } = require('../core/utils');
 const Player = require('./player');
 const DiscordBot = require('./discord_bot')
+const { MARKET_KEY } = require('../core/market_dashboard')
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -264,6 +265,12 @@ client.on('message', (channel, tags, message, self) => {
                 marketOpen = false;
                 client.say(channel, 'market is now CLOSE.');
             }
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.STATUS,
+                data: {
+                    marketOpen
+                }
+            });
             return;
         }
 

@@ -61,26 +61,11 @@
           <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
       }
 
-      .ml2 {
-          font-weight: 900;
-          font-size: 3.5em;
-          color: #FFF;
+      body {
+        color: #e0e1e6;
+        padding: 36px 0px 36px;
       }
 
-      .ml2 .letter {
-          display: inline-block;
-          line-height: 1em;
-          text-shadow: 0px 0px 10px #000000;
-      }
-      .dashboard-container {
-          height:100vh;
-          padding: 18px 0px 18px 0px;
-      }
-      .card {
-          background-color: #273050;
-          color: #e0e1e6;
-          margin-bottom: 1rem;
-      }
       .flex-column {
           display: flex;
           flex-direction: column;
@@ -90,6 +75,28 @@
       }
       .flex-2 {
           flex: 2;
+      }
+      .status {
+        content: ' ';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-top: 4px;
+        margin-right: 10px;
+        margin-left:10px;
+        border: 1px solid #000;
+        border-radius: 12px;
+      }
+      .status.online {
+        background-color: #94E185;
+        border-color: #78D965;
+        box-shadow: 0px 0px 4px 1px #94E185;
+      }
+
+      .status.offline {
+        background-color: #C9404D;
+        border-color: #C42C3B;
+        box-shadow: 0px 0px 4px 1px #C9404D;
       }
     </style>
     <script
@@ -101,47 +108,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
     <script>
       const socket = io();
-      // should use <%= widget.id %> channel
-      socket.on("widget::alerts", (data) => {
-        console.log("🚀 Market Dashboard: ", data);
+      socket.on("widget::<%= widget.id %>", (data) => {
         show(data);
       });
-      socket.on("widget::alerts:reload", () => {
+      socket.on("widget::<%= widget.id %>:reload", () => {
         window.location.reload();
       });
     </script>
   </head>
 
   <body>
-    <div class="container-fluid animate__animated animate__fadeIn">
-      <div class="row dashboard-container">
-        <div class="col-md-5 flex-column">
-          <div class="card flex-2">
-            <div class="card-body">
-              <h5 class="card-title">Sign ups</h5>
-              <div id="sign-up-data"></div>
-            </div>
-          </div>
-          <div class="card flex-1">
-            <div class="card-body">
-              <h5 class="card-title">Widget Added</h5>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 flex-column">
-          <div class="card flex-1">
-            <div class="card-body">
-              <h5 class="card-title">MRR</h5>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 flex-column">
-          <div class="card flex-1">
-            <div class="card-body">
-              <h5 class="card-title">Stat</h5>
-            </div>
-          </div>
-        </div>
+    <div class="container animate__animated animate__fadeIn">
+      <div>
+        <h1 style="display: inline" class="align-middle">Market</h1>
+        <div id="market_open"></div>
       </div>
     </div>
     <script>
@@ -153,11 +133,20 @@
       var to
       var url = "/upload/widgets/<%= widget.id %>/"
 
-      function show(data) {
-        console.log("🚀 ~ file: show.ejs ~ line 154 ~ show ~ data", data)
-        if(data.message){
-            $("#sign-up-data").show().text(data.message)
+      function show({key, data}) {
+        console.log("🚀 ~ file: show.ejs ~ line 128 ~ show ~ key, data", key, data)
+        if(key === "STATUS"){
+          const {marketOpen} = data
+          $("#market_open").removeClass()
+          $("#market_open").addClass("animate__animated animate__fadeIn")
+          if(marketOpen){
+            $("#market_open").addClass("status online")
+          } else {
+            $("#market_open").addClass("status offline")
+          }
         }
+
+
       }
     </script>
   </body>
