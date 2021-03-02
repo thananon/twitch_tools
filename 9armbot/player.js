@@ -1,5 +1,7 @@
-const axios = require('axios')
+const axios = require('axios');
 const fs = require('fs');
+const migrate = require('../core/migrate');
+const migrations = require('../core/migrations');
 
 class Player{
 
@@ -16,8 +18,8 @@ class Player{
         }
         try{
             let save_data = fs.readFileSync(this.options.database_path, 'utf8');
-            this.players = JSON.parse(save_data);
-        }catch(err){
+            this.players = JSON.parse(save_data).map(el => migrate(el, migrations, '1.1'));
+        } catch(err) {
             this.players = []
         }
         this.syncPlayers()
