@@ -16,7 +16,7 @@ class Player{
             ...this.cloneDeep(this.options),
             ...options
         }
-        try{
+        try {
             let save_data = fs.readFileSync(this.options.database_path, 'utf8');
             this.players = JSON.parse(save_data).map(el => migrate(el, migrations, '1.1'));
         } catch(err) {
@@ -71,6 +71,7 @@ class Player{
 
     create(username, level = 1, coins = 0, status = "offline"){
         let player = {
+            version: "1.1",
             username: username,
             level: level,
             coins: coins,
