@@ -11,6 +11,8 @@ class Player{
         channel: `${process.env.tmi_channel_name}`,
         sync_player_time: 15000 // milliseconds
     }
+    version = "1.1";
+
     constructor(options = {}) {
         this.options = {
             ...this.cloneDeep(this.options),
@@ -18,7 +20,7 @@ class Player{
         }
         try {
             let save_data = fs.readFileSync(this.options.database_path, 'utf8');
-            this.players = JSON.parse(save_data).map(el => migrate(el, migrations, '1.1'));
+            this.players = JSON.parse(save_data).map(el => migrate(el, migrations, this.version));
         } catch(err) {
             this.players = []
         }
@@ -71,7 +73,7 @@ class Player{
 
     create(username, level = 1, coins = 0, status = "offline"){
         let player = {
-            version: "1.1",
+            version: this.version,
             username: username,
             level: level,
             coins: coins,
