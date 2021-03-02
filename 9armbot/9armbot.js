@@ -160,6 +160,9 @@ function roll(critRate, mysticRoll = false, _player = null) {
     if (!mysticRoll) {
         return dice < critRate;
     } else {
+        if (!_player.hasOwnProperty('rollCounter')) {
+            _player.rollCounter = 0;
+        }
         _player.rollCounter++;
         if (_player.rollCounter == 100) {
             _player.rollCounter = 0;
