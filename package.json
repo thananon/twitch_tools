@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'"
+    "start": "cd 9armbot && node 9armbot.js",
+    "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'"
   },
   "repository": {
     "type": "git",
