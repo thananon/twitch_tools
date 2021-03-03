@@ -191,6 +191,7 @@ function gacha(channel, user, amount) {
                 amount: amount,
                 gain: gain || 0,
                 rate: gachaRateType,
+                timestamp: dayjs().unix(),
                 txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
             }
         });
@@ -282,7 +283,7 @@ client.on('message', (channel, tags, message, self) => {
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.STATUS,
                 data: {
-                    marketOpen
+                    marketOpen: marketOpen
                 }
             });
             return;

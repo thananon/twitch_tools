@@ -13,7 +13,6 @@ const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 /** test on receive message and show GIF */
 client.on('message', (channel, tags, message, self) => {
 
-    console.log(message)
     
     webapp.socket.io().emit("widget::market_dashboard", {
         key: MARKET_KEY.STATUS,
@@ -24,18 +23,20 @@ client.on('message', (channel, tags, message, self) => {
 
     let amount = Math.floor(Math.random() * 10000) + 1;
     let gain = Math.round(Math.random() * 10000 + 1 * (Math.random()));
-
-    webapp.socket.io().emit("widget::market_dashboard", {
+    let txnPayload = {
         key: MARKET_KEY.TRANSACTION,
         data: {
             username: players[message["itemKey"]],
             amount,
             gain: gain,
             rate: gachaRate[message["itemKey"]],
+            timestamp: dayjs().unix(),
             txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
         }
-    })
-
+    }
+    webapp.socket.io().emit("widget::market_dashboard", txnPayload)
+    console.log("🚀 ~  Gacha Transaction: ", txnPayload)
+        
 });
 
 
@@ -69,6 +70,6 @@ setInterval(()=>{
     if(i>=messages.length){
         i = 0;
     }
-}, 3000)
+}, 1000)
 
 console.log(`see GIF at ${webapp.url}/widgets/market_dashboard click -> 'Launch'`)

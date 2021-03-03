@@ -76,6 +76,9 @@
       .flex-2 {
           flex: 2;
       }
+      .header {
+        margin-bottom: 24px;
+      }
       .status {
         content: ' ';
         display: inline-block;
@@ -98,6 +101,28 @@
         border-color: #C42C3B;
         box-shadow: 0px 0px 4px 1px #C9404D;
       }
+
+      .card-dark {
+          background-color: #273050;
+          color: #e0e1e6;
+      }
+
+      .card-code {
+        background-color: #34495e;
+        color: #e0e1e6;
+      }
+
+      #card-transaction {
+        height: 280px;
+        overflow-y: scroll;
+        padding-bottom: 14px;
+      }
+
+      #card-transaction > .card-body > #transaction {
+        overflow-y: hidden;
+        list-style-type: none;
+      }
+      
     </style>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -119,22 +144,40 @@
 
   <body>
     <div class="container animate__animated animate__fadeIn">
-      <div>
+      <div class="header">
         <h1 style="display: inline" class="align-middle">Market</h1>
         <div id="market_open"></div>
       </div>
+      
+      <div class="container-fluid">
+        <div class="row">
+          <div class="card card-dark col-md-6">
+            <div class="card-body">
+              <h5 class="card-title">Gacha Transaction 💸</h5>
+              <div id="card-transaction" class="card card-code">
+                <div class="card-body">
+                    <ul id="transaction">
+
+                    </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
     </div>
+
+
+
     <script>
+      let { min_transaction } = <%- JSON.stringify(storage) %>;
+      console.log("🚀 ~ file: show.ejs ~ line 130 ~ min_transaction", min_transaction)
 
-      var widgetStorage = <%- JSON.stringify(storage) %>;
-
-      var ani
-      var ani2
-      var to
-      var url = "/upload/widgets/<%= widget.id %>/"
+      let txns = [] 
 
       function show({key, data}) {
-        console.log("🚀 ~ file: show.ejs ~ line 128 ~ show ~ key, data", key, data)
+        // console.log("🚀 ~ file: show.ejs ~ line 128 ~ show ~ key, data", key, data)
         if(key === "STATUS"){
           const {marketOpen} = data
           $("#market_open").removeClass()
@@ -145,7 +188,20 @@
             $("#market_open").addClass("status offline")
           }
         }
-
+        else if (key === "TRANSACTION"){
+          const {username, timestamp} = data
+          if(txns.length >= min_transaction){
+            $(`#txn-${txns[0].timestamp}`).removeClass()
+            $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
+            setTimeout(() => {
+              $(`#txn-${txns[0].timestamp}`).remove()
+              txns.shift()
+            },500)
+          }
+          txns.push(data)
+          $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${username}</li>`)
+          console.log("🚀 ~ file: show.ejs ~ line 150 ~ show ~ txns", txns)
+        }
 
       }
     </script>
