@@ -47,15 +47,27 @@ async function giveCoins_allonline(amount) {
     return players.length;
 }
 
+function baseExp() {
+    return 500 + (botInfo.level * 50) - 50;
+}
+
 function feedBot(channel, user, amount) {
-   if (player.deductCoins(user.username, amount)) {
+    if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
-        if (botInfo.exp >= 500) { // level up
-            let levelup = parseInt(botInfo.exp/500);
-            botInfo.level += levelup;
-            botInfo.exp %= 500;
-            botInfo.attackPower+=10*levelup;
-            client.say(channel, `LEVEL UP!! -> ${botInfo.level}`);
+        const oldLevel = botInfo.level;
+        while (true) {
+            const bexp = baseExp();
+            if (botInfo.exp >= bexp) {
+                botInfo.exp -= bexp;
+                botInfo.level++;
+            } else {
+                break;
+            }
+        }
+        const levelUp = botInfo.level - oldLevel;
+        if (levelUp > 0) {
+            botInfo.attackPower += 10 * levelUp;
+            client.say(channel, `LEVEL UP!! ${oldLevel} -> ${botInfo.level}, NextLevel: ${botInfo.exp}/${baseExp()}`);
         }
     }
 }
@@ -243,7 +255,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     if (message == '!botstat') {
-        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
+        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/${baseExp()}> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
         return;
     }
 
