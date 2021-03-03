@@ -112,7 +112,7 @@ function gacha(channel, user, amount) {
                 itemKey: 0,
                 message: str_out
             });
-        } else if (roll(gachaMysticRate, true, _player)) {
+        } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
@@ -155,9 +155,9 @@ function timeoutUser(channel, user, duration, reason) {
     });
 }
 
-function roll(critRate, mysticRoll = false, _player = null) {
+function roll(critRate, _player = null) {
     dice = Math.random() * 100;
-    if (!mysticRoll) {
+    if (!_player) {
         return dice < critRate;
     } else {
         _player.rollCounter++;

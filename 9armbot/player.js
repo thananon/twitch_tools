@@ -72,7 +72,7 @@ class Player{
     }
 
     create(username, level = 1, coins = 0, status = "offline"){
-        let player = {
+        const player = {
             version: this.version,
             username: username,
             level: level,
@@ -81,7 +81,7 @@ class Player{
             exp: 0,
             rollCounter: 0,
             role: "viewer"
-        } 
+        };
         if(!this.players.find(x=>x.username == player.username)){
             this.players.push(player)
         }
