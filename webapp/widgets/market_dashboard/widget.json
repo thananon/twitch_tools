@@ -6,6 +6,12 @@
     "public_path": "public",
     "default_storage": {
         "background_color": "#151238",
-        "min_transaction": 10
+        "min_transaction": 9,
+        "rate_icon": {
+            "JACKPOT": "🙂",
+            "ALL_IN_JACKPOT": "🤣🤣🤣",
+            "MYSTIC": "",
+            "SALT": ""
+        }
     }
 }

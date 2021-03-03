@@ -113,14 +113,19 @@
       }
 
       #card-transaction {
-        height: 280px;
-        overflow-y: scroll;
+        height: 32.5vh;
+        overflow-y: hidden;
         padding-bottom: 14px;
+      }
+
+      #card-transaction > .card-body {
+        overflow-y: hidden;
       }
 
       #card-transaction > .card-body > #transaction {
         overflow-y: hidden;
         list-style-type: none;
+        padding-left: 0px;
       }
       
     </style>
@@ -151,14 +156,12 @@
       
       <div class="container-fluid">
         <div class="row">
-          <div class="card card-dark col-md-6">
+          <div class="card card-dark col-md-6 col-sm-12">
             <div class="card-body">
               <h5 class="card-title">Gacha Transaction 💸</h5>
               <div id="card-transaction" class="card card-code">
                 <div class="card-body">
-                    <ul id="transaction">
-
-                    </ul>
+                    <ul id="transaction"></ul>
                 </div>
               </div>
             </div>
@@ -171,13 +174,11 @@
 
 
     <script>
-      let { min_transaction } = <%- JSON.stringify(storage) %>;
-      console.log("🚀 ~ file: show.ejs ~ line 130 ~ min_transaction", min_transaction)
+      let { min_transaction, rate_icon } = <%- JSON.stringify(storage) %>;
 
       let txns = [] 
 
       function show({key, data}) {
-        // console.log("🚀 ~ file: show.ejs ~ line 128 ~ show ~ key, data", key, data)
         if(key === "STATUS"){
           const {marketOpen} = data
           $("#market_open").removeClass()
@@ -189,21 +190,43 @@
           }
         }
         else if (key === "TRANSACTION"){
-          const {username, timestamp} = data
+          const {username, timestamp,  amount, gain, rate, txnTime} = data
           if(txns.length >= min_transaction){
             $(`#txn-${txns[0].timestamp}`).removeClass()
             $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
             setTimeout(() => {
               $(`#txn-${txns[0].timestamp}`).remove()
               txns.shift()
-            },500)
+            },300)
           }
           txns.push(data)
-          $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${username}</li>`)
-          console.log("🚀 ~ file: show.ejs ~ line 150 ~ show ~ txns", txns)
+          console.log("🚀 ~ file: show.ejs ~ line 200 ~ show ~ data", data)
+          let message = displayGachaTransaction(username, amount, gain, rate, txnTime)
+          console.log("🚀 ~ file: show.ejs ~ line 202 ~ show ~ message", message)
+          $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
         }
 
       }
+
+      function displayGachaTransaction(username, amount, gain, rate, txnTime){
+        const _amount = roundDecimalPoint(amount)
+        const _gain = roundDecimalPoint(gain)
+        return `
+        <div style="display:flex; justify-content:space-between; font-size:14px; ">
+          <div style="padding:0px .5em .5em;flex:3;">${username} ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)} ${rate_icon[rate]}</div>
+          <div style="flex:1;font-size:10px;text-align:right;">${txnTime}</div>
+        </div>`
+      }
+
+      function roundDecimalPoint(num){
+        return Math.round(num * 100) / 100
+      }
+
+      function numberWithCommas(x) {
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
     </script>
   </body>
 </html>
