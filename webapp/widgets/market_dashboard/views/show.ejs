@@ -58,7 +58,7 @@
           background-size: contain;
       }
       body{
-          <%= widget.storage.background_color ? `background-color:${widget.storage.background_color};` : '' %>
+        background-color: #151238;
       }
 
       body {
@@ -174,7 +174,7 @@
 
 
     <script>
-      let { min_transaction, rate_icon } = <%- JSON.stringify(storage) %>;
+      let { min_transaction, rate_icon, rate_color } = <%- JSON.stringify(storage) %>;
 
       let txns = [] 
 
@@ -213,8 +213,8 @@
         const _gain = roundDecimalPoint(gain)
         return `
         <div style="display:flex; justify-content:space-between; font-size:14px; ">
-          <div style="padding:0px .5em .5em;flex:3;">${username} ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)} ${rate_icon[rate]}</div>
-          <div style="flex:1;font-size:10px;text-align:right;">${txnTime}</div>
+          <div style="padding:0px .5em .5em;flex:3; color:${rate_color[rate]};">${rate_icon[rate]} ${username} ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
+          <div style="flex:1;font-size:10px;text-align:right;color:#95afc0;">${txnTime}</div>
         </div>`
       }
 

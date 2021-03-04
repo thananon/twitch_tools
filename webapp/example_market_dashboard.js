@@ -23,13 +23,14 @@ client.on('message', (channel, tags, message, self) => {
 
     let amount = Math.floor(Math.random() * 10000) + 1;
     let gain = Math.round(Math.random() * 10000 + 1 * (Math.random()));
+    let rateIcon = gachaRate[Math.floor(Math.random() * 4)]
     let txnPayload = {
         key: MARKET_KEY.TRANSACTION,
         data: {
             username: players[message["itemKey"]],
             amount,
             gain: gain,
-            rate: gachaRate[message["itemKey"]],
+            rate: rateIcon,
             timestamp: dayjs().unix(),
             txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
         }
@@ -58,7 +59,8 @@ let players = ["Peter", "Victor", "Mario"]
 let gachaRate = [
     GACHA_RATE_TYPE.SALT,
     GACHA_RATE_TYPE.ALL_IN_JACKPOT,
-    GACHA_RATE_TYPE.MYSTIC
+    GACHA_RATE_TYPE.MYSTIC,
+    GACHA_RATE_TYPE.JACKPOT
 ]
 
 

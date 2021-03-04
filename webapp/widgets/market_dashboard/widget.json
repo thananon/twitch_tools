@@ -5,13 +5,18 @@
     "bgColor": "#1dd1a1",
     "public_path": "public",
     "default_storage": {
-        "background_color": "#151238",
-        "min_transaction": 9,
+        "min_transaction": 8,
         "rate_icon": {
             "JACKPOT": "🙂",
-            "ALL_IN_JACKPOT": "🤣🤣🤣",
+            "ALL_IN_JACKPOT": "🤣 <b style='color:#f9ca24;'> High Risk High Return !!! </b> 🤣",
             "MYSTIC": "",
             "SALT": ""
+        },
+        "rate_color": {
+            "JACKPOT": "#e67e22",
+            "ALL_IN_JACKPOT": "#f1c40f",
+            "MYSTIC": "#9b59b6",
+            "SALT": "#bdc3c7"
         }
     }
 }

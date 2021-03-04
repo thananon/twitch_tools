@@ -1,32 +1,166 @@
-<% 
-var files = {}
-var storage = widget.storage
-%>
+<% var storage = widget.storage %>
 
+<form method="post" enctype="multipart/form-data">
 
-<!-- <script>
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Transaction</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Min Transaction</label>
+        <div class="col-sm-10">
+          <input 
+            type="number"
+            class="form-control"
+            id="min_transaction"
+            name="min_transaction"
+            value="<%= storage.min_transaction %>"
+          />
+        </div>
+      </div>
+      <!-- end min transaction -->
+      <label class="col-form-label">Rate Icon</label>
+      <div class="form-row align-items-center">
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">All in Jackpot</label>
+          <input
+            type="text"
+            class="form-control"
+            id="ALL_IN_JACKPOT"
+            name="rate_icon[ALL_IN_JACKPOT]"
+            value="<%= storage.rate_icon.ALL_IN_JACKPOT %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Jackpot</label>
+          <input
+            type="text"
+            class="form-control"
+            id="JACKPOT"
+            name="rate_icon[JACKPOT]"
+            value="<%= storage.rate_icon.JACKPOT %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Mystic</label>
+          <input
+            type="text"
+            class="form-control"
+            id="MYSTIC"
+            name="rate_icon[MYSTIC]"
+            value="<%= storage.rate_icon.MYSTIC %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Salt</label>
+          <input
+            type="text"
+            class="form-control"
+            id="SALT"
+            name="rate_icon[SALT]"
+            value="<%= storage.rate_icon.SALT %>"
+          />
+        </div>
+      </div>
+      <!-- end rate icon -->
+      <label class="col-form-label">Rate Color</label>
+      <div class="form-row align-items-center">
+        <div class="col-sm-3 my-1">
+            <label class="col-form-label">All in Jackpot</label>
+            <div class="input-group background_color">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="BG_ALL_IN_JACKPOT"
+                    name="rate_color[ALL_IN_JACKPOT]"
+                    value="<%= storage.rate_color.ALL_IN_JACKPOT %>"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text"
+                    ><i id="BG_ALL_IN_JACKPOT_SQUARE" class="fas fa-square"/></i
+                  ></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 my-1">
+            <label class="col-form-label">Jackpot</label>
+            <div class="input-group background_color">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="BG_JACKPOT"
+                    name="rate_color[JACKPOT]"
+                    value="<%= storage.rate_color.JACKPOT %>"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text"
+                    ><i id="BG_JACKPOT_SQUARE" class="fas fa-square"/></i
+                  ></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 my-1">
+            <label class="col-form-label">Mystic</label>
+            <div class="input-group background_color">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="BG_MYSTIC"
+                    name="rate_color[MYSTIC]"
+                    value="<%= storage.rate_color.MYSTIC %>"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text"
+                    ><i id="BG_MYSTIC_SQUARE" class="fas fa-square"/></i
+                  ></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 my-1">
+            <label class="col-form-label">Salt</label>
+            <div class="input-group background_color">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="BG_SALT"
+                    name="rate_color[SALT]"
+                    value="<%= storage.rate_color.SALT %>"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text"
+                    ><i id="BG_SALT_SQUARE" class="fas fa-square"/></i
+                  ></span>
+                </div>
+            </div>
+        </div>
+      </div>
+      <!-- end rate color -->
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-footer text-center">
+      <button type="submit" class="btn btn-primary">Save Setting</button>
+    </div>
+  </div>
+</form>
+
+<script>
     $(function(){
-        $('#background_color').colorpicker()
-        $('#background_color').on('colorpickerChange', function(event) {
-            $('.background_color .fa-square').css('color', event.color.toString());
-        });
-        $('.background_color .fa-square').css('color', $('#background_color').val());
-
-        $('#alert_delay').ionRangeSlider({
-            min     : 0,
-            max     : 30,
-            type    : 'single',
-            step    : 1,
-            postfix : 's',
-            prettify: false,
-            hasGrid : true
-        })
+        let {rate_color} = <%- JSON.stringify(storage) %>;
+        
+        for(rate in rate_color){
+            let pickerId = `#BG_${rate}`
+            let pickerDisplay = `#BG_${rate}_SQUARE`
+            $(pickerId).colorpicker()
+            $(pickerId).on('colorpickerChange', function(event) {
+                $(pickerDisplay).css('color', event.color.toString());
+            });
+            $(pickerDisplay).css('color', $(pickerId).val());
+        }
+        
     })
     
-    function Test() {
-        socket.emit('widget', {
-            id: "gif",
-            message: $("#message").val()
-        });
-    }
-</script> -->
+   
+</script>
