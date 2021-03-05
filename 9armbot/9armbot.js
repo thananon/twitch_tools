@@ -55,11 +55,20 @@ function feedBot(channel, user, amount) {
     if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
         const oldLevel = botInfo.level;
+
+        webapp.socket.io().emit("widget::killfeed", {
+            message: `<b class="badge bg-primary">${user.username}</b> <i class="fas fa-pizza-slice"></i> <i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> x${amount}`,
+        });
         while (true) {
             const bexp = baseExp();
             if (botInfo.exp >= bexp) {
                 botInfo.exp -= bexp;
                 botInfo.level++;
+
+                webapp.socket.io().emit("widget::killfeed", {
+                    message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <b>LEVEL UP!</b> <i class="fas fa-level-up-alt"></i> <b class="badge bg-primary">${botInfo.level}</b>`,
+                });
+
             } else {
                 break;
             }
@@ -88,6 +97,10 @@ async function thanos (channel, byUser) {
                 casualties++;
                 console.log(`${username} got snapped.`);
                 client.timeout(channel, username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
+ 
+                webapp.socket.io().emit("widget::killfeed", {
+                    message: `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${casualties})`,
+                });
                 await new Utils().sleep(620)
             }
         }
@@ -117,10 +130,10 @@ function gacha(channel, user, amount) {
             sessionPayout += gain - amount;
             if (Bonus!=1) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
-                killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
+                killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
-                killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
+                killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
             }
             str_out =  _player.username + " ได้รางวัล "+ gain +" armcoin";
         } else if (roll(gachaMysticRate, _player)) {
@@ -129,13 +142,13 @@ function gacha(channel, user, amount) {
             _player.coins+=gain
             client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
-            killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
+            killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
         } else {
             sessionIncome += amount;
             if (_player.coins == 0) {
                 killfeed_msg =`<i class="far fa-grin-squint-tears"></i> <b class="badge bg-danger">หมดตัว</b> <b class="badge bg-danger">${_player.username}</b>  <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin`;
             } else {
-                killfeed_msg = `<b class="badge bg-danger">${_player.username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin`;
+                killfeed_msg = `<b class="badge bg-danger">${_player.username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin (${_player.coins})`;
             }
 
         }
@@ -165,10 +178,17 @@ function timeoutUser(channel, user, duration, reason) {
     if (roll(botInfo.critRate)) {
         final_duration *= botInfo.critMultiplier;
         client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
+        webapp.socket.io().emit("widget::killfeed", {
+            message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <i class="fas fa-hammer"></i> <b class="badge bg-danger">CRITICAL!</b> <b>x${botInfo.critMultiplier}</b>`,
+        });
     }
-
+    final_duration = parseInt(final_duration);
     client.timeout(channel, user.username, final_duration, `${reason} (critRate = ${botInfo.critRate})`).catch((err) => {
         console.error(err);
+    });
+
+    webapp.socket.io().emit("widget::killfeed", {
+        message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <i class="fas fa-crosshairs"> </i>  <i class="fas fa-arrow-alt-circle-right"></i> <b class="badge bg-danger">${user.username}</b> (${final_duration})`,
     });
 }
 
@@ -235,6 +255,7 @@ client.on('message', (channel, tags, message, self) => {
                     isMod: false
                 };
                 timeoutUser(channel, user, botInfo.attackPower, 'mod สั่งมา');
+                
             }
         }
     }
@@ -370,10 +391,19 @@ client.on('message', (channel, tags, message, self) => {
 });
 
 function subscriptionPayout (channel, username) {
-    botInfo.critRate+=2;
-    client.say(channel, `>> botInfo.critRate+2% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
+    botInfo.critRate+=0.1;
+    client.say(channel, `>> botInfo.critRate+0.1% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
+
+        webapp.socket.io().emit("widget::killfeed", {
+            message: `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 armcoin จากการ Subscibe`,
+        });
+
+        webapp.socket.io().emit("widget::killfeed", {
+            message:  `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 armcoin <i class="fas fa-coins"></i> จากการ Subscribe ของ  <b class="badge bg-primary">${username}</b>`,
+        });
+
     });
     player.giveCoins(username,10)
 }
@@ -402,10 +432,15 @@ client.on('submysterygift', (channel, username, num, method, userstate) => {
     if (!num) num = 1;
     player.giveCoins(username, 10*num);
     client.say (channel, `${username} ได้รับ ${10*num} armcoin จากการ Gift ให้สมาชิก ${num} คน armKraab `);
+
+    webapp.socket.io().emit("widget::killfeed", {
+        message: `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${10*num} armcoin จากการ gift sub x${num}`,
+    });
+
 });
 
 client.on('cheer', (channel, userstate, message) => {
-    let amt =  userstate.bits/1000;
+    let amt =  userstate.bits/10000;
     client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt} จากพลังของนายทุน <<`);
     botInfo.critMultiplier += amt;
 });
