@@ -1,4 +1,4 @@
-const migrations = [
+const playerMigrations = [
     {
         from: "1.0",
         to: "1.1",
@@ -30,4 +30,6 @@ const migrations = [
     },
 ];
 
-module.exports = migrations
+module.exports = {
+    playerMigrations
+};

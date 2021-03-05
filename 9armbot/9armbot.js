@@ -1,9 +1,9 @@
-require('dotenv').config({ path: './../.env'});
+require('dotenv').config({ path: '../.env'});
 const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-const Utils = require('../core/utils');
+const { sleep } = require('../core/utils');
 const Player = require('./player');
 
 var dodgeRate = 1;
@@ -101,7 +101,7 @@ async function thanos (channel, byUser) {
                 webapp.socket.io().emit("widget::killfeed", {
                     message: `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${casualties})`,
                 });
-                await new Utils().sleep(620)
+                await sleep(620);
             }
         }
         client.say(channel, `@${byUser.username} ใช้งาน Thanos Mode มี ${casualties} คนในแชทหายตัวไป....`);
