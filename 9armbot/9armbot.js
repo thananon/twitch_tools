@@ -123,7 +123,7 @@ function gacha(channel, user, amount) {
                 killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
             }
             str_out =  _player.username + " ได้รางวัล "+ gain +" armcoin";
-        } else if (roll(gachaMysticRate)) {
+        } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
@@ -172,9 +172,27 @@ function timeoutUser(channel, user, duration, reason) {
     });
 }
 
-function roll (critRate) {
+function roll(critRate, _player = null) {
     dice = Math.random() * 100;
-    return dice < critRate;
+    if (!_player) {
+        return dice < critRate;
+    } else {
+        _player.rollCounter++;
+        if (_player.rollCounter == 100) {
+            _player.rollCounter = 0;
+            return true; // 100% guarantee rate
+        }
+        let rateUp = 0;
+        if (_player.rollCounter >= 80) {
+            rateUp = _player.rollCounter / 10;
+        }
+        let catchIt = dice < (critRate + rateUp);
+        if (catchIt) {
+            // reset roll counter
+            _player.rollCounter = 0;
+        }
+        return catchIt;
+    }
 }
 
 const client = new tmi.Client({

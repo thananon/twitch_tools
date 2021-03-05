@@ -1,5 +1,7 @@
-const axios = require('axios')
+const axios = require('axios');
 const fs = require('fs');
+const migrate = require('../core/migrate');
+const migrations = require('../core/migrations');
 
 class Player{
 
@@ -9,15 +11,17 @@ class Player{
         channel: `${process.env.tmi_channel_name}`,
         sync_player_time: 15000 // milliseconds
     }
+    version = "1.1";
+
     constructor(options = {}) {
         this.options = {
             ...this.cloneDeep(this.options),
             ...options
         }
-        try{
+        try {
             let save_data = fs.readFileSync(this.options.database_path, 'utf8');
-            this.players = JSON.parse(save_data);
-        }catch(err){
+            this.players = JSON.parse(save_data).map(el => migrate(el, migrations, this.version));
+        } catch(err) {
             this.players = []
         }
         this.syncPlayers()
@@ -68,14 +72,16 @@ class Player{
     }
 
     create(username, level = 1, coins = 0, status = "offline"){
-        let player = {
+        const player = {
+            version: this.version,
             username: username,
             level: level,
             coins: coins,
             status: status,
             exp: 0,
+            rollCounter: 0,
             role: "viewer"
-        } 
+        };
         if(!this.players.find(x=>x.username == player.username)){
             this.players.push(player)
         }
