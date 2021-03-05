@@ -8,8 +8,8 @@
         "background_color": "#00FF00",
         "items": [
             {
-                "name": "GIF Name 1",
-                "alert_delay": "3"
+                "name": "JACKPOT",
+                "alert_delay": "1"
             },
             {
                 "name": "GIF Name 2",
@@ -21,7 +21,7 @@
             }
         ],
         "gif_0": "default.gif",
-        "sound_0": "default.mp3",
+        "sound_0": "slot.mp3",
         "gif_1": "default.gif",
         "sound_1": "default.mp3",
         "gif_2": "default.gif",

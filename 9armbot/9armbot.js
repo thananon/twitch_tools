@@ -47,15 +47,27 @@ async function giveCoins_allonline(amount) {
     return players.length;
 }
 
+function baseExp() {
+    return 500 + (botInfo.level * 50) - 50;
+}
+
 function feedBot(channel, user, amount) {
-   if (player.deductCoins(user.username, amount)) {
+    if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
-        if (botInfo.exp >= 500) { // level up
-            let levelup = parseInt(botInfo.exp/500);
-            botInfo.level += levelup;
-            botInfo.exp %= 500;
-            botInfo.attackPower+=10*levelup;
-            client.say(channel, `LEVEL UP!! -> ${botInfo.level}`);
+        const oldLevel = botInfo.level;
+        while (true) {
+            const bexp = baseExp();
+            if (botInfo.exp >= bexp) {
+                botInfo.exp -= bexp;
+                botInfo.level++;
+            } else {
+                break;
+            }
+        }
+        const levelUp = botInfo.level - oldLevel;
+        if (levelUp > 0) {
+            botInfo.attackPower += 10 * levelUp;
+            client.say(channel, `LEVEL UP!! ${oldLevel} -> ${botInfo.level}, NextLevel: ${botInfo.exp}/${baseExp()}`);
         }
     }
 }
@@ -86,9 +98,10 @@ async function thanos (channel, byUser) {
 }
 
 function gacha(channel, user, amount) {
-    let gachaLegendaryRate = 2;
+    let gachaLegendaryRate = 1;
     let gachaMysticRate = 10;
     let Bonus = 1;
+    let killfeed_msg = "";
     if (amount == 0) return;
 
     let _player = player.getPlayerByUsername(user.username)
@@ -104,28 +117,32 @@ function gacha(channel, user, amount) {
             sessionPayout += gain - amount;
             if (Bonus!=1) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
+                killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
+                killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
             }
             str_out =  _player.username + " ได้รางวัล "+ gain +" armcoin";
-            webapp.socket.io().emit("widget::alerts", {
-                itemKey: 0,
-                message: str_out
-            });
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
             client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
+            killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin`;
         } else {
             sessionIncome += amount;
-            webapp.socket.io().emit("widget::saltalerts", {
-                itemKey: 0,
-                message: _player.username
-            });
-            //client.say(channel, `🧂🧂🧂 @${_player.username} 🧂 LUL🧂🧂🧂🧂`);
+            if (_player.coins == 0) {
+                killfeed_msg =`<i class="far fa-grin-squint-tears"></i> <b class="badge bg-danger">หมดตัว</b> <b class="badge bg-danger">${_player.username}</b>  <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin`;
+            } else {
+                killfeed_msg = `<b class="badge bg-danger">${_player.username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin`;
+            }
+
         }
+
+        webapp.socket.io().emit("widget::killfeed", {
+            message: killfeed_msg,
+        });
     } else {
         //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
     }
@@ -261,7 +278,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     if (message == '!botstat') {
-        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/500> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
+        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/${baseExp()}> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
         return;
     }
 
@@ -362,7 +379,9 @@ function subscriptionPayout (channel, username) {
 }
 
 function isSubscriber (userStat) {
-    return "founder" in userStat.badges || userStat.subscriber
+    if (userStat.badges && "founder" in userStat.badges)
+        return true;
+    return userStat.subscriber
 }
 
 client.on('subscription', (channel, username, method, message, userstate) => {

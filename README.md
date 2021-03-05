@@ -4,10 +4,12 @@ Repo to keep my community's twitch gadgetries. Join me at [www.twitch.tv/armzi](
 
 ### Projects:
 - 9armbot - custom bot to moderate twitch channel with unique personality.
+- webapp - a webapp to display events/gif/messages from 9armbot but it can be a standalone project on its own.
 
 ### Contribute ###
 - Please open an issue for feature request.
 - Open a PR - Please describe the benefit of your PR and run some basic testing. I should not be the one to test and fix your 'feature' or 'enhancement'.
+- We do not accept PR for minor typo or 'code cleanup'. Your PR should have some form of enhancement/feature or major refactoring.
 
 ## 📦 Installation
 
