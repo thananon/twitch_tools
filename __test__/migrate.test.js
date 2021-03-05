@@ -2,6 +2,17 @@ const fs = require('fs');
 const migrate = require('../core/migrate');
 const { playerMigrations } = require('../core/migrations');
 
+const newSchema = {
+    version: "1.1",
+    username: "TestUser",
+    level: 1,
+    coins: 0,
+    status: "online",
+    exp: 0,
+    rollCounter: 0,
+    role: "viewer"
+};
+
 test('player migration test.', () => {
     let oldSchema = {
         username: "TestUser",
@@ -9,16 +20,6 @@ test('player migration test.', () => {
         coins: 0,
         status: "online",
         exp: 0,
-        role: "viewer"
-    };
-    const newSchema = {
-        version: "1.1",
-        username: "TestUser",
-        level: 1,
-        coins: 0,
-        status: "online",
-        exp: 0,
-        rollCounter: 0,
         role: "viewer"
     };
     oldSchema = migrate(oldSchema, playerMigrations, "1.1");
@@ -32,16 +33,6 @@ test('player migration test with exists database.', () => {
         coins: 0,
         status: "online",
         exp: 0,
-        role: "viewer"
-    };
-    const newSchema = {
-        version: "1.1",
-        username: "TestUser",
-        level: 1,
-        coins: 0,
-        status: "online",
-        exp: 0,
-        rollCounter: 0,
         role: "viewer"
     };
     let players = [oldSchema];
@@ -79,16 +70,7 @@ function roll(critRate, _player = null) {
 }
 
 test('roll guarantee test', () => {
-    const player = {
-        version: "1.1",
-        username: "TestUser",
-        level: 1,
-        coins: 0,
-        status: "online",
-        exp: 0,
-        rollCounter: 0,
-        role: "viewer"
-    };
+    const player = JSON.parse(JSON.stringify(newSchema));
     player.rollCounter = 99;
     const result = roll(1, player);
 
