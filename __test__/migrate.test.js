@@ -44,36 +44,3 @@ test('player migration test with exists database.', () => {
 
     expect(players[0]).toEqual(newSchema);
 });
-
-// same of roll function in 9armbot.js
-function roll(critRate, _player = null) {
-    dice = Math.random() * 100;
-    if (!_player) {
-        return dice < critRate;
-    } else {
-        _player.rollCounter++;
-        if (_player.rollCounter == 100) {
-            _player.rollCounter = 0;
-            return true; // 100% guarantee rate
-        }
-        let rateUp = 0;
-        if (_player.rollCounter >= 80) {
-            rateUp = _player.rollCounter / 10;
-        }
-        let catchIt = dice < (critRate + rateUp);
-        if (catchIt) {
-            // reset roll counter
-            _player.rollCounter = 0;
-        }
-        return catchIt;
-    }
-}
-
-test('roll guarantee test', () => {
-    const player = JSON.parse(JSON.stringify(newSchema));
-    player.rollCounter = 99;
-    const result = roll(1, player);
-
-    expect(result).toBeTruthy();
-    expect(player.rollCounter).toBe(0);
-});

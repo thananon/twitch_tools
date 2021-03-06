@@ -3,7 +3,7 @@ const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
-const { sleep } = require('../core/utils');
+const { sleep, roll } = require('../core/utils');
 const Player = require('./player');
 
 var dodgeRate = 1;
@@ -190,29 +190,6 @@ function timeoutUser(channel, user, duration, reason) {
     webapp.socket.io().emit("widget::killfeed", {
         message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <i class="fas fa-crosshairs"> </i>  <i class="fas fa-arrow-alt-circle-right"></i> <b class="badge bg-danger">${user.username}</b> (${final_duration})`,
     });
-}
-
-function roll(critRate, _player = null) {
-    dice = Math.random() * 100;
-    if (!_player) {
-        return dice < critRate;
-    } else {
-        _player.rollCounter++;
-        if (_player.rollCounter == 100) {
-            _player.rollCounter = 0;
-            return true; // 100% guarantee rate
-        }
-        let rateUp = 0;
-        if (_player.rollCounter >= 80) {
-            rateUp = _player.rollCounter / 10;
-        }
-        let catchIt = dice < (critRate + rateUp);
-        if (catchIt) {
-            // reset roll counter
-            _player.rollCounter = 0;
-        }
-        return catchIt;
-    }
 }
 
 const client = new tmi.Client({
