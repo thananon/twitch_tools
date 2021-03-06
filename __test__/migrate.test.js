@@ -57,7 +57,7 @@ test('player migration exists database write to file test.', () => {
     let players = [oldSchema];
     let data = JSON.stringify(players);
     fs.writeFileSync('migrate.json', data, 'utf8');
-    players = [newSchema];
+    players[0] = migrate(players[0], playerMigrations, "1.1");
     data = JSON.stringify(players);
     fs.writeFileSync('migrate.json', data, 'utf8');
     let load = fs.readFileSync('migrate.json', 'utf8');
@@ -65,4 +65,5 @@ test('player migration exists database write to file test.', () => {
     fs.unlinkSync('migrate.json');
 
     expect(players.length).toBe(1);
+    expect(players[0]).toEqual(newSchema);
 });
