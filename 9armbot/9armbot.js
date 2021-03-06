@@ -135,7 +135,6 @@ function gacha(channel, user, amount) {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
             }
-            str_out =  _player.username + " ได้รางวัล "+ gain +" armcoin";
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2+Math.random()*3 + botInfo.level/100;
             let gain =  parseInt(amount*multiplier);
