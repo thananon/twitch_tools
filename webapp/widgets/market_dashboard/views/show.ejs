@@ -28,36 +28,37 @@
     ></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <style>
-      html, body {
-          height: 100%;
-          width: 100%;
-          margin: 0;
-          margin: 0px;
-          padding: 0px;
-          font-family: 'Prompt', sans-serif;
-          overflow: hidden;
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        margin: 0px;
+        padding: 0px;
+        font-family: "Prompt", sans-serif;
+        overflow: hidden;
       }
       .box {
-          text-align: center;
+        text-align: center;
       }
-      .wrapper{
-          height: 100%;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
+      .wrapper {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
       }
       #alert-image {
-          text-align: center;
-          height: 100%;
-          width: 100%;
-          display: table-cell;
-          background-position: center bottom;
-          background-repeat: no-repeat;
-          background-size: contain;
+        text-align: center;
+        height: 100%;
+        width: 100%;
+        display: table-cell;
+        background-position: center bottom;
+        background-repeat: no-repeat;
+        background-size: contain;
       }
-      body{
+      body {
         background-color: #151238;
       }
 
@@ -67,44 +68,44 @@
       }
 
       .flex-column {
-          display: flex;
-          flex-direction: column;
+        display: flex;
+        flex-direction: column;
       }
       .flex-1 {
-          flex: 1;
+        flex: 1;
       }
       .flex-2 {
-          flex: 2;
+        flex: 2;
       }
       .header {
         margin-bottom: 24px;
       }
       .status {
-        content: ' ';
+        content: " ";
         display: inline-block;
         width: 12px;
         height: 12px;
         margin-top: 4px;
         margin-right: 10px;
-        margin-left:10px;
+        margin-left: 10px;
         border: 1px solid #000;
         border-radius: 12px;
       }
       .status.online {
-        background-color: #94E185;
-        border-color: #78D965;
-        box-shadow: 0px 0px 4px 1px #94E185;
+        background-color: #94e185;
+        border-color: #78d965;
+        box-shadow: 0px 0px 4px 1px #94e185;
       }
 
       .status.offline {
-        background-color: #C9404D;
-        border-color: #C42C3B;
-        box-shadow: 0px 0px 4px 1px #C9404D;
+        background-color: #c9404d;
+        border-color: #c42c3b;
+        box-shadow: 0px 0px 4px 1px #c9404d;
       }
 
       .card-dark {
-          background-color: #273050;
-          color: #e0e1e6;
+        background-color: #273050;
+        color: #e0e1e6;
       }
 
       .card-code {
@@ -127,7 +128,6 @@
         list-style-type: none;
         padding-left: 0px;
       }
-      
     </style>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -153,7 +153,7 @@
         <h1 style="display: inline" class="align-middle">Market</h1>
         <div id="market_open"></div>
       </div>
-      
+
       <div class="container-fluid">
         <div class="row">
           <div class="card card-dark col-md-6 col-sm-12">
@@ -161,72 +161,68 @@
               <h5 class="card-title">Gacha Transaction 💸</h5>
               <div id="card-transaction" class="card card-code">
                 <div class="card-body">
-                    <ul id="transaction"></ul>
+                  <ul id="transaction"></ul>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
     </div>
 
-
-
     <script>
-      let { min_transaction, rate_icon, rate_color } = <%- JSON.stringify(storage) %>;
+        let { min_transaction, rate_icon, rate_color } = <%- JSON.stringify(storage) %>;
 
-      let txns = [] 
+        let txns = []
 
-      function show({key, data}) {
-        if(key === "STATUS"){
-          const {marketOpen} = data
-          $("#market_open").removeClass()
-          $("#market_open").addClass("animate__animated animate__fadeIn")
-          if(marketOpen){
-            $("#market_open").addClass("status online")
-          } else {
-            $("#market_open").addClass("status offline")
+        function show({key, data}) {
+          if(key === "STATUS"){
+            const {marketOpen} = data
+            $("#market_open").removeClass()
+            $("#market_open").addClass("animate__animated animate__fadeIn")
+            if(marketOpen){
+              $("#market_open").addClass("status online")
+            } else {
+              $("#market_open").addClass("status offline")
+            }
           }
-        }
-        else if (key === "TRANSACTION"){
-          const {username, timestamp,  amount, gain, rate, txnTime} = data
-          if(txns.length >= min_transaction){
-            $(`#txn-${txns[0].timestamp}`).removeClass()
-            $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
-            setTimeout(() => {
-              $(`#txn-${txns[0].timestamp}`).remove()
-              txns.shift()
-            },300)
+          else if (key === "TRANSACTION"){
+            const {username, timestamp,  amount, gain, rate, txnTime} = data
+            if(txns.length >= min_transaction){
+              $(`#txn-${txns[0].timestamp}`).removeClass()
+              $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
+              setTimeout(() => {
+                $(`#txn-${txns[0].timestamp}`).remove()
+                txns.shift()
+              },300)
+            }
+            txns.push(data)
+            let message = displayGachaTransaction(username, amount, gain, rate, txnTime)
+            $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
+          } else if (key === "LATEST_WINNERS"){
           }
-          txns.push(data)
-          console.log("🚀 ~ file: show.ejs ~ line 200 ~ show ~ data", data)
-          let message = displayGachaTransaction(username, amount, gain, rate, txnTime)
-          console.log("🚀 ~ file: show.ejs ~ line 202 ~ show ~ message", message)
-          $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
+
         }
 
-      }
+        function displayGachaTransaction(username, amount, gain, rate, txnTime){
+          const _amount = roundDecimalPoint(amount)
+          const _gain = roundDecimalPoint(gain)
+          return `
+          <div style="display:flex; justify-content:space-between; font-size:14px; ">
+            <div style="padding:0px .5em .5em;flex:3; color:${rate_color[rate]};">${rate_icon[rate]} <b>${username}</b> ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
+            <div style="flex:1;font-size:10px;text-align:right;color:#95afc0;">${txnTime}</div>
+          </div>`
+        }
 
-      function displayGachaTransaction(username, amount, gain, rate, txnTime){
-        const _amount = roundDecimalPoint(amount)
-        const _gain = roundDecimalPoint(gain)
-        return `
-        <div style="display:flex; justify-content:space-between; font-size:14px; ">
-          <div style="padding:0px .5em .5em;flex:3; color:${rate_color[rate]};">${rate_icon[rate]} ${username} ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
-          <div style="flex:1;font-size:10px;text-align:right;color:#95afc0;">${txnTime}</div>
-        </div>`
-      }
+        function roundDecimalPoint(num){
+          return Math.round(num * 100) / 100
+        }
 
-      function roundDecimalPoint(num){
-        return Math.round(num * 100) / 100
+        function numberWithCommas(x) {
+          var parts = x.toString().split(".");
+          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return parts.join(".");
       }
-
-      function numberWithCommas(x) {
-        var parts = x.toString().split(".");
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        return parts.join(".");
-    }
     </script>
   </body>
 </html>

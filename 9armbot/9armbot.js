@@ -133,6 +133,24 @@ async function thanos(channel, byUser) {
     }
 }
 
+let gachaWinners = []
+const MIN_GACHA_WINNER = 5
+
+function pushGachaWinners({player, amount, gain, rate}){
+    if(gachaWinners.length >= MIN_GACHA_WINNER){
+        gachaWinners.shift()
+    }
+
+    gachaWinners.push({
+        username: player.username,
+        amount,
+        gain: gain || 0,
+        rate,
+        timestamp: dayjs().unix(),
+        txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
+    })
+}
+
 function gacha(channel, user, amount) {
     let gachaLegendaryRate = 1;
     let gachaMysticRate = 10;
@@ -161,6 +179,16 @@ function gacha(channel, user, amount) {
                 killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
                 gachaRateType = GACHA_RATE_TYPE.JACKPOT
             }
+
+            pushGachaWinners({player: _player, amount, gain, rate: gachaRateType})
+
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.LATEST_WINNERS,
+                data: {
+                    winners: gachaWinners
+                }
+            });
+
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2 + Math.random() * 3 + botInfo.level / 100;
             let gain = parseInt(amount * multiplier);

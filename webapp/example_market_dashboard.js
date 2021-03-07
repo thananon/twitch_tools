@@ -8,6 +8,8 @@ const Emitter = require('events');
 const client = new Emitter();
 const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 
+const gachaWinners = []
+const MIN_WINNERS = 5
 
 
 /** test on receive message and show GIF */
@@ -35,7 +37,35 @@ client.on('message', (channel, tags, message, self) => {
             txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
         }
     }
+
     webapp.socket.io().emit("widget::market_dashboard", txnPayload)
+    
+    if(txnPayload.data.rate === GACHA_RATE_TYPE.ALL_IN_JACKPOT || txnPayload.data.rate === GACHA_RATE_TYPE.JACKPOT){
+    const {username, amount, gain, rate, timestamp, txnTime} = txnPayload.data
+        if(gachaWinners.length >= MIN_WINNERS){
+            gachaWinners.shift()
+        }
+
+        gachaWinners.push({
+            username,
+            amount,
+            gain,
+            rate,
+            timestamp,
+            txnTime
+        })
+
+        webapp.socket.io().emit("widget::market_dashboard", {
+            key: MARKET_KEY.LATEST_WINNERS,
+            data: {
+                winners: gachaWinners
+            }
+        })
+    }
+
+
+ 
+
     console.log("🚀 ~  Gacha Transaction: ", txnPayload)
         
 });
