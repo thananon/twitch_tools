@@ -166,6 +166,33 @@
               </div>
             </div>
           </div>
+          <!-- end gacha transaction -->
+
+          <div class="col-md-6 col-sm-12" style="display:flex; flex-direction:column;">
+            <div class="card card-dark col-sm-12" style="flex:1;margin-bottom:16px;">
+              <div class="card-body">
+                <h5 class="card-title">Latest Winners </h5>
+                <div class="card card-code">
+                  <div class="card-body">
+                      Coming Soon ...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card card-dark col-sm-12" style="flex:1;">
+              <div class="card-body">
+                <h5 class="card-title">Top 5 Richest</h5>
+                <div class="card card-code">
+                  <div class="card-body">
+                    Coming Soon ...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end top 5 -->
+
         </div>
       </div>
     </div>
@@ -200,6 +227,7 @@
             let message = displayGachaTransaction(username, amount, gain, rate, txnTime)
             $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
           } else if (key === "LATEST_WINNERS"){
+
           }
 
         }
