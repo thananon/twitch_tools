@@ -66,11 +66,7 @@
         color: #e0e1e6;
         padding: 36px 0px 36px;
       }
-
-      .flex-column {
-        display: flex;
-        flex-direction: column;
-      }
+      
       .flex-1 {
         flex: 1;
       }
@@ -114,7 +110,6 @@
       }
 
       #card-transaction {
-        height: 32.5vh;
         overflow-y: hidden;
         padding-bottom: 14px;
       }
@@ -154,47 +149,45 @@
         <div id="market_open"></div>
       </div>
 
-      <div class="container-fluid">
-        <div class="row">
-          <div class="card card-dark col-md-6 col-sm-12">
-            <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <div class="card card-dark mb-3">
+            <div class="card-body d-flex flex-column" style="height:40vh">
               <h5 class="card-title">Gacha Transaction 💸</h5>
-              <div id="card-transaction" class="card card-code">
+              <div id="card-transaction" class="card card-code" style="flex: 1">
                 <div class="card-body">
                   <ul id="transaction"></ul>
                 </div>
               </div>
             </div>
           </div>
-          <!-- end gacha transaction -->
+        </div>
 
-          <div class="col-md-6 col-sm-12" style="display:flex; flex-direction:column;">
-            <div class="card card-dark col-sm-12" style="flex:1;margin-bottom:16px;">
+
+        <div class="col-md-3 col-sm-12">
+            <div class="card card-dark mb-2">
               <div class="card-body">
-                <h5 class="card-title">Latest Winners </h5>
+                <h5 class="card-title">Latest Winners</h5>
                 <div class="card card-code">
-                  <div class="card-body">
-                      Coming Soon ...
-                  </div>
+                  <div class="card-body">Coming Soon ...</div>
                 </div>
               </div>
             </div>
+        </div>
 
-            <div class="card card-dark col-sm-12" style="flex:1;">
-              <div class="card-body">
-                <h5 class="card-title">Top 5 Richest</h5>
-                <div class="card card-code">
-                  <div class="card-body">
-                    Coming Soon ...
-                  </div>
-                </div>
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-dark mb-2">
+            <div class="card-body">
+              <h5 class="card-title">Top 5 Richest</h5>
+              <div class="card card-code">
+                <div class="card-body">Coming Soon ...</div>
               </div>
             </div>
           </div>
-          <!-- end top 5 -->
-
         </div>
+        
       </div>
+      <!-- end of row -->
     </div>
 
     <script>
