@@ -1,5 +1,6 @@
 require('dotenv').config({ path: '../.env'});
-var dayjs = require('dayjs')
+const dayjs = require('dayjs')
+const _ = require('lodash')
 const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -157,6 +158,7 @@ function gacha(channel, user, amount) {
     let Bonus = 1;
     let killfeed_msg = "";
     let gachaRateType = GACHA_RATE_TYPE.SALT
+    let previousGachaWinners = _.clone(gachaWinners)
     if (amount == 0) return;
 
     let _player = player.getPlayerByUsername(user.username)
@@ -182,13 +184,6 @@ function gacha(channel, user, amount) {
 
             pushGachaWinners({player: _player, amount, gain, rate: gachaRateType})
 
-            webapp.socket.io().emit("widget::market_dashboard", {
-                key: MARKET_KEY.LATEST_WINNERS,
-                data: {
-                    winners: gachaWinners
-                }
-            });
-
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2 + Math.random() * 3 + botInfo.level / 100;
             let gain = parseInt(amount * multiplier);
@@ -198,6 +193,8 @@ function gacha(channel, user, amount) {
             killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
             discordBot.sendEmbed("LUCKY!", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
             gachaRateType = GACHA_RATE_TYPE.MYSTIC
+
+            pushGachaWinners({player: _player, amount, gain, rate: gachaRateType})
         } else {
             sessionIncome += amount;
             if (_player.coins == 0) {
@@ -223,6 +220,16 @@ function gacha(channel, user, amount) {
                 txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
             }
         });
+
+        if(gachaWinners.length > 0 && !_.isEqual(gachaWinners, previousGachaWinners)){
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.LATEST_WINNERS,
+                data: {
+                    winners: gachaWinners
+                }
+            });
+        }
+        
     } else {
         //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
     }

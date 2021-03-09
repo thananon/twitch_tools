@@ -4,6 +4,7 @@
 
 var dayjs = require('dayjs')
 const webapp = require('.')
+const _ = require('lodash')
 const Emitter = require('events');
 const client = new Emitter();
 const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
@@ -40,7 +41,8 @@ client.on('message', (channel, tags, message, self) => {
 
     webapp.socket.io().emit("widget::market_dashboard", txnPayload)
     
-    if(txnPayload.data.rate === GACHA_RATE_TYPE.ALL_IN_JACKPOT || txnPayload.data.rate === GACHA_RATE_TYPE.JACKPOT){
+    let previousWinners = _.clone(gachaWinners)
+    if(_.includes([GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.JACKPOT, GACHA_RATE_TYPE.MYSTIC], txnPayload.data.rate)){
     const {username, amount, gain, rate, timestamp, txnTime} = txnPayload.data
         if(gachaWinners.length >= MIN_WINNERS){
             gachaWinners.shift()
@@ -54,7 +56,9 @@ client.on('message', (channel, tags, message, self) => {
             timestamp,
             txnTime
         })
+    }
 
+    if(gachaWinners.length > 0 && !_.isEqual(previousWinners,gachaWinners) ){
         webapp.socket.io().emit("widget::market_dashboard", {
             key: MARKET_KEY.LATEST_WINNERS,
             data: {
@@ -63,8 +67,6 @@ client.on('message', (channel, tags, message, self) => {
         })
     }
 
-
- 
 
     console.log("🚀 ~  Gacha Transaction: ", txnPayload)
         
@@ -102,6 +104,6 @@ setInterval(()=>{
     if(i>=messages.length){
         i = 0;
     }
-}, 1000)
+}, 2000)
 
 console.log(`see GIF at ${webapp.url}/widgets/market_dashboard click -> 'Launch'`)

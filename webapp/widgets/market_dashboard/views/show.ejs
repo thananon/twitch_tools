@@ -26,7 +26,6 @@
       integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
       crossorigin="anonymous"
     ></script>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
     <style>
       html,
       body {
@@ -66,7 +65,7 @@
         color: #e0e1e6;
         padding: 36px 0px 36px;
       }
-      
+
       .flex-1 {
         flex: 1;
       }
@@ -104,7 +103,7 @@
         color: #e0e1e6;
       }
 
-      .card-code {
+      .code {
         background-color: #34495e;
         color: #e0e1e6;
       }
@@ -122,6 +121,15 @@
         overflow-y: hidden;
         list-style-type: none;
         padding-left: 0px;
+      }
+
+      #latest-winners {
+        height: 226px;
+      }
+
+      .time-message {
+        font-size:10px;
+        color:#95afc0;
       }
     </style>
     <script
@@ -152,50 +160,67 @@
       <div class="row">
         <div class="col-md-6 col-sm-12">
           <div class="card card-dark mb-3">
-            <div class="card-body d-flex flex-column " style="height:40vh; min-height:320px;">
-              <h5 class="card-title">Gacha Transaction 💸</h5>
-              <div id="card-transaction" class="card card-code" style="flex: 1">
+            <div
+              class="card-body d-flex flex-column"
+              style="height: 40vh; min-height: 320px"
+            >
+              <h5 class="card-title fs-6">Gacha Transaction 💸</h5>
+              <div id="card-transaction" class="card code" style="flex: 1">
                 <div class="card-body">
-                  <ul id="transaction"></ul>
+                  <ul id="transaction">
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                      <div class="spinner-grow" role="status">
+                          <span class="sr-only"></span>
+                      </div>
+                    </div>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-
-        <div class="col-md-3 col-sm-12">
-            <div class="card card-dark mb-2">
-              <div class="card-body">
-                <h5 class="card-title">Latest Winners</h5>
-                <div class="card card-code">
-                  <div class="card-body">Coming Soon ...</div>
-                </div>
-              </div>
-            </div>
         </div>
 
         <div class="col-md-3 col-sm-12">
           <div class="card card-dark mb-2">
             <div class="card-body">
-              <h5 class="card-title">Top 5 Richest</h5>
-              <div class="card card-code">
+              <h5 class="card-title fs-6">Latest Winners</h5>
+              <div class="card code">
+
+                <div id="latest-winners" class="list-group">
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <div class="spinner-grow" role="status">
+                        <span class="sr-only"></span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-dark mb-2">
+            <div class="card-body">
+              <h5 class="card-title fs-6">Top 5 Richest</h5>
+              <div class="card code">
                 <div class="card-body">Coming Soon ...</div>
               </div>
             </div>
           </div>
         </div>
-        
       </div>
       <!-- end of row -->
     </div>
 
     <script>
-        let { min_transaction, rate_icon, rate_color } = <%- JSON.stringify(storage) %>;
+        let { min_transaction, rate_txn_icon, rate_text, rate_color } = <%- JSON.stringify(storage) %>;
 
         let txns = []
+        let latestWinners = []
 
         function show({key, data}) {
+          if(!data) return
           if(key === "STATUS"){
             const {marketOpen} = data
             $("#market_open").removeClass()
@@ -208,6 +233,10 @@
           }
           else if (key === "TRANSACTION"){
             const {username, timestamp,  amount, gain, rate, txnTime} = data
+            if(txns.length === 0){
+              $("#transaction").empty()
+            }
+
             if(txns.length >= min_transaction){
               $(`#txn-${txns[0].timestamp}`).removeClass()
               $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
@@ -220,7 +249,21 @@
             let message = displayGachaTransaction(username, amount, gain, rate, txnTime)
             $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
           } else if (key === "LATEST_WINNERS"){
+            const {winners} = data
+            $("#latest-winners").empty()
+            for(index in winners){
+              const {username, amount, gain, rate, txnTime, timestamp} = winners[index]
+              const item = displayListItemWinners(username, amount, gain, rate, txnTime)
+              $("#latest-winners").append(`
+              <div id='winner-${timestamp}' class="list-group-item code animate__animated animate__fadeIn py-1 px-2" style="font-size:14px;">
+                <div class="d-flex align-items-center justify-content-between row">
+                  ${item}
+                </div>
+              </div>
+              `)
+            }
 
+            latestWinners = winners
           }
 
         }
@@ -230,9 +273,28 @@
           const _gain = roundDecimalPoint(gain)
           return `
           <div class="d-flex justify-content-between flex-nowrap" style="font-size:14px;">
-            <div class="w-75 px-1 py-1" style="color:${rate_color[rate]};">${rate_icon[rate]} <b>${username}</b> ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
-            <div class="py-1 flex-shrink-1 text-end" style="font-size:10px;color:#95afc0;">${txnTime}</div>
+            <div class="w-75 px-1 py-1" style="color:${rate_color[rate]};">${rate_txn_icon[rate]} <b>${username}</b> ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
+            <div class="py-1 flex-shrink-1 text-end time-message">${txnTime}</div>
           </div>`
+        }
+
+        function displayListItemWinners(username, amount, gain, rate, txnTime){
+          const _amount = roundDecimalPoint(amount)
+          const _gain = roundDecimalPoint(gain)
+          return `
+          <div class="col-md-4 d-flex flex-column" >
+            <span style="font-size:10px;color:${rate_color[rate]};">${rate_text[rate]}</span> 
+            <span >${username}</span>
+          </div>
+          <div class="col-md-4 d-flex flex-column">
+            <span style="font-size:8px;">ลงทุน</span>
+            <span style="font-size:12px;" >${numberWithCommas(_amount)}</span>
+          </div>
+          <div class="col-md-4 d-flex flex-column">
+            <div style="font-size:8px;">ได้รับ</div>
+            <span style="font-size:12px;" >${numberWithCommas(_gain)}</span>
+          </div>
+          `
         }
 
         function roundDecimalPoint(num){

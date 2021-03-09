@@ -6,7 +6,13 @@
     "public_path": "public",
     "default_storage": {
         "min_transaction": 8,
-        "rate_icon": {
+        "rate_text": {
+            "JACKPOT": "Jackpot",
+            "ALL_IN_JACKPOT": "All-in Jackpot",
+            "MYSTIC": "Mystic",
+            "SALT": "Salt"
+        },
+        "rate_txn_icon": {
             "JACKPOT": "🙂",
             "ALL_IN_JACKPOT": "🤣 <b style='color:#f9ca24;'> High Risk High Return !!! </b> 🤣",
             "MYSTIC": "",
