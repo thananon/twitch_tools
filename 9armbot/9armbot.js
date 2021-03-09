@@ -194,7 +194,7 @@ function gacha(channel, user, amount) {
             discordBot.sendEmbed("LUCKY!", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
             gachaRateType = GACHA_RATE_TYPE.MYSTIC
 
-            pushGachaWinners({player: _player, amount, gain, rate: gachaRateType})
+            // pushGachaWinners({player: _player, amount, gain, rate: gachaRateType})
         } else {
             sessionIncome += amount;
             if (_player.coins == 0) {

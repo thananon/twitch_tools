@@ -42,7 +42,7 @@ client.on('message', (channel, tags, message, self) => {
     webapp.socket.io().emit("widget::market_dashboard", txnPayload)
     
     let previousWinners = _.clone(gachaWinners)
-    if(_.includes([GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.JACKPOT, GACHA_RATE_TYPE.MYSTIC], txnPayload.data.rate)){
+    if(_.includes([GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.JACKPOT], txnPayload.data.rate)){
     const {username, amount, gain, rate, timestamp, txnTime} = txnPayload.data
         if(gachaWinners.length >= MIN_WINNERS){
             gachaWinners.shift()
