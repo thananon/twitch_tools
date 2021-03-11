@@ -232,11 +232,11 @@ function gacha(channel, user, amount) {
         }
         
         let currentTopCoinPlayers = player.getCoinTop(MIN_TOP_COIN_PLAYER)
-        if(currentTopCoinPlayers.length > 0){
+        if(currentTopCoinPlayers.length > 0 && gachaRateType !== GACHA_RATE_TYPE.SALT){
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.RICHEST_PLAYERS,
                 data: {
-                    players: currentTopCoinPlayers
+                    players: _.map(currentTopCoinPlayers, ({username, coins}) => ({username, coins}))
                 }
             });
         } 
