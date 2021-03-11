@@ -136,6 +136,7 @@ async function thanos(channel, byUser) {
 
 let gachaWinners = []
 const MIN_GACHA_WINNER = 6
+const MIN_TOP_COIN_PLAYER = 6
 
 function pushGachaWinners({player, amount, gain, rate}){
     if(gachaWinners.length >= MIN_GACHA_WINNER){
@@ -229,6 +230,16 @@ function gacha(channel, user, amount) {
                 }
             });
         }
+        
+        let currentTopCoinPlayers = player.getCoinTop(MIN_TOP_COIN_PLAYER)
+        if(currentTopCoinPlayers.length > 0){
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.RICHEST_PLAYERS,
+                data: {
+                    players: currentTopCoinPlayers
+                }
+            });
+        } 
         
     } else {
         //timeoutUser(client.getChannel, user, botInfo.attackPower, `เล่นพนันไม่มีตังจ่าย ติดคุก`);
