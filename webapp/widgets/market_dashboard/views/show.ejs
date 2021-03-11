@@ -196,7 +196,7 @@
         <div class="col-md-3 col-sm-6 col-12">
           <div class="card card-dark mb-2">
             <div class="card-body">
-              <h5 class="card-title fs-6">Top 5 Richest</h5>
+              <h5 class="card-title fs-6">The Richest 💰</h5>
               <div class="card code">
                 <div class="card-body">Coming Soon ...</div>
               </div>
@@ -259,6 +259,9 @@
             }
 
             previousWinners = winners
+          } else if (key === "RICHEST_PLAYERS"){
+            const {players} = data
+            console.log("🚀 ~ file: show.ejs ~ line 265 ~ show ~ players", players)
           }
 
         }

@@ -12,6 +12,36 @@ const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 const gachaWinners = []
 const MIN_WINNERS = 6
 
+let topCoinPlayers = [
+    {
+        username: "Victor",
+        coins: 99999999
+    },
+    {
+        username: "Peter",
+        coins: 100000
+    },
+    {
+        username: "Mario",
+        coins: 8888
+    },
+    {
+        username: "Smith",
+        coins: 111
+    },
+    {
+        username: "Jones",
+        coins: 11
+    },
+    {
+        username: "Alan",
+        coins: 1
+    },
+
+]
+
+
+let previousTopCoinPlayers = _.clone(topCoinPlayers)
 
 /** test on receive message and show GIF */
 client.on('message', (channel, tags, message, self) => {
@@ -66,6 +96,13 @@ client.on('message', (channel, tags, message, self) => {
             }
         })
     }
+
+    webapp.socket.io().emit("widget::market_dashboard", {
+        key: MARKET_KEY.RICHEST_PLAYERS,
+        data: {
+            players: topCoinPlayers
+        }
+    })
 
 
     console.log("🚀 ~  Gacha Transaction: ", txnPayload)
