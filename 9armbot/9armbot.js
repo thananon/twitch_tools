@@ -24,6 +24,23 @@ var botInfo = {
 
 let player = new Player()
 
+// Graceful Shutdown
+function gracefulShutdown(){
+    console.log('\nPre-Close')
+    saveBotData()
+    player.saveData()
+    setTimeout(()=> {
+        console.log('Closed')
+        process.exit(0)
+    },1000)
+}
+process.on("SIGINT", () => gracefulShutdown())
+process.on("SIGTERM", () => gracefulShutdown())
+process.on('uncaughtException', (err) => {
+    console.error(err)
+    gracefulShutdown()
+})
+
 function saveBotData () {
     data = JSON.stringify(botInfo);
     fs.writeFileSync('botstat.json', data, 'utf8');
