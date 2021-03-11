@@ -31,11 +31,9 @@
       body {
         height: 100%;
         width: 100%;
-        margin: 0;
-        margin: 0px;
-        padding: 0px;
         font-family: "Prompt", sans-serif;
-        overflow: hidden;
+        overflow-y: scroll;
+        overflow-x: hidden;
       }
       .box {
         text-align: center;
@@ -123,10 +121,6 @@
         padding-left: 0px;
       }
 
-      #latest-winners {
-        height: 226px;
-      }
-
       .time-message {
         font-size:10px;
         color:#95afc0;
@@ -139,6 +133,7 @@
     ></script>
     <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
     <script>
       const socket = io();
       socket.on("widget::<%= widget.id %>", (data) => {
@@ -158,18 +153,18 @@
       </div>
 
       <div class="row">
-        <div class="col-md-6 col-sm-12">
+        <div class="col-md-6 col-sm-12 col-12">
           <div class="card card-dark mb-3">
             <div
               class="card-body d-flex flex-column"
-              style="height: 40vh; min-height: 320px"
+              style="height: 40vh; min-height: 330px"
             >
               <h5 class="card-title fs-6">Gacha Transaction 💸</h5>
               <div id="card-transaction" class="card code" style="flex: 1">
                 <div class="card-body">
                   <ul id="transaction">
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                      <div class="spinner-grow" role="status">
+                      <div class="spinner-grow mt-5" role="status">
                           <span class="sr-only"></span>
                       </div>
                     </div>
@@ -180,15 +175,14 @@
           </div>
         </div>
 
-        <div class="col-md-3 col-sm-12">
+        <div class="col-md-3 col-sm-6 col-12">
           <div class="card card-dark mb-2">
-            <div class="card-body">
-              <h5 class="card-title fs-6">Latest Winners 🤑</h5>
-              <div class="card code">
-
-                <div id="latest-winners" class="list-group">
-                  <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                    <div class="spinner-grow" role="status">
+            <div class="card-body d-flex flex-column" style="min-height: 330px;">
+              <h5 class="card-title fs-6 ">Latest Winners 🤑</h5>
+              <div class="card code"  style="flex: 1;" >
+                <div id="latest-winners" class="list-group h-100">
+                  <div class="h-100 d-flex align-items-center justify-content-center">
+                    <div class="spinner-grow mt-5" role="status" >
                         <span class="sr-only"></span>
                     </div>
                   </div>
@@ -199,7 +193,7 @@
           </div>
         </div>
 
-        <div class="col-md-3 col-sm-12">
+        <div class="col-md-3 col-sm-6 col-12">
           <div class="card card-dark mb-2">
             <div class="card-body">
               <h5 class="card-title fs-6">Top 5 Richest</h5>
@@ -217,7 +211,7 @@
         let { min_transaction, rate_txn_icon, rate_text, rate_color } = <%- JSON.stringify(storage) %>;
 
         let txns = []
-        let latestWinners = []
+        let previousWinners = []
 
         function show({key, data}) {
           if(!data) return
@@ -250,12 +244,13 @@
             $("#transaction").append(`<li id="txn-${timestamp}" class="animate__animated animate__fadeInUp" >${message}</li>`)
           } else if (key === "LATEST_WINNERS"){
             const {winners} = data
+            if(_.isEqual(previousWinners, winners)) return
             $("#latest-winners").empty()
             for(index in winners){
               const {username, amount, gain, rate, txnTime, timestamp} = winners[index]
               const item = displayListItemWinners(username, amount, gain, rate, txnTime)
               $("#latest-winners").append(`
-              <div id='winner-${timestamp}' class="list-group-item code animate__animated animate__fadeIn py-1 px-2" style="font-size:14px;">
+              <div id='winner-${timestamp}' class="list-group-item code animate__animated animate__fadeIn py-1 px-2" style="font-size:.9rem;">
                 <div class="d-flex align-items-center justify-content-between row">
                   ${item}
                 </div>
@@ -263,7 +258,7 @@
               `)
             }
 
-            latestWinners = winners
+            previousWinners = winners
           }
 
         }
@@ -282,17 +277,17 @@
           const _amount = roundDecimalPoint(amount)
           const _gain = roundDecimalPoint(gain)
           return `
-          <div class="col-md-4 d-flex flex-column" >
-            <span style="font-size:10px;color:${rate_color[rate]};">${rate_text[rate]}</span> 
+          <div class="col-md-4 col-12 d-flex flex-column" >
+            <span style="font-size:.6rem;color:${rate_color[rate]};">${rate_text[rate]}</span> 
             <span >${username}</span>
           </div>
-          <div class="col-md-4 d-flex flex-column">
-            <span style="font-size:8px;">ลงทุน</span>
-            <span style="font-size:12px;" >${numberWithCommas(_amount)}</span>
+          <div class="col-md-4 col-6 d-flex flex-column">
+            <span style="font-size:.4rem;">ลงทุน</span>
+            <span style="font-size:.75rem;" >${numberWithCommas(_amount)}</span>
           </div>
-          <div class="col-md-4 d-flex flex-column">
-            <div style="font-size:8px;">ได้รับ</div>
-            <span style="font-size:12px;" >${numberWithCommas(_gain)}</span>
+          <div class="col-md-4 col-6 d-flex flex-column">
+            <div style="font-size:.4rem;">ได้รับ</div>
+            <span style="font-size:.75rem;" >${numberWithCommas(_gain)}</span>
           </div>
           `
         }

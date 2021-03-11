@@ -10,7 +10,7 @@ const client = new Emitter();
 const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
 
 const gachaWinners = []
-const MIN_WINNERS = 5
+const MIN_WINNERS = 6
 
 
 /** test on receive message and show GIF */
@@ -58,7 +58,7 @@ client.on('message', (channel, tags, message, self) => {
         })
     }
 
-    if(gachaWinners.length > 0 && !_.isEqual(previousWinners,gachaWinners) ){
+    if(gachaWinners.length > 0){
         webapp.socket.io().emit("widget::market_dashboard", {
             key: MARKET_KEY.LATEST_WINNERS,
             data: {
