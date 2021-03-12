@@ -141,7 +141,7 @@ function gacha(channel, user, amount) {
         }
 
         if (roll(gachaLegendaryRate)) {
-            let multiplier = 5+Math.random()*5 + botInfo.level/100 * Bonus;
+            let multiplier = (5 + Math.random()*5 + botInfo.level/100) * Bonus;
             let gain =  parseInt(amount*multiplier);
             _player.coins+=gain
             sessionPayout += gain - amount;
