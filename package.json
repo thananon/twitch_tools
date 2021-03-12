@@ -4,7 +4,7 @@
   "description": "Repo to keep my community's twitch gadgeties.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
     "start": "cd 9armbot && node 9armbot.js"
   },
   "repository": {
@@ -25,5 +25,8 @@
     "multer": "^1.4.2",
     "socket.io": "^3.1.1",
     "tmi.js": "^1.7.1"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
   }
 }
