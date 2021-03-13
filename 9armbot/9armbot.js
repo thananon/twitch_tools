@@ -136,7 +136,7 @@ async function thanos(channel, byUser) {
 
 let gachaWinners = []
 const MIN_GACHA_WINNER = 6
-const MIN_TOP_COIN_PLAYER = 6
+const MIN_TOP_COIN_PLAYER = 5
 
 function pushGachaWinners({player, amount, gain, rate}){
     if(gachaWinners.length >= MIN_GACHA_WINNER){
@@ -231,7 +231,7 @@ function gacha(channel, user, amount) {
             });
         }
         
-        let currentTopCoinPlayers = player.getCoinTop(MIN_TOP_COIN_PLAYER)
+        const currentTopCoinPlayers = player.getCoinTop(MIN_TOP_COIN_PLAYER)
         if(currentTopCoinPlayers.length > 0 && gachaRateType !== GACHA_RATE_TYPE.SALT){
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.RICHEST_PLAYERS,

@@ -33,10 +33,6 @@ let topCoinPlayers = [
         username: "Jones",
         coins: 11
     },
-    {
-        username: "Alan",
-        coins: 1
-    },
 
 ]
 
