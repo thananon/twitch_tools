@@ -137,6 +137,8 @@ async function thanos(channel, byUser) {
 let gachaWinners = []
 const MIN_GACHA_WINNER = 6
 const MIN_TOP_COIN_PLAYER = 5
+let previousSessionPayout = sessionPayout
+let previousSessionIncome = sessionIncome
 
 function pushGachaWinners({player, amount, gain, rate}){
     if(gachaWinners.length >= MIN_GACHA_WINNER){
@@ -159,7 +161,6 @@ function gacha(channel, user, amount) {
     let Bonus = 1;
     let killfeed_msg = "";
     let gachaRateType = GACHA_RATE_TYPE.SALT
-    let previousGachaWinners = _.clone(gachaWinners)
     if (amount == 0) return;
 
     let _player = player.getPlayerByUsername(user.username)
@@ -209,6 +210,32 @@ function gacha(channel, user, amount) {
         webapp.socket.io().emit("widget::killfeed", {
             message: killfeed_msg,
         });
+
+        if(!_.isEqual(previousSessionIncome, sessionIncome)){
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.SESSION_INCOME,
+                data: {
+                    timestamp: dayjs().unix(),
+                    txnTime: dayjs().format("D MMM YYYY HH:mm:ss"),
+                    income: sessionIncome
+                }
+            });
+            previousSessionIncome = sessionIncome
+        }
+
+        if(!_.isEqual(previousSessionPayout, sessionPayout)){
+            webapp.socket.io().emit("widget::market_dashboard", {
+                key: MARKET_KEY.SESSION_PAYOUT,
+                data: {
+                    timestamp: dayjs().unix(),
+                    txnTime: dayjs().format("D MMM YYYY HH:mm:ss"),
+                    payout: sessionPayout
+                }
+            });
+            previousSessionPayout = sessionPayout
+        }
+
+
 
         webapp.socket.io().emit("widget::market_dashboard", {
             key: MARKET_KEY.TRANSACTION,
