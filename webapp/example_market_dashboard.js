@@ -38,7 +38,10 @@ let topCoinPlayers = [
 
 
 let previousTopCoinPlayers = _.clone(topCoinPlayers)
-
+let sessionIncome = 0
+let sessionPayout= 0
+let previousSessionIncome = 0
+let previousSessionPayout= 0
 /** test on receive message and show GIF */
 client.on('message', (channel, tags, message, self) => {
 
@@ -63,6 +66,12 @@ client.on('message', (channel, tags, message, self) => {
             timestamp: dayjs().unix(),
             txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
         }
+    }
+
+    if(_.includes([GACHA_RATE_TYPE.JACKPOT, GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.MYSTIC], rateIcon)){
+        sessionPayout += gain - amount
+    }else {
+        sessionIncome += amount
     }
 
     webapp.socket.io().emit("widget::market_dashboard", txnPayload)
@@ -99,6 +108,39 @@ client.on('message', (channel, tags, message, self) => {
             players: topCoinPlayers
         }
     })
+
+
+    webapp.socket.io().emit("widget::market_dashboard", {
+        key: MARKET_KEY.RICHEST_PLAYERS,
+        data: {
+            players: topCoinPlayers
+        }
+    })
+
+    if(!_.isEqual(previousSessionIncome, sessionIncome)){
+        previousSessionIncome = sessionIncome
+        webapp.socket.io().emit("widget::market_dashboard", {
+            key: MARKET_KEY.SESSION_INCOME,
+            data: {
+                timestamp:txnPayload.data.timestamp,
+                txnTime: txnPayload.data.txnTime,
+                income: sessionIncome
+            }
+        })
+    }
+
+    if(!_.isEqual(previousSessionPayout, sessionPayout)){
+        previousSessionPayout = sessionPayout
+        webapp.socket.io().emit("widget::market_dashboard", {
+            key: MARKET_KEY.SESSION_PAYOUT,
+            data: {
+                timestamp:txnPayload.data.timestamp,
+                txnTime: txnPayload.data.txnTime,
+                payout: sessionPayout
+            }
+        })
+    }
+
 
 
     console.log("🚀 ~  Gacha Transaction: ", txnPayload)

@@ -211,12 +211,26 @@ function gacha(channel, user, amount) {
             message: killfeed_msg,
         });
 
+        const txnPayload = {
+            username: _player.username,
+            amount: amount,
+            gain: gain || 0,
+            rate: gachaRateType,
+            timestamp: dayjs().unix(),
+            txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
+        }
+
+        webapp.socket.io().emit("widget::market_dashboard", {
+            key: MARKET_KEY.TRANSACTION,
+            data: txnPayload
+        });
+
         if(!_.isEqual(previousSessionIncome, sessionIncome)){
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.SESSION_INCOME,
                 data: {
-                    timestamp: dayjs().unix(),
-                    txnTime: dayjs().format("D MMM YYYY HH:mm:ss"),
+                    timestamp: txnPayload.timestamp,
+                    txnTime: txnPayload.txnTime,
                     income: sessionIncome
                 }
             });
@@ -227,27 +241,14 @@ function gacha(channel, user, amount) {
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.SESSION_PAYOUT,
                 data: {
-                    timestamp: dayjs().unix(),
-                    txnTime: dayjs().format("D MMM YYYY HH:mm:ss"),
+                    timestamp: txnPayload.timestamp,
+                    txnTime: txnPayload.txnTime,
                     payout: sessionPayout
                 }
             });
             previousSessionPayout = sessionPayout
         }
 
-
-
-        webapp.socket.io().emit("widget::market_dashboard", {
-            key: MARKET_KEY.TRANSACTION,
-            data: {
-                username: _player.username,
-                amount: amount,
-                gain: gain || 0,
-                rate: gachaRateType,
-                timestamp: dayjs().unix(),
-                txnTime: dayjs().format("D MMM YYYY HH:mm:ss")
-            }
-        });
 
         if(gachaWinners.length > 0){
             webapp.socket.io().emit("widget::market_dashboard", {

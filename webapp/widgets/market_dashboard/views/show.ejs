@@ -294,7 +294,6 @@
             if(_.isEqual(previousRichestPlayers, players)) return
             $("#richest-players").empty()
             for(index in players){
-              console.log("🚀 ~ file: show.ejs ~ line 280 ~ show ~ index", index)
               const {username, coins} = players[index]
               const item = displayListItemRichestPlayer(username, coins, _.toNumber(index)===0)
               $("#richest-players").append(`
@@ -307,6 +306,10 @@
             }
             previousRichestPlayers = players
 
+          } else if(key === "SESSION_INCOME"){
+            console.log("🚀 ~ file: show.ejs ~ line 247 ~ show ~ data: income", data)
+          } else if(key === "SESSION_PAYOUT"){
+            console.log("🚀 ~ file: show.ejs ~ line 247 ~ show ~ data: payout", data)
           }
 
         }
