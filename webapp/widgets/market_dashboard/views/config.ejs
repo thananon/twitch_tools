@@ -20,7 +20,7 @@
         </div>
       </div>
       <!-- end min transaction -->
-      <label class="col-form-label">Rate Icon</label>
+      <label class="col-form-label">Rate Prefix :transaction</label>
       <div class="form-row align-items-center">
         <div class="col-sm-3 my-1">
           <label class="col-form-label">All in Jackpot</label>
@@ -64,7 +64,7 @@
         </div>
       </div>
       <!-- end rate icon -->
-      <label class="col-form-label">Rate Color</label>
+      <label class="col-form-label">Rate Color :transaction</label>
       <div class="form-row align-items-center">
         <div class="col-sm-3 my-1">
             <label class="col-form-label">All in Jackpot</label>
@@ -136,6 +136,73 @@
         </div>
       </div>
       <!-- end rate color -->
+
+      <label class="col-form-label">Rate Text :latest winners</label>
+      <div class="form-row align-items-center">
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">All in Jackpot</label>
+          <input
+            type="text"
+            class="form-control"
+            id="TEXT_ALL_IN_JACKPOT"
+            name="rate_text[ALL_IN_JACKPOT]"
+            value="<%= storage.rate_text.ALL_IN_JACKPOT %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Jackpot</label>
+          <input
+            type="text"
+            class="form-control"
+            id="TEXT_JACKPOT"
+            name="rate_text[JACKPOT]"
+            value="<%= storage.rate_text.JACKPOT %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Mystic</label>
+          <input
+            type="text"
+            class="form-control"
+            id="TEXT_MYSTIC"
+            name="rate_text[MYSTIC]"
+            value="<%= storage.rate_text.MYSTIC %>"
+          />
+        </div>
+        <div class="col-sm-3 my-1">
+          <label class="col-form-label">Salt</label>
+          <input
+            type="text"
+            class="form-control"
+            id="TEXT_SALT"
+            name="rate_text[SALT]"
+            value="<%= storage.rate_text.SALT %>"
+          />
+        </div>
+      </div>
+      <!-- end rate icon -->
+      
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Session Income & Payout</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Min Sesstion Dataset</label>
+        <div class="col-sm-10">
+          <input 
+            type="number"
+            class="form-control"
+            id="min_session_dataset"
+            name="min_session_dataset"
+            value="<%= storage.min_session_dataset %>"
+          />
+        </div>
+      </div>
+      <!-- end min session dataset -->
     </div>
   </div>
 

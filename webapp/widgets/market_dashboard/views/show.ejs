@@ -276,13 +276,12 @@
     <script>
         const incomeChart = initTimeChart("Income", "session-income", "rgb(46, 204, 113)")
         const payoutChart = initTimeChart("Payout", "session-payout", "rgb(231, 76, 60)")
-        let { min_transaction, rate_txn_icon, rate_text, rate_color } = <%- JSON.stringify(storage) %>;
-
+        let { min_transaction, min_session_dataset, rate_txn_icon, rate_text, rate_color } = <%- JSON.stringify(storage) %>;
+        const MIN_TRASACTION = parseInt(min_transaction)
+        const MIN_SESSION_DATASET = parseInt(min_session_dataset)
         let txns = []
         let previousWinners = []
         let previousRichestPlayers = []
-
-        const MIN_SESSION_DATASET = 10
 
         function show({key, data}) {
           if(!data) return
@@ -302,7 +301,7 @@
               $("#transaction").empty()
             }
 
-            if(txns.length >= min_transaction){
+            if(txns.length >= MIN_TRASACTION){
               $(`#txn-${txns[0].timestamp}`).removeClass()
               $(`#txn-${txns[0].timestamp}`).addClass("animate__animated animate__fadeOutUp ")
               setTimeout(() => {
@@ -336,9 +335,10 @@
             $("#richest-players").empty()
             for(index in players){
               const {username, coins} = players[index]
-              const item = displayListItemRichestPlayer(username, coins, _.toNumber(index)===0)
+              const _order =  parseInt(index)+1
+              const item = displayListItemRichestPlayer(username, coins, _order)
               $("#richest-players").append(`
-              <div id='richest-rank-${_.toNumber(index)+1}' class="list-group-item code animate__animated animate__fadeIn px-2" style="font-size:.9rem;">
+              <div id='richest-rank-${_order}' class="list-group-item code animate__animated animate__fadeIn px-2" style="font-size:.9rem;">
                 <div class="d-flex align-items-center justify-content-between row">
                   ${item}
                 </div>
@@ -400,7 +400,7 @@
                               if(value > Math.pow(10,3))
                                 return numeral(value).format("0.00 a");
                               else 
-                                return numeral(value).format("0,0 a");
+                                return numeral(value).format("0,0.0 a");
                             }
                         }
                     }],
@@ -437,7 +437,7 @@
                                     .value() 
           
           
-          if(_.isArray(currentDataSet) &&  currentDataSet.length > MIN_SESSION_DATASET){
+          if(Array.isArray(currentDataSet) &&  currentDataSet.length > MIN_SESSION_DATASET){
             chart.data.datasets.forEach((dataset) => {
                 dataset.data.shift();
             });
@@ -475,16 +475,25 @@
           `
         }
 
-        function displayListItemRichestPlayer(username, coins, isFirst=false){
-          const _coins = roundDecimalPoint(coins)
+        function displayListItemRichestPlayer(username, coins, order){
+          const prefixIcon = displayRichestMedal(order)
           return `
           <div class="col-md-4 col-6 d-flex flex-column" >
-            <span >${isFirst? '👑':''} ${username}</span>
+            <span >${prefixIcon}${username}</span>
           </div>
           <div class="col-md-4 col-6 d-flex flex-column text-end ">
             <span style="font-size:.8rem; white-space:nowrap;" >${numeral(coins).format("0,0")}</span>
           </div>
           `
+        }
+        
+        function displayRichestMedal(order){
+          switch(order){
+            case 1: return '🥇 '
+            case 2: return '🥈 '
+            case 3: return '🥉 '
+            default: return ''
+          }
         }
 
         function roundDecimalPoint(num){
