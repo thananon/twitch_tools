@@ -122,29 +122,29 @@
       }
 
       .time-message {
-        font-size:10px;
-        color:#95afc0;
+        font-size: 10px;
+        color: #95afc0;
       }
 
       #richest-rank-1 {
         background-color: #fdcb6e;
-        color:#34495e;
-        padding-top:1.55rem;
-        padding-bottom:1.55rem;
+        color: #34495e;
+        padding-top: 1.55rem;
+        padding-bottom: 1.55rem;
       }
 
       #richest-rank-2 {
         background-color: #dfe6e9;
-        color:#34495e;
-        padding-top:1.35rem;
-        padding-bottom:1.35rem;
+        color: #34495e;
+        padding-top: 1.35rem;
+        padding-bottom: 1.35rem;
       }
 
       #richest-rank-3 {
         background-color: #fab1a0;
-        color:#34495e;
-        padding-top:1rem;
-        padding-bottom:1rem;
+        color: #34495e;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
       }
     </style>
     <script
@@ -155,6 +155,10 @@
     <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
     <script>
       const socket = io();
       socket.on("widget::<%= widget.id %>", (data) => {
@@ -184,9 +188,11 @@
               <div id="card-transaction" class="card code" style="flex: 1">
                 <div class="card-body">
                   <ul id="transaction">
-                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <div
+                      class="w-100 h-100 d-flex align-items-center justify-content-center"
+                    >
                       <div class="spinner-grow mt-5" role="status">
-                          <span class="sr-only"></span>
+                        <span class="sr-only"></span>
                       </div>
                     </div>
                   </ul>
@@ -198,17 +204,18 @@
 
         <div class="col-md-3 col-sm-6 col-12">
           <div class="card card-dark mb-2">
-            <div class="card-body d-flex flex-column" style="min-height: 330px;">
-              <h5 class="card-title fs-6 ">Latest Winners 🤑</h5>
-              <div class="card code"  style="flex: 1;" >
+            <div class="card-body d-flex flex-column" style="min-height: 330px">
+              <h5 class="card-title fs-6">Latest Winners 🤑</h5>
+              <div class="card code" style="flex: 1">
                 <div id="latest-winners" class="list-group h-100">
-                  <div class="h-100 d-flex align-items-center justify-content-center">
-                    <div class="spinner-grow mt-5" role="status" >
-                        <span class="sr-only"></span>
+                  <div
+                    class="h-100 d-flex align-items-center justify-content-center"
+                  >
+                    <div class="spinner-grow mt-5" role="status">
+                      <span class="sr-only"></span>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -216,19 +223,49 @@
 
         <div class="col-md-3 col-sm-6 col-12">
           <div class="card card-dark mb-2">
-            <div class="card-body d-flex flex-column" style="min-height: 330px;">
+            <div class="card-body d-flex flex-column" style="min-height: 330px">
               <h5 class="card-title fs-6">The Richest 💰</h5>
-              <div class="card code"  style="flex: 1;" >
-
+              <div class="card code" style="flex: 1">
                 <div id="richest-players" class="list-group h-100">
-                  <div class="h-100 d-flex align-items-center justify-content-center">
-                    <div class="spinner-grow mt-5" role="status" >
-                        <span class="sr-only"></span>
+                  <div
+                    class="h-100 d-flex align-items-center justify-content-center"
+                  >
+                    <div class="spinner-grow mt-5" role="status">
+                      <span class="sr-only"></span>
                     </div>
                   </div>
                 </div>
-                
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end of row -->
+      <div class="row">
+        <div class="col-md-6 col-12 ">
+          <div class="card card-dark mb-2">
+            <div class="card-body d-flex flex-column">
+              <div class="card-title fs-6">Session Income 🤩</div>
+              <canvas
+                id="session-income"
+                class="card code px-2 py-1"
+                height="255"
+              >
+              </canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-12 ">
+          <div class="card card-dark mb-2">
+            <div class="card-body d-flex flex-column">
+              <div class="card-title fs-6">Session Payout 🤔</div>
+              <canvas
+                id="session-payout"
+                class="card code px-2 py-1"
+                height="255"
+              >
+              </canvas>
             </div>
           </div>
         </div>
@@ -237,11 +274,15 @@
     </div>
 
     <script>
+        const incomeChart = initTimeChart("Income", "session-income", "rgb(46, 204, 113)")
+        const payoutChart = initTimeChart("Payout", "session-payout", "rgb(231, 76, 60)")
         let { min_transaction, rate_txn_icon, rate_text, rate_color } = <%- JSON.stringify(storage) %>;
 
         let txns = []
         let previousWinners = []
         let previousRichestPlayers = []
+
+        const MIN_SESSION_DATASET = 10
 
         function show({key, data}) {
           if(!data) return
@@ -307,19 +348,110 @@
             previousRichestPlayers = players
 
           } else if(key === "SESSION_INCOME"){
-            console.log("🚀 ~ file: show.ejs ~ line 247 ~ show ~ data: income", data)
+            const { income, timestamp } = data
+            const _timestamp = new Date(timestamp*1000)
+            addData(incomeChart, {t:_timestamp, y:income})
+            shiftData(incomeChart)
           } else if(key === "SESSION_PAYOUT"){
-            console.log("🚀 ~ file: show.ejs ~ line 247 ~ show ~ data: payout", data)
+            const { payout, timestamp } = data
+            const _timestamp = new Date(timestamp*1000)
+            addData(payoutChart, {t:_timestamp, y:payout})
+            shiftData(payoutChart)
           }
 
         }
+
+        function initTimeChart(label, chartElementId, lineColor){
+          $(`#${chartElementId}`).empty()
+          let ctx = document.getElementById(chartElementId).getContext('2d');
+          return new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: [],
+                datasets: [{
+                    label,
+                    borderColor: lineColor,
+                    data: []
+                }]
+              },
+              options:  {
+                  legend: {
+                    display: false
+                  },
+                  tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                            if (label) {
+                                label += ': ';
+                            }
+                            
+                            label += numeral(tooltipItem.yLabel).format("0,0")
+                            return label;
+                        }
+                    }
+                  },
+                  scales: {
+                    yAxes: [{
+                        ticks: {
+                            fontColor: "#e0e1e6",
+                            callback: function(value, index, values) {
+                              if(value > Math.pow(10,3))
+                                return numeral(value).format("0.00 a");
+                              else 
+                                return numeral(value).format("0,0 a");
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'minute',
+                            displayFormats: {
+                              minute: 'HH:mm',
+                              second: 'HH:mm:ss'
+                            }
+                        },
+                        ticks: {
+                            fontColor: "#e0e1e6"
+                        },
+                    }]
+                  }
+              } 
+          });
+
+        }
+
+        function addData(chart, data) {
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.push(data);
+            });
+            chart.update()
+        }
+
+        function shiftData(chart) {
+          const currentDataSet = _.chain(chart.data.datasets)
+                                    .first()
+                                    .get("data", [])
+                                    .value() 
+          
+          
+          if(_.isArray(currentDataSet) &&  currentDataSet.length > MIN_SESSION_DATASET){
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.shift();
+            });
+            chart.update()
+          }
+        }
+
 
         function displayGachaTransaction(username, amount, gain, rate, txnTime){
           const _amount = roundDecimalPoint(amount)
           const _gain = roundDecimalPoint(gain)
           return `
           <div class="d-flex justify-content-between flex-nowrap" style="font-size:14px;">
-            <div class="w-75 px-1 py-1" style="color:${rate_color[rate]};">${rate_txn_icon[rate]} <b>${username}</b> ลงทุน ${numberWithCommas(_amount)} ได้รับ ${numberWithCommas(_gain)}</div>
+            <div class="w-75 px-1 py-1" style="color:${rate_color[rate]};">${rate_txn_icon[rate]} <b>${username}</b> ลงทุน ${numeral(amount).format("0,0")} ได้รับ ${numeral(gain).format("0,0")}</div>
             <div class="py-1 flex-shrink-1 text-end time-message">${txnTime}</div>
           </div>`
         }
@@ -329,16 +461,16 @@
           const _gain = roundDecimalPoint(gain)
           return `
           <div class="col-md-4 col-12 d-flex flex-column" >
-            <span style="font-size:.6rem;color:${rate_color[rate]};">${rate_text[rate]}</span> 
+            <span style="font-size:.6rem;color:${rate_color[rate]};">${rate_text[rate]}</span>
             <span >${username}</span>
           </div>
           <div class="col-md-4 col-6 d-flex flex-column">
             <span style="font-size:.4rem;">ลงทุน</span>
-            <span style="font-size:.75rem;" >${numberWithCommas(_amount)}</span>
+            <span style="font-size:.75rem;" >${numeral(amount).format("0,0")}</span>
           </div>
           <div class="col-md-4 col-6 d-flex flex-column">
             <div style="font-size:.4rem;">ได้รับ</div>
-            <span style="font-size:.75rem;" >${numberWithCommas(_gain)}</span>
+            <span style="font-size:.75rem;" >${numeral(gain).format("0,0")}</span>
           </div>
           `
         }
@@ -350,7 +482,7 @@
             <span >${isFirst? '👑':''} ${username}</span>
           </div>
           <div class="col-md-4 col-6 d-flex flex-column text-end ">
-            <span style="font-size:.8rem; white-space:nowrap;" >${numberWithCommas(_coins)}</span>
+            <span style="font-size:.8rem; white-space:nowrap;" >${numeral(coins).format("0,0")}</span>
           </div>
           `
         }
@@ -359,11 +491,7 @@
           return Math.round(num * 100) / 100
         }
 
-        function numberWithCommas(x) {
-          var parts = x.toString().split(".");
-          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-          return parts.join(".");
-      }
+      
     </script>
   </body>
 </html>

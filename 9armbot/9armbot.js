@@ -137,8 +137,21 @@ async function thanos(channel, byUser) {
 let gachaWinners = []
 const MIN_GACHA_WINNER = 6
 const MIN_TOP_COIN_PLAYER = 5
-let previousSessionPayout = sessionPayout
+const MIN_SESSION_DATA = 20
+let sessionPayoutDataSet = []
+let sessionIncomeDataSet = []
 let previousSessionIncome = sessionIncome
+let previousSessionIncome = sessionPayout
+
+function pushSessionData(session, data){
+    if(!_.isArray(session)) return
+
+    if(session.length >= MIN_SESSION_DATA){
+        session.shift()
+    }
+
+    session.push(data)
+}
 
 function pushGachaWinners({player, amount, gain, rate}){
     if(gachaWinners.length >= MIN_GACHA_WINNER){
@@ -226,6 +239,10 @@ function gacha(channel, user, amount) {
         });
 
         if(!_.isEqual(previousSessionIncome, sessionIncome)){
+            pushSessionData(sessionIncomeDataSet, {
+                t: txnPayload.timestamp,
+                y: sessionIncome
+            })
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.SESSION_INCOME,
                 data: {
@@ -238,6 +255,10 @@ function gacha(channel, user, amount) {
         }
 
         if(!_.isEqual(previousSessionPayout, sessionPayout)){
+            pushSessionData(sessionPayoutDataSet, {
+                t: txnPayload.timestamp,
+                y: sessionPayout
+            })
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.SESSION_PAYOUT,
                 data: {
