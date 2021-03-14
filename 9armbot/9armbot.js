@@ -1,6 +1,5 @@
 require('dotenv').config({ path: '../.env'});
 const dayjs = require('dayjs')
-const _ = require('lodash')
 const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -144,7 +143,7 @@ let previousSessionIncome = sessionIncome
 let previousSessionIncome = sessionPayout
 
 function pushSessionData(session, data){
-    if(!_.isArray(session)) return
+    if(!Array.isArray(session)) return
 
     if(session.length >= MIN_SESSION_DATA){
         session.shift()
@@ -238,7 +237,7 @@ function gacha(channel, user, amount) {
             data: txnPayload
         });
 
-        if(!_.isEqual(previousSessionIncome, sessionIncome)){
+        if(previousSessionIncome !== sessionIncome){
             pushSessionData(sessionIncomeDataSet, {
                 t: txnPayload.timestamp,
                 y: sessionIncome
@@ -254,7 +253,7 @@ function gacha(channel, user, amount) {
             previousSessionIncome = sessionIncome
         }
 
-        if(!_.isEqual(previousSessionPayout, sessionPayout)){
+        if(previousSessionPayout !== sessionPayout){
             pushSessionData(sessionPayoutDataSet, {
                 t: txnPayload.timestamp,
                 y: sessionPayout
@@ -285,7 +284,7 @@ function gacha(channel, user, amount) {
             webapp.socket.io().emit("widget::market_dashboard", {
                 key: MARKET_KEY.RICHEST_PLAYERS,
                 data: {
-                    players: _.map(currentTopCoinPlayers, ({username, coins}) => ({username, coins}))
+                    players: currentTopCoinPlayers.map(({username, coins}) => ({username, coins}))
                 }
             });
         } 
