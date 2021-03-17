@@ -4,7 +4,6 @@
 
 var dayjs = require('dayjs')
 const webapp = require('.')
-const _ = require('lodash')
 const Emitter = require('events');
 const client = new Emitter();
 const { MARKET_KEY, GACHA_RATE_TYPE } = require('../core/market_dashboard')
@@ -37,7 +36,7 @@ let topCoinPlayers = [
 ]
 
 
-let previousTopCoinPlayers = _.clone(topCoinPlayers)
+let previousTopCoinPlayers = [...topCoinPlayers]
 let sessionIncome = 0
 let sessionPayout= 0
 let previousSessionIncome = 0
@@ -68,7 +67,7 @@ client.on('message', (channel, tags, message, self) => {
         }
     }
 
-    if(_.includes([GACHA_RATE_TYPE.JACKPOT, GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.MYSTIC], rateIcon)){
+    if([GACHA_RATE_TYPE.JACKPOT, GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.MYSTIC].includes(rateIcon)){
         sessionPayout += gain - amount
     }else {
         sessionIncome += amount
@@ -76,8 +75,8 @@ client.on('message', (channel, tags, message, self) => {
 
     webapp.socket.io().emit("widget::market_dashboard", txnPayload)
     
-    let previousWinners = _.clone(gachaWinners)
-    if(_.includes([GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.JACKPOT], txnPayload.data.rate)){
+    let previousWinners = [...gachaWinners]
+    if([GACHA_RATE_TYPE.ALL_IN_JACKPOT, GACHA_RATE_TYPE.JACKPOT].includes(txnPayload.data.rate)){
     const {username, amount, gain, rate, timestamp, txnTime} = txnPayload.data
         if(gachaWinners.length >= MIN_WINNERS){
             gachaWinners.shift()
@@ -117,7 +116,7 @@ client.on('message', (channel, tags, message, self) => {
         }
     })
 
-    if(!_.isEqual(previousSessionIncome, sessionIncome)){
+    if(previousSessionIncome !== sessionIncome){
         previousSessionIncome = sessionIncome
         webapp.socket.io().emit("widget::market_dashboard", {
             key: MARKET_KEY.SESSION_INCOME,
@@ -129,7 +128,7 @@ client.on('message', (channel, tags, message, self) => {
         })
     }
 
-    if(!_.isEqual(previousSessionPayout, sessionPayout)){
+    if( previousSessionPayout !== sessionPayout){
         previousSessionPayout = sessionPayout
         webapp.socket.io().emit("widget::market_dashboard", {
             key: MARKET_KEY.SESSION_PAYOUT,
