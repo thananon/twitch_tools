@@ -3,3 +3,5 @@ node_modules
 9armbot/botstat.json
 9armbot/coins.json
 9armbot/players.json
+package-lock.json
+yarn.lock

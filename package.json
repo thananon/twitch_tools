@@ -4,9 +4,9 @@
   "description": "Repo to keep my community's twitch gadgeties.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
     "start": "cd 9armbot && node 9armbot.js",
-    "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'"
+    "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'",
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "tmi.js": "^1.7.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "jest": "^26.6.3"
   }
 }
