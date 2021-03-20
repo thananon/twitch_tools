@@ -270,7 +270,7 @@ client.on('message', (channel, tags, message, self) => {
 
     if (message == '!time') {
         let time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
-        client.say(channel, time);
+        client.say(channel, `เวลานายอาร์มตอนนี้คือ ${time}`);
         return;
     }
     if (message == '!github')
