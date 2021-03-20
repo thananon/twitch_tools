@@ -267,6 +267,12 @@ client.on('message', (channel, tags, message, self) => {
         client.whisper(tags.username, 'test');
     }
 */
+
+    if (message == '!time') {
+        let time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+        client.say(channel, time);
+        return;
+    }
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
