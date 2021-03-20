@@ -193,7 +193,7 @@ function timeoutUser(channel, user, duration, reason) {
     // roll crit
     if (roll(botInfo.critRate)) {
         final_duration *= botInfo.critMultiplier;
-        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
+        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier.toFixed(2)}`);
         webapp.socket.io().emit("widget::killfeed", {
             message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <i class="fas fa-hammer"></i> <b class="badge bg-danger">CRITICAL!</b> <b>x${botInfo.critMultiplier}</b>`,
         });
