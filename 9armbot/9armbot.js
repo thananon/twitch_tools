@@ -440,7 +440,7 @@ client.on('submysterygift', (channel, username, num, method, userstate) => {
 
 client.on('cheer', (channel, userstate, message) => {
     let amt =  userstate.bits/10000;
-    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt.toFixed(2)} จากพลังของนายทุน <<`);
+    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt.toFixed(3)} จากพลังของนายทุน <<`);
     botInfo.critMultiplier += amt;
 });
 
