@@ -443,6 +443,10 @@ client.on('cheer', (channel, userstate, message) => {
     let amt =  userstate.bits/10000;
     client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt.toFixed(3)} จากพลังของนายทุน <<`);
     botInfo.critMultiplier += amt;
+
+    webapp.socket.io().emit("widget::alerts", {
+        itemKey: 2
+    });
 });
 
 client.on('connected', (address, port) => {
