@@ -112,6 +112,7 @@ class Player{
     }
 
     giveCoins(username, amount){
+        username = username.toLocaleLowerCase();
         if(!Number(amount)){
             return
         }

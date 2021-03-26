@@ -392,6 +392,7 @@ client.on('message', (channel, tags, message, self) => {
 function subscriptionPayout (channel, username) {
     botInfo.critRate+=0.1;
     client.say(channel, `>> botInfo.critRate+0.1% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate.toFixed(2)}%) <<`);
+    player.giveCoins(username, 10);
     giveCoins_allonline(1).then(function (total) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
 

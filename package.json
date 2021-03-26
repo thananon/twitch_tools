@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --verbose",
     "start": "cd 9armbot && node 9armbot.js",
-    "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'",
+    "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'"
   },
   "repository": {
     "type": "git",
