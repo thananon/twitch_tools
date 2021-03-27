@@ -403,7 +403,7 @@ async function onKick(channel, user) {
                 isMod: false
             };
             // client.timeout(channel, kick.input, 10)
-            await sleep(700);
+            // await sleep(700); // No need for this timeout as we wont kick that many people in a row. Thanos needs this because of rate limit about 100 kick/min.
             timeoutUser(channel, user, botInfo.attackPower, 'mod สั่งมา');
         }
     }
