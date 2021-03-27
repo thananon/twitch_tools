@@ -193,7 +193,7 @@ function timeoutUser(channel, user, duration, reason) {
     // roll crit
     if (roll(botInfo.critRate)) {
         final_duration *= botInfo.critMultiplier;
-        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier}`);
+        client.say(channel, `@${user.username} ⚔️⚔️ CRITICAL!! รับโทษ x${botInfo.critMultiplier.toFixed(2)}`);
         webapp.socket.io().emit("widget::killfeed", {
             message: `<i class="fas fa-robot"></i> <b class="badge bg-info">${process.env.tmi_username}</b> <i class="fas fa-hammer"></i> <b class="badge bg-danger">CRITICAL!</b> <b>x${botInfo.critMultiplier}</b>`,
         });
@@ -269,12 +269,18 @@ client.on('message', (channel, tags, message, self) => {
             player.giveCoins(group[1], parseInt(group[2]))
         }
     }
-    /*
-        if (message == '!whisper') {
-            console.log('whisper..');
-            client.whisper(tags.username, 'test');
-        }
-    */
+/*
+    if (message == '!whisper') {
+        console.log('whisper..');
+        client.whisper(tags.username, 'test');
+    }
+*/
+
+    if (message == '!time') {
+        let time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+        client.say(channel, `เวลานายอาร์มตอนนี้คือ ${time}`);
+        return;
+    }
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
@@ -300,7 +306,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     if (message == '!botstat') {
-        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/${baseExp()}> <พลังโจมตี: ${botInfo.attackPower}> <%crit: ${botInfo.critRate}> <ตัวคูณ: ${botInfo.critMultiplier}> <Gacha Bonus +${botInfo.level}%>`);
+        client.say(channel, `<Level ${botInfo.level}> <EXP ${botInfo.exp}/${baseExp()}> <พลังโจมตี: ${botInfo.attackPower.toFixed(2)}> <%crit: ${botInfo.critRate.toFixed(2)}> <ตัวคูณ: ${botInfo.critMultiplier.toFixed(2)}> <Gacha Bonus +${botInfo.level}%>`);
         return;
     }
 
@@ -391,6 +397,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 });
 
+
 async function onKick(channel, user) {
     kick_command = user;
     for (let i in kick_command) {
@@ -408,10 +415,11 @@ async function onKick(channel, user) {
         }
     }
 }
+function subscriptionPayout (channel, username) {
+    botInfo.critRate+=0.1;
+    client.say(channel, `>> botInfo.critRate+0.1% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate.toFixed(2)}%) <<`);
+    player.giveCoins(username, 10);
 
-function subscriptionPayout(channel, username) {
-    botInfo.critRate += 0.1;
-    client.say(channel, `>> botInfo.critRate+0.1% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate}%) <<`);
     giveCoins_allonline(1).then(function (total) {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
 
@@ -459,9 +467,15 @@ client.on('submysterygift', (channel, username, num, method, userstate) => {
 });
 
 client.on('cheer', (channel, userstate, message) => {
-    let amt = userstate.bits / 10000;
-    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt} จากพลังของนายทุน <<`);
+
+    let amt =  userstate.bits/10000;
+    client.say(channel, `>> ตัวคูณเพิ่มขึ้น ${amt.toFixed(3)} จากพลังของนายทุน <<`);
+
     botInfo.critMultiplier += amt;
+
+    webapp.socket.io().emit("widget::alerts", {
+        itemKey: 2
+    });
 });
 
 client.on('connected', (address, port) => {
