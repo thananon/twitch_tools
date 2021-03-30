@@ -92,3 +92,12 @@ HOST=0.0.0.0 access any ip
 ```shell
 HOST=0.0.0.0 node 9armbot/9armbot.js
 ```
+
+## Market Dashboard WebApp
+run with this command for mock dashboard data
+
+```shell
+node webapp/example_market_dashboard.js
+```
+then watch the dashboard result ->
+http://localhost:3000/widget/market_dashboard/preview
