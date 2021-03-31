@@ -30,6 +30,22 @@ class Player{
         },this.options.sync_player_time)
     }
 
+    static #instance = null
+
+    static getInstance() {
+        if (this.#instance === null) {
+            this.#instance = new Player()
+        }
+        return this.#instance
+    }
+
+    setOptions(options = {}) {
+        this.options = {
+            ...this.options,
+            ...options
+        }
+    }
+
     cloneDeep(data){
         let _data = JSON.stringify(data) 
         return JSON.parse(_data)

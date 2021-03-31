@@ -22,7 +22,7 @@ var botInfo = {
     level: 1
 };
 
-let player = new Player()
+let player = Player.getInstance()
 
 // Graceful Shutdown
 function gracefulShutdown() {
