@@ -6,6 +6,14 @@ const { playerMigrations } = require('../core/migrations');
 class Player{
 
     players = []
+    raffleList = []
+    rafflePrice = 10
+    raffleOn = false
+
+    auctionOn = false
+    auctionBid = 0
+    auctionLeader = ""
+
     options = {
         database_path: "./players.json",
         channel: `${process.env.tmi_channel_name}`,
@@ -111,8 +119,60 @@ class Player{
         return player || null;
     }
 
+    startRaffle(amount) {
+        this.raffleList = []
+        this.rafflePrice = Number(amount)
+        this.raffleOn = true
+        console.log (`raffle started with ${amount} per entry.`)
+        // TODO: ANNOUCE ON KILLFEED
+    }
+
+    endRaffle() {
+        this.raffleOn = false;
+    }
+
+    joinRaffle(username, total_tickets) {
+        let purchased = 0
+        while (this.deductCoins(username, this.rafflePrice) && purchased < total_tickets) {
+                this.raffleList.push(username)
+                purchased++
+        }
+        console.log(`${username} purchased ${purchased} raffle tickets`)
+        return purchased
+    }
+
+    drawRaffle() {
+        let rand = Math.floor(Math.random() * this.raffleList.length)
+        let winner = this.raffleList[rand]
+        console.log(`winner is ${winner}`)
+        this.raffleList.splice(rand, 1)
+        return winner
+    }
+
+    openAuction() {
+        this.auctionOn = true
+        this.auctionBid = 0
+        this.auctionLeader = "armzi"
+    }
+
+    closeAuction() {
+        this.auctionOn = false
+    }
+
+    auction(username, amount) {
+        amount = Number(amount)
+        let player = this.players.find(x=>x.username == username)
+        if (!player) return false
+        if (player.coins && player.coins >= amount && amount > this.auctionBid) {
+            this.auctionLeader = username
+            this.auctionBid = amount
+            return true
+        }
+        return false
+    }
+
     giveCoins(username, amount){
-        username = username.toLocaleLowerCase();
+        username = username.toLocaleLowerCase()
         if(!Number(amount)){
             return
         }

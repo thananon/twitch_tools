@@ -3,8 +3,10 @@ const webapp = require("../webapp");
 const tmi = require('tmi.js');
 const fs = require('fs');
 var oauth_token = fs.readFileSync('oauth_token', 'utf8');
+var discord_token = fs.readFileSync('discord_token', 'utf8');
 const { sleep, roll } = require('../core/utils');
 const Player = require('./player');
+const DiscordBot = require('./discord_bot')
 
 var dodgeRate = 1;
 var marketOpen = false;
@@ -23,6 +25,8 @@ var botInfo = {
 };
 
 let player = new Player()
+let discordBot = new DiscordBot(player=player)
+discordBot.login(discord_token)
 
 // Graceful Shutdown
 function gracefulShutdown() {
@@ -148,9 +152,11 @@ function gacha(channel, user, amount) {
             if (Bonus != 1) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
+                discordBot.sendEmbed("ALL-IN JACKPOT", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
             } else {
                 client.say(channel, `JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
+                discordBot.sendEmbed("JACKPOT", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
             }
         } else if (roll(gachaMysticRate, _player)) {
             let multiplier = 2 + Math.random() * 3 + botInfo.level / 100;
@@ -159,6 +165,7 @@ function gacha(channel, user, amount) {
             client.say(channel, `@${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.`);
             sessionPayout += gain - amount;
             killfeed_msg = `<b class="badge bg-primary">${_player.username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
+            discordBot.sendEmbed("LUCKY!", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
         } else {
             sessionIncome += amount;
             if (_player.coins == 0) {
@@ -208,6 +215,22 @@ function timeoutUser(channel, user, duration, reason) {
     });
 }
 
+function handleChannelPoints(username, reward_id) {
+    if (reward_id === "3a13ba8f-2a09-4765-abe0-7e028cdcaf28") { 
+        player.giveCoins(username, 1);
+        console.log(`${username} redeemed 1 armcoin`);
+    }
+    if (reward_id === "041ca23b-47b3-4d91-8fb9-d37f96c17f47") {
+        player.giveCoins(username, 10);
+        console.log(`${username} redeemed 10 armcoin`);
+    }
+
+    if (reward_id === "e22b1088-dfba-45a4-bcad-d79a8306ef7c") {
+        player.giveCoins(username, 50);
+        console.log(`${username} redeemed 50 armcoin`);
+    }
+}
+
 const client = new tmi.Client({
     options: { debug: true },
     connection: { reconnect: true },
@@ -222,6 +245,11 @@ client.connect();
 
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
+
+    /* catch custom reward */
+    if (tags["custom-reward-id"]) {
+        handleChannelPoints(tags.username, tags["custom-reward-id"]);
+    }
 
     /* mod can open/close the market. Allowing people to check/spend their coins. */
     if (tags.mod || player.isAdmin(tags.username)) {
@@ -247,18 +275,11 @@ client.on('message', (channel, tags, message, self) => {
             onKick(channel, kick_command.slice(1))
         }
 
-        // let kick_re = /!kick\s*([A-Za-z0-9_]*)/;
-        // let kick = message.match(kick_re);
-        // if (kick) {
-        //     if (kick) {
-        //         let user = {
-        //             username: kick.input,
-        //             isMod: false
-        //         };
-        //         timeoutUser(channel, user, botInfo.attackPower, 'mod สั่งมา');
-
-        //     }
-        // }
+        /* sentry mode is to toggle message filter on/off. */
+        if (message == '!sentry') {
+            sentryMode = !sentryMode;
+            return
+        }
     }
 
     /* Give coins to a user. Testing command, only available to me. */
@@ -269,12 +290,10 @@ client.on('message', (channel, tags, message, self) => {
             player.giveCoins(group[1], parseInt(group[2]))
         }
     }
-/*
-    if (message == '!whisper') {
-        console.log('whisper..');
-        client.whisper(tags.username, 'test');
+
+    if (message == "!payday" && player.isAdmin(tags.username)) {
+        giveCoins_allonline(1)
     }
-*/
 
     if (message == '!time') {
         let time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
@@ -284,24 +303,22 @@ client.on('message', (channel, tags, message, self) => {
     if (message == '!github')
         client.say(channel, 'https://github.com/thananon/twitch_tools');
 
-
     /* MESSAGE FILTER:
        I added a low chance for timeout instead of kicking right away as chat will be full with
        kicking message and it is unpleasant. */
 
     if (sentryMode) {
-        if (/[2๒]\s*[5๕]\s*([*xX]|คูณ|multiply)\s*[2๒]\s*[5๕]/i.test(message)) {
-            client.say(channel, '225 ไง Land Protector อะ');
-            if (roll(15))
-                timeoutUser(channel, tags, botInfo.attackPower, 'เก่งคณิตศาสตร์');
-            return;
-        }
 
         let wanttofly = /อยากบิน.*/;
         if (wanttofly.test(message)) {
             if (roll(50))
                 timeoutUser(channel, tags, botInfo.attackPower, 'อยากบิน');
             return;
+        }
+
+        let intel =  /.*([il]\s*n\s*t\s*e\s*[lI]|อิ\s*น\s*เ\s*ท\s*ล).*/i;
+        if (intel.test(message)) {
+            timeoutUser(channel, tags, botInfo.attackPower, 'AMD');
         }
     }
 
@@ -319,12 +336,6 @@ client.on('message', (channel, tags, message, self) => {
         botInfo.exp = 0;
         botInfo.level = 1;
         return;
-    }
-
-    /* sentry mode is to toggle message filter on/off. */
-    if (player.isAdmin(tags.username) && message == '!sentry') {
-        sentryMode = !sentryMode;
-        return
     }
 
     /* for testing purpose */
@@ -381,6 +392,37 @@ client.on('message', (channel, tags, message, self) => {
             else
                 feedBot(channel, tags, parseInt(group[1]));
         }
+
+        /* Raffle -- lucky draw entry */
+        let raffle_re = /^!raffle\s*(\d*)/;
+        group = message.match(raffle_re);
+        if (player.raffleOn && group) {
+            let total = 0;
+            if (!group[1])
+                total = player.joinRaffle(tags.username, 1);
+            else
+                total = player.joinRaffle(tags.username, parseInt(group[1]));
+
+            if (total == 0) {
+                timeoutUser(channel, tags, 300, 'ไม่มีตังจ่ายค่าตั๋ว');
+            } else { 
+                webapp.socket.io().emit("widget::killfeed", {
+                    message: `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${total} ใบ`,
+                });
+            }
+        }
+
+        let auction_re = /^!auction\s*(\d*)/;
+        group = message.match(auction_re);
+        if (player.auctionOn && group) {
+            let total = 0;
+            if (group[1])
+                if (player.auction(tags.username, parseInt(group[1]))) {
+                    webapp.socket.io().emit("widget::killfeed", {
+                        message: `<b class="badge bg-primary">${player.auctionLeader}</b> ประมูลสูงสุดที่ ${player.auctionBid} armcoin`,
+                    });
+                }
+        }
     }
 
     if (message == '!income' && player.isAdmin(tags.username)) {
@@ -395,6 +437,39 @@ client.on('message', (channel, tags, message, self) => {
     if (message == '!load' && player.isAdmin(tags.username)) {
         restoreBotData();
     }
+
+    if (message == "!raffle start" && player.isAdmin(tags.username)){
+        player.startRaffle(1);
+        return;
+    }
+
+    if (message == "!raffle stop" && player.isAdmin(tags.username)){
+        player.endRaffle();
+        return;
+    }
+
+    if (message == "!draw" && player.isAdmin(tags.username)) {
+        let winner = player.drawRaffle()
+
+        webapp.socket.io().emit("widget::killfeed", {
+            message: `<b class="badge bg-primary">${winner}</b> ได้รับรางวัล`,
+        });
+    }
+
+    if (message == "!auction start" && player.isAdmin(tags.username)) {
+        player.openAuction();
+        return;
+    }
+
+    if (message == "!auction stop" && player.isAdmin(tags.username)) {
+        player.closeAuction();
+        webapp.socket.io().emit("widget::killfeed", {
+            message: `<b class="badge bg-primary">${player.auctionLeader}</b> ชนะประมูลด้วยจำนวน ${player.auctionBid} armcoin`,
+        });
+        player.deductCoins(player.auctionLeader, player.auctionBid);
+        return;
+    }
+
 });
 
 
