@@ -7,25 +7,17 @@ const sleep = (ms = 0) => {
 
 const roll = (critRate, _player = null) => {
     dice = Math.random() * 100;
-    if (!_player) {
-        return dice < critRate;
-    } else {
+    if(_player && _player.rollCounter >= 0) {
         _player.rollCounter++;
-        if (_player.rollCounter == 100) {
-            _player.rollCounter = 0;
-            return true; // 100% guarantee rate
+        if(_player.rollCounter >= 80) {
+            let rateUp =  (_player.rollCounter == 100)? 100 : _player.rollCounter / 10;
+            if(dice < critRate + rateUp) {
+                _player.rollCounter = 0;
+                return true;
+            }
         }
-        let rateUp = 0;
-        if (_player.rollCounter >= 80) {
-            rateUp = _player.rollCounter / 10;
-        }
-        let catchIt = dice < (critRate + rateUp);
-        if (catchIt) {
-            // reset roll counter
-            _player.rollCounter = 0;
-        }
-        return catchIt;
     }
+    return dice < critRate;
 }
 
 module.exports = {
