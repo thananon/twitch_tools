@@ -22,7 +22,7 @@ const migrate = (schema, migrations, toVersion) => {
     return schema;
   }
   const currentMigration = migrations.find(
-    migration => migration[direction === "up" ? "from" : "to"] === fromVersion;
+    migration => migration[direction === "up" ? "from" : "to"] === fromVersion
   );
   const newSchema = currentMigration[direction](schema);
   return migrate(newSchema, migrations, toVersion);
