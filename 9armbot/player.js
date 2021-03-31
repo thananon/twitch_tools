@@ -41,7 +41,7 @@ class Player{
 
     setOptions(options = {}) {
         this.options = {
-            ...this.options,
+            ...this.cloneDeep(this.options),
             ...options
         }
     }
