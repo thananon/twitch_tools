@@ -4,7 +4,7 @@
   "description": "Repo to keep my community's twitch gadgeties.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose",
+    "test": "jest --verbose ./__test__",
     "start": "cd 9armbot && node 9armbot.js",
     "dev": "cd 9armbot && nodemon 9armbot.js --ignore '*.json'",
     "dev-2.0": "ts-node-dev --respawn 9armbot-2.0",
