@@ -28,12 +28,4 @@ export async function twitchService() {
   setInterval(() => {
     console.log('twitch read db from dbservice', dbService.read())
   }, 2000)
-
-  setInterval(() => {
-    console.log(
-      'twitch',
-      'test adding random players',
-      dbService.createPlayer(Math.random().toString()),
-    )
-  }, 6000)
 }
