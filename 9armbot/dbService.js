@@ -38,7 +38,7 @@ class dbService {
 
         var res = await database.collection("users").find(query).toArray();
         if (res == undefined) return (undefined);
-        if (res.lenth == 0) return (undefined);
+        if (res.length == 0) return (undefined);
 
         return (res[0]);
     }
