@@ -1,12 +1,12 @@
 /**
  * 9armbot Console
- * Warning : Since this is not sharing the same process as the NodeJS server,
+ * Warning : Since this console toes not share the same process as the NodeJS server,
  *           writing to db will overwrite everything! (Singleton does not work across processes, damn!)
  */
 
 import repl from 'repl'
-import { dbService } from './services/db'
 import _ from 'lodash'
+import { dbService } from './services/db'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,

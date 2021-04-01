@@ -45,7 +45,7 @@ describe('Database', () => {
     })
   })
 
-  describe('save', () => {
+  describe('#save', () => {
     it('saves the current database state to json file', () => {
       db.createPlayer('foo')
 
@@ -94,7 +94,7 @@ describe('CRUD players', () => {
     })
   })
 
-  describe('getPlayerbyUsername', () => {
+  describe('#getPlayerbyUsername', () => {
     it('returns undefined if player is not found', () => {
       expect(db.getPlayerbyUsername('foo')).toBeUndefined
     })

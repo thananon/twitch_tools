@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid'
 import path from 'path'
 
 const DB_PATH = path.resolve(process.cwd(), './players-2.0.json')
+
 export interface IDb {
   players: IPlayer[]
 }
@@ -42,17 +43,15 @@ export class Db {
     return this.db
   }
 
-  public createPlayer(username: string) {
+  public createPlayer(username: string): IPlayer {
     // Don't re-create existing player
-    const player = find(this.db.players, (p) => {
-      return p.username === username
-    })
+    const player = this.getPlayerbyUsername(username)
 
     if (player) {
       return player
     }
 
-    const newPlayer = {
+    const newPlayer: IPlayer = {
       uid: nanoid(),
       username,
     }
@@ -62,7 +61,7 @@ export class Db {
     return newPlayer
   }
 
-  public getPlayerbyUsername(username: string) {
+  public getPlayerbyUsername(username: string): IPlayer | undefined {
     return find(this.db.players, (p) => {
       return p.username === username
     })
@@ -70,7 +69,7 @@ export class Db {
 }
 
 // Graceful Shutdown
-function gracefulShutdown() {
+function gracefulShutdown(): void {
   console.log('\nPre-Close')
   dbService.save()
   setTimeout(() => {
