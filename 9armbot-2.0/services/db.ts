@@ -1,5 +1,6 @@
 import find from 'lodash/find'
 import fs from 'fs'
+import { nanoid } from 'nanoid'
 
 export interface IDb {
   players: IPlayer[]
@@ -39,7 +40,7 @@ export class Db {
     }
 
     const newPlayer = {
-      uid: 'Changeme',
+      uid: nanoid(),
       username,
     }
 
