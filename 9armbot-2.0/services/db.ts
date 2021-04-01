@@ -69,5 +69,21 @@ export class Db {
   }
 }
 
+// Graceful Shutdown
+function gracefulShutdown() {
+  console.log('\nPre-Close')
+  dbService.save()
+  setTimeout(() => {
+    console.log('Closed')
+    process.exit(0)
+  }, 1000)
+}
+process.on('SIGINT', () => gracefulShutdown())
+process.on('SIGTERM', () => gracefulShutdown())
+process.on('uncaughtException', (err) => {
+  console.error(err)
+  gracefulShutdown()
+})
+
 // Use singleton pattern to mitigate multiple readers/writers
 export const dbService = new Db()
