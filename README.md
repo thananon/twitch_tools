@@ -60,3 +60,9 @@ $ npm install
 $ npm start
 ```
 > More information about `oauth_token` [here](https://dev.twitch.tv/docs/irc).
+
+### Debug Console
+
+```bash
+$ npm run console
+```

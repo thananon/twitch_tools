@@ -6,3 +6,4 @@ node_modules
 package-lock.json
 yarn.lock
 players-2.0.json
+.node_repl_history
