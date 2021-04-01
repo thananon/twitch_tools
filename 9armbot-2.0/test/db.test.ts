@@ -1,4 +1,9 @@
-import { Db } from '../services/db'
+import { Db, IDb } from '../services/db'
+import fs from 'fs'
+
+jest.mock('fs')
+
+const mockFs = fs as jest.Mocked<typeof fs>
 
 let db: Db
 
@@ -6,18 +11,41 @@ beforeEach(() => {
   db = new Db()
 })
 
-describe('read db', () => {
-  describe('when db is not existed yet', () => {
-    it('returns default data', () => {
-      expect(db.read()).toEqual({
-        players: [],
-      })
+describe('#load', () => {
+  it('loads data from json file and initiate players', () => {
+    const dbFileContent: IDb = {
+      players: [
+        {
+          uid: 'uid',
+          username: 'foo',
+        },
+      ],
+    }
+
+    mockFs.readFileSync.mockReturnValueOnce(JSON.stringify(dbFileContent))
+
+    db.load()
+
+    expect(db.read()).toEqual(dbFileContent)
+    expect(mockFs.readFileSync).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to default if file does not exist', () => {
+    const dbFileBlank: IDb = {
+      players: [],
+    }
+
+    mockFs.readFileSync.mockImplementation(() => {
+      throw new Error('ENOENT: no such file or directory')
     })
+
+    expect(db.read()).toEqual(dbFileBlank)
+    expect(mockFs.readFileSync).toHaveBeenCalledTimes(1)
   })
 })
 
 describe('CRUD players', () => {
-  describe('createPlayer', () => {
+  describe('#createPlayer', () => {
     it('can create new player by username (twitch for now)', () => {
       db.createPlayer('foo')
 

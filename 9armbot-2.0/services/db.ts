@@ -1,18 +1,27 @@
 import find from 'lodash/find'
+import fs from 'fs'
 
-interface IDb {
+export interface IDb {
   players: IPlayer[]
 }
 
-interface IPlayer {
+export interface IPlayer {
   uid: string
   username: string
 }
 
 export class Db {
-  // TODO: Fetch from json file instead
   private db: IDb = {
     players: [],
+  }
+
+  public load() {
+    try {
+      const playersJson = fs.readFileSync('./players.json', 'utf8')
+      this.db = JSON.parse(playersJson)
+    } catch (err) {
+      console.log('File not found, use default blank db.', err.message)
+    }
   }
 
   public read() {
