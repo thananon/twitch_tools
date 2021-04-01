@@ -1,8 +1,9 @@
 import find from 'lodash/find'
 import fs from 'fs'
 import { nanoid } from 'nanoid'
+import path from 'path'
 
-const DB_PATH = './players-2.0.json'
+const DB_PATH = path.resolve(process.cwd(), './players-2.0.json')
 export interface IDb {
   players: IPlayer[]
 }
@@ -21,7 +22,7 @@ export class Db {
     try {
       const playersJson = fs.readFileSync(DB_PATH, 'utf8')
       this.db = JSON.parse(playersJson)
-      console.log(`Loaded ${this.db.players.length} players.`)
+      console.log(`Loaded ${this.db.players.length} players from ${DB_PATH}.`)
     } catch (err) {
       console.log('[ERROR] File not found, use default blank db.', err.message)
     }
@@ -31,7 +32,7 @@ export class Db {
     try {
       const data = JSON.stringify(this.read(), null, 2)
       fs.writeFileSync(DB_PATH, data, 'utf8')
-      console.log(`Saved ${this.db.players.length} players.`)
+      console.log(`Saved ${this.db.players.length} players to ${DB_PATH}.`)
     } catch (err) {
       console.log('[ERROR] Cannot write file.', err.message)
     }

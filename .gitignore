@@ -5,3 +5,4 @@ node_modules
 9armbot/players.json
 package-lock.json
 yarn.lock
+players-2.0.json
