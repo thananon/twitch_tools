@@ -9,3 +9,19 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+model Player {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  status       String?
+  coins        Int      @default(0)
+  roll_counter Int      @default(0)
+  twitch_id    String?
+  discord_id   String?
+
+  @@index([username])
+  @@index([status])
+  @@index([coins])
+  @@index([twitch_id])
+  @@index([discord_id])
+}
