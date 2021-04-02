@@ -1,12 +1,12 @@
 /**
  * 9armbot Console
- * Warning : Since this console toes not share the same process as the NodeJS server,
- *           writing to db will overwrite everything! (Singleton does not work across processes, damn!)
+ *   Features:
+ *   - db : Database Service [services/db.ts]
  */
 
 import repl from 'repl'
 import _ from 'lodash'
-import { dbService } from './services/db'
+import { Db } from './services/db'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,
@@ -14,14 +14,15 @@ const replServer = repl.start({
 
 replServer.setupHistory('./.node_repl_history', () => {})
 
-// Preload database
-dbService.load()
+const db = new Db()
 
-console.log('Database loaded, press enter to continue.')
+const dbName = process.env.DATABASE_URL!.split(':')[1]
+console.log(`Database "${dbName}" loaded, press enter to continue.`)
 
-// Access db eg. `db.read()`
-// Type `db.` then press Tab to see all available commands
-replServer.context.db = dbService
+// Access db eg. `await db.read()`
+//   Since it is asynchronous function you have to use await keyword.
+//   Type `db.` then press Tab to see all available commands
+replServer.context.db = db
 
 // Lodash (_ is reserved, use l or __ instead)
 replServer.context.l = _

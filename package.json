@@ -15,7 +15,7 @@
     "test-2.0": "DATABASE_URL=file:./test.db jest --config 9armbot-2.0/jest.config.js --runInBand",
     "pretest-2.0:watch": "npm run test-db-setup",
     "test-2.0:watch": "DATABASE_URL=file:./test.db jest --config 9armbot-2.0/jest.config.js --watch --runInBand",
-    "console": "ts-node 9armbot-2.0/console"
+    "console": "node --require ts-node/register/transpile-only --experimental-repl-await 9armbot-2.0/console"
   },
   "repository": {
     "type": "git",
