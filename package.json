@@ -18,7 +18,8 @@
     "console": "node --require ts-node/register/transpile-only --experimental-repl-await 9armbot-2.0/console",
     "db:studio": "npx prisma studio",
     "db:generate": "npx prisma migrate dev --create-only",
-    "db:migrate": "npx prisma migrate dev"
+    "db:migrate": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset"
   },
   "repository": {
     "type": "git",
