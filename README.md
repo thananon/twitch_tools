@@ -61,8 +61,24 @@ $ npm start
 ```
 > More information about `oauth_token` [here](https://dev.twitch.tv/docs/irc).
 
+## [v2.0.0 (work in progress)](https://github.com/thananon/twitch_tools/issues/44)
+
 ### Debug Console
 
 ```bash
 $ npm run console
 ```
+
+### Prisma Studio (View database on browser)
+
+```bash
+$ npm run db:studio
+```
+
+### Updating Database Schema
+
+1. Planning - Update [schema.prisma](./prisma/schema.prisma) ([Docs](https://pris.ly/d/prisma-schema))
+1. Generate - Run `npm run db:generate`, name the schema (eg. `"Add is_admin field"`), SQL migration file will be created.
+1. Inspect - Verify and/or edit `.sql` file at [prisma/migrations](./prisma/migrations)
+1. Migrate - Run `npm run db:migrate` to apply changes to your database (**Note: This action cannot be reversed easily without resetting your schema ([Ref](https://www.prisma.io/docs/concepts/components/prisma-migrate/prisma-migrate-limitations-issues#lack-of-rollbacks--down-migrations)).**)
+1. Commit - Don't forget to Git-commit the migration files.
