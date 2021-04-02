@@ -8,3 +8,7 @@ yarn.lock
 players-2.0.json
 .node_repl_history
 dist
+
+# Prisma
+dev.db
+prod.db
