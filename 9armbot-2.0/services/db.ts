@@ -1,34 +1,32 @@
 import { Player } from '@prisma/client'
 import prisma from '../../prisma/client'
 
-export interface IDb {
-  players: Player[]
+export interface DbInterface {
+  connect(): Promise<void>
+  disconnect(): Promise<void>
+  createPlayer(username: string): Promise<Player>
+  getPlayerbyUsername(username: string): Promise<Player | null>
 }
 
-export interface IPlayer {
-  id: Number
-  username: string
-}
-
-export class Db {
-  public async connect(): Promise<void> {
+export class Db implements DbInterface {
+  public async connect() {
     await prisma.$connect()
     console.log('Database disconnected.')
   }
 
-  public async disconnect(): Promise<void> {
+  public async disconnect() {
     await prisma.$disconnect()
     console.log('Database disconnected.')
   }
 
+  // Deprecated : Should only be used in tests
   public async read() {
     return {
       players: await prisma.player.findMany(),
     }
   }
 
-  public async createPlayer(username: string): Promise<Player> {
-    // Don't re-create existing player
+  public async createPlayer(username: string) {
     const player = await this.getPlayerbyUsername(username)
 
     if (player) {
