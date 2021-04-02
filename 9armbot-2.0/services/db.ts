@@ -42,6 +42,24 @@ export class Db implements DbInterface {
     return newPlayer
   }
 
+  // Untested
+  public async updatePlayer(username: string, data: Partial<Player>) {
+    const player = await prisma.player.update({
+      where: {
+        username,
+      },
+      data: {
+        status: data.status,
+        coins: data.coins,
+        roll_counter: data.roll_counter,
+        twitch_id: data.twitch_id,
+        discord_id: data.discord_id,
+      },
+    })
+
+    return player
+  }
+
   public async getPlayerbyUsername(username: string) {
     return await prisma.player.findFirst({
       where: { username },
