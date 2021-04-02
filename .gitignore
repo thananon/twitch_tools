@@ -12,3 +12,6 @@ dist
 # Prisma
 dev.db
 prod.db
+
+# SQLite
+*.db-journal
