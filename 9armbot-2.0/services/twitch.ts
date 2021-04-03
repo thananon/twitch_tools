@@ -1,10 +1,7 @@
 import tmi from 'tmi.js'
 import fs from 'fs'
-import dotenv from 'dotenv'
 import path from 'path'
 import { Db } from './db'
-
-dotenv.config()
 
 let oauth_token = fs.readFileSync(
   path.resolve(__dirname, '../../9armbot/oauth_token'),
