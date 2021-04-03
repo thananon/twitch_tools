@@ -1,7 +1,6 @@
 import tmi from 'tmi.js'
 import fs from 'fs'
 import path from 'path'
-import { Db } from './db'
 
 let oauth_token = fs.readFileSync(
   path.resolve(__dirname, '../../9armbot/oauth_token'),
@@ -9,8 +8,6 @@ let oauth_token = fs.readFileSync(
 )
 
 export async function twitchService() {
-  const dbService = new Db()
-
   const client = new tmi.Client({
     options: { debug: true },
     connection: { reconnect: true },
@@ -23,9 +20,17 @@ export async function twitchService() {
 
   await client.connect()
 
-  // Test db reading
-  setInterval(async () => {
-    const data = await dbService.read()
-    console.log('twitch read db from dbservice', data)
-  }, 2000)
+  client.on('message', (channel, _tags, message, self) => {
+    if (self) return
+
+    // ! Commands
+    switch (message) {
+      case '!github':
+        client.say(channel, 'https://github.com/thananon/twitch_tools')
+        break
+
+      default:
+        break
+    }
+  })
 }
