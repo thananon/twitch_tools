@@ -72,6 +72,15 @@ $ npm start
 
 ## [v2.0.0 (work in progress)](https://github.com/thananon/twitch_tools/issues/44)
 
+### Development workflow
+
+1. Create Twitch and/or Discord Application, then get OAuth Token
+1. Open `.env`, modify names and credentials, then save it as `.env.local` (This file is Git-ignored)
+1. Initiate database by running `npm run db:migrate`
+1. Start development server `npm run dev-2.0`
+1. Run tests with `npm run test-2.0`
+1. See database with `npm run db:studio`
+
 ### Migrate from JSON database (players.json)
 
 See [json-to-prisma.ts](./9armbot-2.0/scripts/json-to-prisma.ts)
