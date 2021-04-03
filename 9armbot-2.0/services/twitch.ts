@@ -2,7 +2,7 @@ import tmi from 'tmi.js'
 import fs from 'fs'
 import dotenv from 'dotenv'
 import path from 'path'
-import { dbService } from './db'
+import { Db } from './db'
 
 dotenv.config()
 
@@ -12,6 +12,8 @@ let oauth_token = fs.readFileSync(
 )
 
 export async function twitchService() {
+  const dbService = new Db()
+
   const client = new tmi.Client({
     options: { debug: true },
     connection: { reconnect: true },
@@ -25,7 +27,8 @@ export async function twitchService() {
   await client.connect()
 
   // Test db reading
-  setInterval(() => {
-    console.log('twitch read db from dbservice', dbService.read())
+  setInterval(async () => {
+    const data = await dbService.read()
+    console.log('twitch read db from dbservice', data)
   }, 2000)
 }
