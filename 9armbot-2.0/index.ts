@@ -2,7 +2,9 @@ import dotenvFlow from 'dotenv-flow'
 import { twitchService } from './services/twitch'
 import { discordService } from './services/discord'
 
-dotenvFlow.config()
+dotenvFlow.config({
+  default_node_env: 'development',
+})
 
 async function main() {
   await twitchService()

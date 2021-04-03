@@ -1,8 +1,5 @@
-import dotenv from 'dotenv'
 import { customAlphabet } from 'nanoid'
 import { Db } from './db'
-
-dotenv.config()
 
 export async function discordService() {
   const dbService = new Db()
