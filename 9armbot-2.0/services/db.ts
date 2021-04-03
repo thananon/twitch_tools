@@ -42,9 +42,14 @@ export class Db implements DbInterface {
     return newPlayer
   }
 
-  // Untested
   public async updatePlayer(username: string, data: Partial<Player>) {
-    const player = await prisma.player.update({
+    let player = await this.getPlayerbyUsername(username)
+
+    if (!player) {
+      throw new Error(`Player ${username} not found!`)
+    }
+
+    player = await prisma.player.update({
       where: {
         username,
       },

@@ -63,4 +63,38 @@ describe('CRUD players', () => {
       expect(await db.getPlayerbyUsername('bar')).toBeUndefined
     })
   })
+
+  describe('#updatePlayer', () => {
+    it('updates player with supplied data', async () => {
+      await db.createPlayer('foo')
+
+      await db.updatePlayer('foo', {
+        username: 'DONTCHANGEME',
+        status: 'online',
+        coins: 10,
+        roll_counter: 5,
+        twitch_id: 'twitch_id_foo',
+        discord_id: 'discord_id_foo',
+      })
+
+      expect(await db.getPlayerbyUsername('foo')).toEqual(
+        expect.objectContaining({
+          username: 'foo',
+          status: 'online',
+          roll_counter: 5,
+          coins: 10,
+          twitch_id: 'twitch_id_foo',
+          discord_id: 'discord_id_foo',
+        }),
+      )
+    })
+
+    it('raises error if player is not found', async () => {
+      await db.createPlayer('foo')
+
+      await expect(db.updatePlayer('bar', {})).rejects.toThrowError(
+        `Player bar not found!`,
+      )
+    })
+  })
 })
