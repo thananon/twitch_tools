@@ -21,8 +21,8 @@ jest.spyOn(tmi, "Client").mockImplementation(() => {
   return (client as unknown) as tmi.Client;
 });
 
-export const mockMessage = function (payload: {
-  channel: string;
+export const mockMessage = async function (payload: {
+  channel?: string;
   tags?: {
     // Allow 2-level hash
     [x: string]:
@@ -40,7 +40,7 @@ export const mockMessage = function (payload: {
   payload.self = !!payload.self;
 
   const callback = listeners["message"];
-  callback(payload.channel, payload.tags, payload.message, payload.self);
+  await callback(payload.channel, payload.tags, payload.message, payload.self);
   return unmockedClient;
 };
 

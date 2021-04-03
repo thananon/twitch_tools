@@ -1,4 +1,7 @@
 import tmi from 'tmi.js'
+import { Db } from './db'
+
+const db = new Db()
 
 export async function twitchService() {
   const client = new tmi.Client({
@@ -19,7 +22,7 @@ export async function twitchService() {
 
   await client.connect()
 
-  client.on('message', (channel, _tags, message, self) => {
+  client.on('message', async (channel, tags, message, self) => {
     if (self) return
 
     // ! Commands
@@ -37,7 +40,11 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!coin':
-        console.log('TODO')
+        const username = tags!.username!
+        const player = await db.getPlayerbyUsername(username)
+        if (player)
+          client.say(channel, `@${player.username} มี ${player.coins} armcoin.`)
+        else client.say(channel, `@${username} มี 0 armcoin.`)
         break
       case '!draw':
         console.log('TODO')

@@ -1,11 +1,20 @@
 import tmi from 'tmi.js'
 import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { twitchService } from '../services/twitch'
+import prisma from '../../prisma/client'
 
 jest.mock('tmi.js')
 
 beforeAll(() => {
   jest.clearAllMocks()
+})
+
+beforeEach(async () => {
+  await prisma.player.deleteMany()
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
 })
 
 // Tmi has no type for events :cry:
@@ -42,15 +51,15 @@ it('connects with twitch via tmi', async () => {
 
   expect(tmi.Client).toBeCalledTimes(1)
 
-  mockMessage(exampleMessage)
+  await mockMessage(exampleMessage)
 
   expect(client.on).toBeCalledWith('message', expect.any(Function))
 })
 
 describe('on message event', () => {
   describe('!github', () => {
-    it('makes the bot say repo url to channel', () => {
-      mockMessage({
+    it('makes the bot say repo url to channel', async () => {
+      await mockMessage({
         channel: '#9armbot',
         message: '!github',
       })
@@ -75,7 +84,37 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
-    it('does something', () => {})
+    it('returns 0 armcoins if player not existed', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!coin',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 0 armcoin.`)
+    })
+
+    it("returns player's coin amount", async () => {
+      const username = 'armzi'
+      await prisma.player.create({
+        data: {
+          username,
+          coins: 7,
+        },
+      })
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!coin',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 7 armcoin.`)
+    })
   })
 
   describe('!draw', () => {
