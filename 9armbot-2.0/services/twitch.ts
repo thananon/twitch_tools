@@ -1,19 +1,14 @@
 import tmi from 'tmi.js'
-import fs from 'fs'
-import path from 'path'
-
-let oauth_token = fs.readFileSync(
-  path.resolve(__dirname, '../../9armbot/oauth_token'),
-  'utf8',
-)
 
 export async function twitchService() {
   const client = new tmi.Client({
-    options: { debug: true },
+    options: {
+      debug: [undefined, 'development'].includes(process.env.NODE_ENV),
+    },
     connection: { reconnect: true },
     identity: {
       username: process.env.tmi_username,
-      password: oauth_token,
+      password: process.env.BOTV2_TWITCH_OAUTH_TOKEN,
     },
     channels: [process.env.tmi_channel_name as string],
   })
