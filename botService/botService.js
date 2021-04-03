@@ -2,11 +2,15 @@ const dbService = require("./dbService");
 const io = require("socket.io")(3000);
 const db = new dbService("mongodb://localhost:27017/", "twitch_tools");
 
+const fs = require('fs');
+const twitchClientID = fs.readFileSync("twitch_client_id", "utf8");
+
 async function main() {
     await db.connect();
+    db.setTwitchAPI(twitchClientID);
 
-    /*const fs = require('fs');
-    let jsonData = fs.readFileSync('../players.json', 'utf8');
+    /*const fs = require("fs");
+    let jsonData = fs.readFileSync("../players.json", "utf8");
     let data = JSON.parse(jsonData);
     await db.migrateDatabase(data);*/
 }
@@ -28,6 +32,11 @@ io.on("connection", socket => {
                 }
             });
             return;
+        }
+
+        if (user.twitchID == undefined) {
+            let userID = await db.getIDbyUsername(data.twitchUsername);
+            if (userID != undefined) await db.setPlayerTwitchID(data.twitchUsername, userID);
         }
 
         var coins = user.wallets.twitch;

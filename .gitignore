@@ -1,5 +1,6 @@
 9armbot/oauth_token
 9armbot/discord_token
+botService/twitch_client_id
 node_modules
 9armbot/botstat.json
 9armbot/coins.json
