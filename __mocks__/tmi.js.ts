@@ -18,7 +18,7 @@ export const client = {
 };
 
 jest.spyOn(tmi, "Client").mockImplementation(() => {
-  return client;
+  return (client as unknown) as tmi.Client;
 });
 
 export const mockMessage = function (payload: {

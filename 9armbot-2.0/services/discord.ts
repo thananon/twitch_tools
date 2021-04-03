@@ -1,23 +1,24 @@
-import { customAlphabet } from 'nanoid'
-import { Db } from './db'
+import Discord from 'discord.js'
 
 export async function discordService() {
-  const dbService = new Db()
+  const client = new Discord.Client()
 
-  // Test db reading
-  setInterval(async () => {
-    const data = await dbService.read()
-    console.log('discord read db from dbservice', data)
-  }, 2500)
+  client.on('ready', () => {
+    console.log('Logged into Discord as ' + client.user!.tag)
+  })
 
-  // Test db writing
-  const randomName = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
+  await client.login(process.env.BOTV2_DISCORD_OAUTH_TOKEN)
 
-  setInterval(async () => {
-    console.log(
-      'discord',
-      'test adding random players',
-      await dbService.createPlayer(randomName()),
-    )
-  }, 7000)
+  client.on('message', (msg) => {
+    if (msg.author.bot) return
+
+    // ! Commands
+    switch (msg.content) {
+      case '!github':
+        msg.channel.send('https://github.com/thananon/twitch_tools')
+        break
+      default:
+        break
+    }
+  })
 }
