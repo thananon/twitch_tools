@@ -12,3 +12,6 @@ dist
 # Prisma & SQLite
 prisma/*.db
 *.db-journal
+
+# Dotenv-flow
+.env*.local
