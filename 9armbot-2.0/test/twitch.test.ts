@@ -48,8 +48,6 @@ it('connects with twitch via tmi', async () => {
 })
 
 describe('on message event', () => {
-  // If player message !coin
-  // It relays message to Bot service, with username?
   describe('!github', () => {
     it('makes the bot say repo url to channel', () => {
       mockMessage({
