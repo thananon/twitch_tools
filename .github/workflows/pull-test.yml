@@ -26,6 +26,7 @@ jobs:
           node-version: "14"
           architecture: "x64"
           check-latest: true
+      - uses: c-hive/gha-npm-cache@v1
       - name: Install dependencies
         run: npm install
       - name: Test
@@ -39,6 +40,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v2
+      - uses: c-hive/gha-npm-cache@v1
       - name: Install dependencies
         run: npm install
       - name: Test
