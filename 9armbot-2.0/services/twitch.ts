@@ -13,6 +13,10 @@ export async function twitchService() {
     channels: [process.env.tmi_channel_name as string],
   })
 
+  client.on('connected', () => {
+    console.log('Connected to Twitch')
+  })
+
   await client.connect()
 
   client.on('message', (channel, _tags, message, self) => {
