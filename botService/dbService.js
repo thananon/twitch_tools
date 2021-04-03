@@ -44,8 +44,11 @@ class dbService {
         var user = await this.getPlayerbyUsername(_twitchUsername);
         if (user != undefined) return (undefined);
 
+        var userID = await this.getIDbyUsername(_twitchUsername);
+
         var userData = {
             twitchUsername: _twitchUsername,
+            twitchID: userID,
             wallets: {
                 discord: 0,
                 twitch: 0

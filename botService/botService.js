@@ -24,10 +24,13 @@ io.on("connection", socket => {
     socket.on("getTwitchCoinsByUsername", async (data) => {
         var user = await db.getPlayerbyUsername(data.twitchUsername);
         if (user == undefined) {
+            await db.createPlayer(data.twitchUsername);
+            
             socket.emit("getTwitchCoinsByUsername", {
                 success: false,
                 cause: `ไม่พบ username <${data.twitchUsername}> โปรดใส่ Twitch username..`,
                 data: {
+                    twitchUsername: data.twitchUsername,
                     channelID: data.channelID
                 }
             });
