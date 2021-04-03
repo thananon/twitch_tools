@@ -39,9 +39,15 @@ describe('on message event', () => {
     })
   })
 
-  describe('!command', () => {})
+  describe('!command', () => {
+    it('does something', () => {})
+  })
 
-  describe('!coin', () => {})
+  describe('!coin', () => {
+    it('does something', () => {})
+  })
 
-  describe('!leader', () => {})
+  describe('!leader', () => {
+    it('does something', () => {})
+  })
 })

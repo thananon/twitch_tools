@@ -17,6 +17,12 @@ export async function discordService() {
       case '!github':
         msg.channel.send('https://github.com/thananon/twitch_tools')
         break
+      case '!leader':
+        console.log('TODO')
+        break
+      case '!command':
+        console.log('TODO')
+        break
       default:
         break
     }

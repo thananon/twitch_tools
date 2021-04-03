@@ -63,6 +63,70 @@ describe('on message event', () => {
       )
     })
   })
+
+  describe('!allin', () => {
+    it('does something', () => {})
+  })
+
+  describe('!auction', () => {
+    it('does something', () => {})
+  })
+
+  describe('!botstat', () => {
+    it('does something', () => {})
+  })
+
+  describe('!coin', () => {
+    it('does something', () => {})
+  })
+
+  describe('!draw', () => {
+    it('does something', () => {})
+  })
+
+  describe('!give', () => {
+    it('does something', () => {})
+  })
+
+  describe('!income', () => {
+    it('does something', () => {})
+  })
+
+  describe('!kick', () => {
+    it('does something', () => {})
+  })
+
+  describe('!load', () => {
+    it('does something', () => {})
+  })
+
+  describe('!payday', () => {
+    it('does something', () => {})
+  })
+
+  describe('!raffle', () => {
+    it('does something', () => {})
+  })
+
+  describe('!reset', () => {
+    it('does something', () => {})
+  })
+
+  describe('!save', () => {
+    it('does something', () => {})
+  })
+
+  describe('!sentry', () => {
+    it('does something', () => {})
+  })
+
+  describe('!thanos', () => {
+    it('does something', () => {})
+  })
+
+  describe('!time', () => {
+    it('does something', () => {})
+  })
 })
 
 describe('on subscription event', () => {})
