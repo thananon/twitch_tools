@@ -20,16 +20,18 @@
   "homepage": "https://github.com/thananon/twitch_tools#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "discord.js": "^12.5.3",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "mongodb": "^3.6.5",
     "multer": "^1.4.2",
     "socket.io": "^3.1.1",
+    "socket.io-client": "^4.0.1",
     "tmi.js": "^1.7.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7",
-    "jest": "^26.6.3"
+    "jest": "^26.6.3",
+    "nodemon": "^2.0.7"
   }
 }

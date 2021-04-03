@@ -38,7 +38,7 @@ class dbService {
 
         var res = await database.collection("users").find(query).toArray();
         if (res == undefined) return (undefined);
-        if (res.lenth == 0) return (undefined);
+        if (res.length == 0) return (undefined);
 
         return (res[0]);
     }
@@ -73,7 +73,24 @@ class dbService {
 
         await database.collection("users").updateOne(query, userData);
         return (amount);
-    };
+    }
+
+    async setTwitchCoins(_twitchUsername, amount) {
+        var user = await this.getPlayerbyUsername(_twitchUsername);
+        if (user == undefined) return (undefined);
+
+        var query = {
+            twitchUsername: _twitchUsername
+        }
+
+        user.wallets.twitch = amount;
+        var userData = {
+            $set: user
+        }
+
+        await database.collection("users").updateOne(query, userData);
+        return (amount);
+    }
 
     async deductTwitchCoins(_twitchUsername, amount) {
         var user = await this.getPlayerbyUsername(_twitchUsername);
@@ -105,41 +122,28 @@ class dbService {
 
     async getTopTwitchCoins(n) {
         var query = [
-            { $unwind: "$wallets" },
-            { $sort: { "wallets.twitch": -1 } },
-            {
-                $group: {
-                    _id: "$_id",
-                    twitchUsername: { "$first": "$twitchUsername" },
-                    wallets: { $push: "$wallets" }
-                }
-            }
+            { $sort: { "wallets.twitch": -1 } }
         ];
 
         var res = await database.collection("users").aggregate(query).toArray();
         if (res == undefined) return ([]);
         if (res.length == 0) return ([]);
 
-        res = res.splice(n);
+        res = res.splice(0, n);
         return(res);
     }
 
-    async migrateDatabase(database) {
+    async migrateDatabase(jsonDB) {
+        let counter = 0;
+        let size = jsonDB.length;
 
+        for(var key in jsonDB) {
+            counter++;
+            await this.createPlayer(jsonDB[key].username);
+            await this.setTwitchCoins(jsonDB[key].username, jsonDB[key].coins);
+            console.log(`Migrating ${counter/size * 100}% (${counter}/${size})`);
+        }
     }
 }
 
-
-async function main() {
-    const db = new dbService("mongodb://localhost:27017/", "twitch_tools");
-
-    await db.connect();
-
-    await db.createPlayer("frogkungth");
-
-    var user = await db.getPlayerbyUsername("frogkungth");
-    var coins = await db.getTopTwitchCoins(1);
-    console.log(coins);
-}
-
-main();
+module.exports = dbService
