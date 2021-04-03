@@ -4,6 +4,7 @@ import { discordService } from './services/discord'
 
 dotenvFlow.config({
   default_node_env: 'development',
+  purge_dotenv: true,
 })
 
 async function main() {
