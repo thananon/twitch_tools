@@ -2,6 +2,7 @@
 
 import Discord, { BaseClient } from "discord.js";
 
+const UnmockedDiscord = jest.requireActual("discord.js") as typeof Discord;
 const unmockedClient = new Discord.Client();
 const mockedDiscord = jest.createMockFromModule("discord.js") as typeof Discord;
 
@@ -31,15 +32,18 @@ export const channel = {
 jest.spyOn(Discord, "Client").mockImplementation(() => {
   return (client as unknown) as Discord.Client;
 });
+jest.spyOn(Discord, "MessageEmbed").mockImplementation(() => {
+  return new UnmockedDiscord.MessageEmbed();
+});
 
-export const mockMessage = function (payload: {
+export const mockMessage = async function (payload: {
   channel: any;
   author: any;
   content: string;
 }) {
   const callback = listeners["message"];
   payload.channel.send = channel.send;
-  callback(payload);
+  await callback(payload);
 
   return unmockedClient;
 };

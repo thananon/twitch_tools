@@ -1,11 +1,20 @@
 import Discord from 'discord.js'
 import { channel, client, mockMessage } from '../../__mocks__/discord.js'
 import { discordService } from '../services/discord'
+import prisma from '../../prisma/client'
 
 jest.mock('discord.js')
 
 beforeAll(() => {
   jest.clearAllMocks()
+})
+
+beforeEach(async () => {
+  await prisma.player.deleteMany()
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
 })
 
 const exampleMessage = {
@@ -72,15 +81,15 @@ it('connects with discord', async () => {
 
   expect(Discord.Client).toBeCalledTimes(1)
 
-  mockMessage(exampleMessage)
+  await mockMessage(exampleMessage)
 
   expect(client.on).toBeCalledWith('message', expect.any(Function))
 })
 
 describe('on message event', () => {
   describe('!github', () => {
-    it('makes the bot say repo url to channel', () => {
-      mockMessage({
+    it('makes the bot say repo url to channel', async () => {
+      await mockMessage({
         channel: {},
         author: {},
         content: '!github',
@@ -97,7 +106,53 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
-    it('does something', () => {})
+    it('returns error if username is not supplied', async () => {
+      await mockMessage({
+        channel: {},
+        author: {},
+        content: '!coin',
+      })
+
+      expect(channel.send).toBeCalledWith(
+        'ใส่ username ของ twitch สิวะ ไม่บอกแล้วจะไปรู้ได้ไงว่า id twitch เอ็งคืออะไร คิดดิคิด...',
+      )
+    })
+
+    it('returns not found error if username supplied is not existed in player database', async () => {
+      await mockMessage({
+        channel: {},
+        author: {},
+        content: '!coin foo',
+      })
+
+      expect(channel.send).toBeCalledWith(
+        'ไม่พบ username <foo> โปรดใส่ Twitch username..',
+      )
+    })
+
+    it("returns player's coin amount", async () => {
+      const username = 'foo'
+      await prisma.player.create({
+        data: {
+          username,
+          coins: 7,
+        },
+      })
+
+      await mockMessage({
+        channel: {},
+        author: {},
+        content: '!coin foo',
+      })
+
+      const expectedMessage = new Discord.MessageEmbed()
+        .addField(`<foo>`, `มียอดคงเหลือ 7 armcoin`)
+        .setFooter(
+          'Contribute @ github: https://github.com/thananon/twitch_tools',
+        )
+
+      expect(channel.send).toBeCalledWith(expectedMessage)
+    })
   })
 
   describe('!leader', () => {
