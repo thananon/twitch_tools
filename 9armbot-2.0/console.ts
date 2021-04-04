@@ -2,11 +2,13 @@
  * 9armbot Console
  *   Features:
  *   - db : Database Service [services/db.ts]
+ *   - bot : Bot Service [services/bot.ts]
  */
 
 import repl from 'repl'
 import _ from 'lodash'
 import { Db } from './services/db'
+import commands from './services/bot'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,
@@ -23,6 +25,9 @@ console.log(`Database "${dbName}" loaded, press enter to continue.`)
 //   Since it is asynchronous function you have to use await keyword.
 //   Type `db.` then press Tab to see all available commands
 replServer.context.db = db
+
+// Bot commands eg. `await bot.coins(username)`
+replServer.context.bot = commands
 
 // Lodash (_ is reserved, use l or __ instead)
 replServer.context.l = _
