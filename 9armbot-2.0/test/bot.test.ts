@@ -1,6 +1,14 @@
 import commands from '../services/bot'
 import prisma from '../../prisma/client'
 
+beforeEach(async () => {
+  await prisma.player.deleteMany()
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
+})
+
 describe('commands', () => {
   describe('#coin', () => {
     it('exists', () => {

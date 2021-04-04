@@ -2,6 +2,7 @@ import tmi from 'tmi.js'
 import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
+import commands from '../services/bot'
 
 jest.mock('tmi.js')
 
@@ -84,6 +85,10 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'coin')
+    })
+
     it('returns 0 armcoins if player not existed', async () => {
       await mockMessage({
         channel: '#9armbot',
@@ -93,6 +98,7 @@ describe('on message event', () => {
         },
       })
 
+      expect(commands.coin).toHaveBeenCalledWith('armzi')
       expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 0 armcoin.`)
     })
 
@@ -113,6 +119,7 @@ describe('on message event', () => {
         },
       })
 
+      expect(commands.coin).toHaveBeenCalledWith('armzi')
       expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 7 armcoin.`)
     })
   })

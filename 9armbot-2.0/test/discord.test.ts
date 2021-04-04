@@ -2,6 +2,7 @@ import Discord from 'discord.js'
 import { channel, client, mockMessage } from '../../__mocks__/discord.js'
 import { discordService } from '../services/discord'
 import prisma from '../../prisma/client'
+import commands from '../services/bot'
 
 jest.mock('discord.js')
 
@@ -106,6 +107,10 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'coin')
+    })
+
     it('returns error if username is not supplied', async () => {
       await mockMessage({
         channel: {},
@@ -113,6 +118,7 @@ describe('on message event', () => {
         content: '!coin',
       })
 
+      expect(commands.coin).not.toHaveBeenCalled()
       expect(channel.send).toBeCalledWith(
         'ใส่ username ของ twitch สิวะ ไม่บอกแล้วจะไปรู้ได้ไงว่า id twitch เอ็งคืออะไร คิดดิคิด...',
       )
@@ -125,6 +131,7 @@ describe('on message event', () => {
         content: '!coin foo',
       })
 
+      expect(commands.coin).toHaveBeenCalledWith('foo')
       expect(channel.send).toBeCalledWith(
         'ไม่พบ username <foo> โปรดใส่ Twitch username..',
       )
@@ -151,6 +158,7 @@ describe('on message event', () => {
           'Contribute @ github: https://github.com/thananon/twitch_tools',
         )
 
+      expect(commands.coin).toHaveBeenCalledWith('foo')
       expect(channel.send).toBeCalledWith(expectedMessage)
     })
   })
