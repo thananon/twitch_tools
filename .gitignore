@@ -5,3 +5,5 @@ node_modules
 9armbot/players.json
 package-lock.json
 yarn.lock
+.idea/
+__test__/*.json

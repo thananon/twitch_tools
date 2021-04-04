@@ -24,8 +24,8 @@ var botInfo = {
     level: 1
 };
 
-let player = new Player()
-let discordBot = new DiscordBot(player=player)
+let player = Player.getInstance()
+let discordBot = new DiscordBot()
 discordBot.login(discord_token)
 
 // Graceful Shutdown
@@ -59,20 +59,12 @@ function restoreBotData() {
     }
 }
 
-async function giveCoins_allonline(amount) {
-    let players = await player.getOnlinePlayers();
-    for (let username of players) {
-        player.giveCoins(username, amount)
-    }
-    console.log(`Gave out ${amount} coins to ${players.length} users.`);
-    return players.length;
-}
-
 function baseExp() {
     return 500 + (botInfo.level * 50) - 50;
 }
 
 function feedBot(channel, user, amount) {
+    if (amount <= 0) return;
     if (player.deductCoins(user.username, amount)) {
         botInfo.exp += amount;
         const oldLevel = botInfo.level;
@@ -106,21 +98,22 @@ async function thanos(channel, byUser) {
     let thanosCost = 3000;
     let thanosTimeoutSeconds = 180;
     let casualties = 0;
-    console.log(`Thanos: I am inevitible..`)
+    console.log('Thanos: I am inevitible..')
 
     if (player.deductCoins(byUser.username, thanosCost) || player.isAdmin(byUser.username)) {
         let players = await player.getOnlinePlayers()
         webapp.socket.io().emit("widget::alerts", {
             itemKey: 1
         });
-        for (let username of players) {
+
+        for (let p of players) {
             if (roll(50)) {
                 casualties++;
-                console.log(`${username} got snapped.`);
-                client.timeout(channel, username, thanosTimeoutSeconds, `โดนทานอสดีดนิ้ว`);
+                console.log(`${p.username} got snapped.`);
+                client.timeout(channel, p.username, thanosTimeoutSeconds, 'โดนทานอสดีดนิ้ว');
 
                 webapp.socket.io().emit("widget::killfeed", {
-                    message: `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${casualties})`,
+                    message: `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${p.username}</b> (<i class="fas fa-user-alt-slash"></i>${casualties})`,
                 });
                 await sleep(620);
             }
@@ -132,24 +125,24 @@ async function thanos(channel, byUser) {
 }
 
 function gacha(channel, user, amount) {
+    if (amount <= 0) return;
     let gachaLegendaryRate = 1;
     let gachaMysticRate = 10;
-    let Bonus = 1;
+    let gachaBonus = 1;
     let killfeed_msg = "";
-    if (amount == 0) return;
 
-    let _player = player.getPlayerByUsername(user.username)
-    if (_player && player.deductCoins(_player.username, amount)) {
-        if (_player.coins == 0 && amount >= 10) {
-            Bonus = 2;
+    let _player = player.getOrCreatePlayer(user.username);
+    if (player.deductCoins(_player.username, amount)) {
+        if (_player.coins === 0 && amount >= 10) {
+            gachaBonus = 2;
         }
 
         if (roll(gachaLegendaryRate)) {
-            let multiplier = (5 + Math.random() * 5 + botInfo.level / 100) * Bonus;
+            let multiplier = (5 + Math.random() * 5 + botInfo.level / 100) * gachaBonus;
             let gain = parseInt(amount * multiplier);
             _player.coins += gain
             sessionPayout += gain - amount;
-            if (Bonus != 1) {
+            if (gachaBonus === 2) {
                 client.say(channel, `ALL-IN JACKPOT!! @${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin. armKraab`);
                 killfeed_msg = `<i class="fas fa-star"></i><b class="badge bg-primary">${_player.username}</b> <i class="fas fa-coins"></i> <b class="badge bg-danger">ALL-IN JACKPOT!!!</b> <i class="fas fa-level-up-alt"></i> ${gain} armcoin (${_player.coins})`;
                 discordBot.sendEmbed("ALL-IN JACKPOT", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
@@ -168,7 +161,7 @@ function gacha(channel, user, amount) {
             discordBot.sendEmbed("LUCKY!", `${_player.username} ลงทุน ${amount} -> ได้รางวัล ${gain} armcoin.` )
         } else {
             sessionIncome += amount;
-            if (_player.coins == 0) {
+            if (_player.coins === 0) {
                 killfeed_msg = `<i class="far fa-grin-squint-tears"></i> <b class="badge bg-danger">หมดตัว</b> <b class="badge bg-danger">${_player.username}</b>  <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin`;
             } else {
                 killfeed_msg = `<b class="badge bg-danger">${_player.username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> ${amount} armcoin (${_player.coins})`;
@@ -186,8 +179,7 @@ function gacha(channel, user, amount) {
 
 function timeoutUser(channel, user, duration, reason) {
 
-    // hard coded again. Need priviledge check.
-    if (user.mod || player.isAdmin(user.username)) {
+    if (player.isMod(user.username) || player.isAdmin(user.username)) {
         return;
     }
 
@@ -246,6 +238,9 @@ client.connect();
 client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
+    // remove multiple whitespace
+    message = message.replaceAll(/[\s\t][\s\t]*/ig, ' ').trim()
+
     /* catch custom reward */
     if (tags["custom-reward-id"]) {
         handleChannelPoints(tags.username, tags["custom-reward-id"]);
@@ -273,6 +268,7 @@ client.on('message', (channel, tags, message, self) => {
             if (kick_command < 2) return;
 
             onKick(channel, kick_command.slice(1))
+            return;
         }
 
         /* sentry mode is to toggle message filter on/off. */
@@ -283,16 +279,18 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     /* Give coins to a user. Testing command, only available to me. */
-    let give_re = /^!give\s*([A-Za-z0-9_]*)\s*(\d*)/;
+    let give_re = /^!give\s([a-zA-Z0-9_]+)\s?([0-9]+)?/;
     group = message.match(give_re);
     if (group && player.isAdmin(tags.username)) {
-        if (group[1] && group[2]) {
-            player.giveCoins(group[1], parseInt(group[2]))
+        let amt = 1;
+        if (group[2]) {
+            amt = Number(group[2])
         }
+        player.giveCoins(group[1], amt);
     }
 
     if (message == "!payday" && player.isAdmin(tags.username)) {
-        giveCoins_allonline(1)
+        player.giveCoinsAllOnline(1)
     }
 
     if (message == '!time') {
@@ -340,7 +338,7 @@ client.on('message', (channel, tags, message, self) => {
 
     /* for testing purpose */
     if (message == '!give' && player.isAdmin(tags.username)) {
-        giveCoins_allonline(50).then(function (total) {
+        player.giveCoinsAllOnline(50).then(total => {
             client.say(channel, `gave ${total} users 50 coins.`);
         });
         return;
@@ -355,42 +353,43 @@ client.on('message', (channel, tags, message, self) => {
     if (marketOpen || isSubscriber(tags)) {
         /* query amount of coin */
         if (message == '!coin') {
-            let _player = player.getPlayerByUsername(tags.username)
-            if (_player)
-                client.say(channel, `@${_player.username} มี ${_player.coins} armcoin.`);
-            else
-                client.say(channel, `@${tags.username} มี 0 armcoin.`);
+            let _player = player.getOrCreatePlayer(tags.username);
+            client.say(channel, `@${_player.username} มี ${_player.coins} armcoin.`);
             return;
         }
 
 
         /* usage: !gacha [amount] */
         /* We are trying to control the inflation. The return, on average should be a loss for users. */
-        let gacha_re = /^!gacha\s*(\d*)/;
+        let gacha_re = /^!gacha\s?([0-9]+)?/;
         let group = message.match(gacha_re);
         if (group) {
-            if (!group[1])
-                gacha(channel, tags, 1);
-            else
-                gacha(channel, tags, parseInt(group[1]));
+            let amt = 1;
+            if (group[1]) {
+                amt = Number(group[1]);
+            }
+            gacha(channel, tags, amt);
             return;
         }
 
         if (message == '!allin') {
-            let _player = player.getPlayerByUsername(tags.username)
-            if (_player) {
+            let _player = player.getOrCreatePlayer(tags.username);
+            if (_player.coins > 0) {
                 gacha(channel, tags, _player.coins);
             }
+            return;
         }
         /* This command let user feed the bot with armcoin. */
         /* usage: !feed [amount] */
-        let feed_re = /^!feed\s*(\d*)/;
+        let feed_re = /^!feed\s?([0-9]+)?/;
         group = message.match(feed_re);
         if (group) {
-            if (!group[1])
-                feedBot(channel, tags, 1);
-            else
-                feedBot(channel, tags, parseInt(group[1]));
+            let amt = 1;
+            if (group[1]) {
+                amt = Number(group[1]);
+            }
+            feedBot(channel, tags, amt);
+            return;
         }
 
         /* Raffle -- lucky draw entry */
@@ -493,9 +492,7 @@ async function onKick(channel, user) {
 function subscriptionPayout (channel, username) {
     botInfo.critRate+=0.1;
     client.say(channel, `>> botInfo.critRate+0.1% ด้วยพลังแห่งทุนนิยม (${botInfo.critRate.toFixed(2)}%) <<`);
-    player.giveCoins(username, 10);
-
-    giveCoins_allonline(1).then(function (total) {
+    player.giveCoinsAllOnline(1).then(total => {
         client.say(channel, `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${total} รายได้รับ 1 armcoin.`);
 
         webapp.socket.io().emit("widget::killfeed", {
@@ -505,7 +502,6 @@ function subscriptionPayout (channel, username) {
         webapp.socket.io().emit("widget::killfeed", {
             message: `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 armcoin <i class="fas fa-coins"></i> จากการ Subscribe ของ  <b class="badge bg-primary">${username}</b>`,
         });
-
     });
     player.giveCoins(username, 10)
 }

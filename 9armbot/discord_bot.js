@@ -6,22 +6,16 @@ const fs = require('fs')
 
 class discordBot {
 
-    player = []
-    #discord_client
+    player = Player.getInstance()
+    #discord_client = null
     #default_channel_id = "826104580898816002"
-    
+
     constructor() {
 
     }
 
-    readPlayerData() {
-        let saveData = fs.readFileSync("./players.json", "utf-8")
-        this.player = JSON.parse(saveData)
-    }
-
     getCoins(username) {
-        this.readPlayerData()
-        let p = this.player.find(x=>x.username == username)
+        let p = this.player.getOrNullPlayer(username);
         if (p) return p.coins
         return null
     }
@@ -52,8 +46,7 @@ class discordBot {
     }
 
     showCoinsLeaderboard(channel_id) {
-        this.readPlayerData()
-        let leaders = this.player.sort((a,b) => b["coins"] - a["coins"]).splice(0, 9)
+        let leaders = this.player.getPlayers("coins", "desc").slice(0, 9)
         this.showLeaders(channel_id, leaders)
     }
 

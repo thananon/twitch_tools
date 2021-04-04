@@ -3,7 +3,7 @@ const fs = require('fs');
 const migrate = require('../core/migrate');
 const { playerMigrations } = require('../core/migrations');
 
-class Player{
+class Player {
 
     players = []
     raffleList = []
@@ -17,9 +17,12 @@ class Player{
     options = {
         database_path: "./players.json",
         channel: `${process.env.tmi_channel_name}`,
-        sync_player_time: 15000 // milliseconds
+        sync_player_time: 15000, // milliseconds
+        isMock: false // for testing.
     }
     version = "1.1";
+
+    static #instance = null
 
     constructor(options = {}) {
         this.options = {
@@ -38,6 +41,13 @@ class Player{
         },this.options.sync_player_time)
     }
 
+    static getInstance() {
+        if (this.#instance === null) {
+            this.#instance = new Player()
+        }
+        return this.#instance
+    }
+
     cloneDeep(data){
         let _data = JSON.stringify(data) 
         return JSON.parse(_data)
@@ -50,18 +60,30 @@ class Player{
 
     async syncPlayers(){
         try {
-         const {data} = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`);
+            const {data} = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`);
             // console.log(data)
             // let chatter_count = data.chatter_count
             let chatters = data.chatters
             for(let username of chatters.viewers){
-                this.create(username,1,0,"online")
+                let player = this.getOrCreatePlayer(username);
+                player.role = 'viewer';
+            }
+            // moderator users
+            for (let username of chatters.moderators) {
+                if (username === process.env.tmi_username) {
+                    continue;
+                }
+                let player = this.getOrCreatePlayer(username);
+                player.role = 'moderator';
             }
 
             // set offline status
-            for(let player of this.players){
-                if(!chatters.viewers.find(x=>x == player.username)){
-                    player.status = "offline"
+            const onlineUsers = [...chatters.viewers, ...chatters.moderators];
+            for (let p of this.players) {
+                if (onlineUsers.some(x => x.toLowerCase() === p.username)) {
+                    p.status = "online";
+                } else {
+                    p.status = "offline";
                 }
             }
 
@@ -70,16 +92,24 @@ class Player{
 
 
         } catch (err) {
-            console.error('[syncPlayers] Error', err)
+            if (!this.options.isMock) // for ignore mock test
+                console.error('[syncPlayers] Error', err);
         }
     }
 
     async getOnlinePlayers(){
-        let { data } = await axios.get(`${process.env.twitch_api}/group/user/${this.options.channel}/chatters`)
-        return data.chatters.viewers;
+        await this.syncPlayers();
+        return this.players.filter(x => x.status === "online");
     }
 
-    create(username, level = 1, coins = 0, status = "offline"){
+    // useful when custom create
+    isPlayerExists(username) {
+        username = username.toLowerCase()
+        return this.players.some(x => x.username === username);
+    }
+
+    create(username, level = 1, coins = 0, status = "online") {
+        username = username.toLowerCase()
         const player = {
             version: this.version,
             username: username,
@@ -90,16 +120,22 @@ class Player{
             rollCounter: 0,
             role: "viewer"
         };
-        if(!this.players.find(x=>x.username == player.username)){
-            this.players.push(player)
-        }
+        this.players.push(player);
+        return player;
+    }
+
+    drop(username) {
+        username = username.toLowerCase()
+        return this.players.some((p, i) => {
+            return p.username === username && this.players.splice(i, 1);
+        });
     }
 
     getPlayers(sortBy = null, sort = "asc"){
         let players = this.players
         if(sortBy){
             sort = sort.toLocaleLowerCase()
-            if(sort == "desc"){
+            if(sort === "desc"){
                 players.sort((a,b)=>b[sortBy]-a[sortBy]);
             }else{
                 players.sort((a,b)=>a[sortBy]-b[sortBy]);
@@ -109,14 +145,17 @@ class Player{
     }
 
     getCoinTop(top = 10){
-        let getPlayers = this.getPlayers("coins", "desc")
-        return this.cloneDeep(getPlayers.splice(0,top>0?top:0))
+        return this.getPlayers("coins", "desc").slice(0, top);
     }
 
+    getOrCreatePlayer(username) {
+        return this.getOrNullPlayer(username) || this.create(username);
+    }
 
-    getPlayerByUsername(username){
-        let player = this.players.find(x=>x.username == username)
-        return player || null;
+    getOrNullPlayer(username) {
+        username = username.toLowerCase()
+        let player = this.players.find(x => x.username === username);
+        return player || null
     }
 
     startRaffle(amount) {
@@ -134,8 +173,8 @@ class Player{
     joinRaffle(username, total_tickets) {
         let purchased = 0
         while (this.deductCoins(username, this.rafflePrice) && purchased < total_tickets) {
-                this.raffleList.push(username)
-                purchased++
+            this.raffleList.push(username)
+            purchased++
         }
         console.log(`${username} purchased ${purchased} raffle tickets`)
         return purchased
@@ -161,7 +200,7 @@ class Player{
 
     auction(username, amount) {
         amount = Number(amount)
-        let player = this.players.find(x=>x.username == username)
+        let player = this.getOrNullPlayer(username);
         if (!player) return false
         if (player.coins && player.coins >= amount && amount > this.auctionBid) {
             this.auctionLeader = username
@@ -173,35 +212,38 @@ class Player{
 
     giveCoins(username, amount){
         username = username.toLocaleLowerCase()
-        if(!Number(amount)){
-            return
-        }
         amount = Number(amount)
-        let player = this.players.find(x=>x.username == username)
-        if(player){
-            player.coins+=amount
-        }else{
-            this.create(username,1,amount, "online")
+        let player = this.getOrCreatePlayer(username);
+        if (amount && amount > 0) {
+            player.coins += amount;
+            return true;
         }
+        return false;
+    }
+
+    async giveCoinsAllOnline(amount) {
+        amount = Number(amount);
+        let ps = await this.getOnlinePlayers();
+        return ps.filter(p => this.giveCoins(p.username, amount)).length;
     }
 
     deductCoins(username, amount) {
-        amount = Number(amount)
-        let player = this.players.find(x=>x.username == username)
-        if(amount && player && player.coins >= amount){
-            player.coins-=amount
-            return true
+        amount = Number(amount);
+        let player = this.getOrCreatePlayer(username);
+        if (amount && player.coins >= amount) {
+            player.coins -= amount;
+            return true;
         }
-        return false
+        return false;
     }
 
     isAdmin(username){
-        if(username == process.env.admin_username){
-            return true
-        }
-        return false
+        return username === process.env.admin_username;
     }
 
+    isMod(username) {
+        return username === process.env.tmi_username || this.players.some(p => p.username === username && p.role === "moderator");
+    }
 }
 
 module.exports = Player
