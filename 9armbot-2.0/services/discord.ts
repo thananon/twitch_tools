@@ -1,6 +1,8 @@
 import Discord from 'discord.js'
 import commands from './bot'
-import { testWidget } from './widget'
+import Widget from './widget'
+
+const widget = new Widget(false)
 
 const helpers = {
   buildEmbedMessage: (
@@ -73,7 +75,7 @@ export async function discordService() {
         console.log('TODO')
         break
       case '!testwidget':
-        await testWidget()
+        await widget.testWidget()
         break
       default:
         break
