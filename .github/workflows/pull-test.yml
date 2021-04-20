@@ -1,26 +1,49 @@
 name: PR unit test
 
 on:
-  pull_request:
-    paths:
-      - '9armbot/**'
-      - 'core/**'
-      - '__test__/**'
+  push:
     branches:
       - main
+      - v2.0.0
+  pull_request:
+    paths:
+      - "9armbot/**"
+      - "9armbot-2.0/**"
+      - "core/**"
+      - "__test__/**"
+    branches:
+      - main
+      - v2.0.0
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
-          architecture: 'x64'
+          node-version: "14"
+          architecture: "x64"
           check-latest: true
+      - uses: c-hive/gha-npm-cache@v1
       - name: Install dependencies
         run: npm install
       - name: Test
         run: npm test
+      - name: Test (2.0)
+        run: npm run test-2.0
+
+  build-linux:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+      - uses: c-hive/gha-npm-cache@v1
+      - name: Install dependencies
+        run: npm install
+      - name: Test
+        run: npm test
+      - name: Test (2.0)
+        run: npm run test-2.0
