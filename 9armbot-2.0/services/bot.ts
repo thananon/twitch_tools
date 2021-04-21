@@ -2,17 +2,22 @@ import { Db } from './db'
 import gacha from './commands/gacha'
 const db = new Db()
 
-export interface Result {
-  error?: string
-  data?: number
+export type Result = DataResult | ErrorResult
+
+export interface DataResult {
+  data: number | Record<string, unknown>
 }
 
-export interface ErrorResult extends Result {
+export interface ErrorResult {
   error: string
 }
 
-interface CoinResult extends Result {
+interface CoinResult extends DataResult {
   data: number
+}
+
+export function isError(result: Result): result is ErrorResult {
+  return (result as ErrorResult).error !== undefined
 }
 
 export const commands = {

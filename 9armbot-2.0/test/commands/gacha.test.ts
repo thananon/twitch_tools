@@ -59,7 +59,12 @@ describe('gacha', () => {
       // Check result
       expect(result).toEqual(
         expect.objectContaining({
-          data: 9,
+          data: {
+            state: 'lose',
+            bet: 1,
+            win: 0,
+            balance: 9,
+          },
         }),
       )
 
@@ -75,7 +80,12 @@ describe('gacha', () => {
       // Check result
       expect(result).toEqual(
         expect.objectContaining({
-          data: 10 - 3,
+          data: {
+            state: 'lose',
+            bet: 3,
+            win: 0,
+            balance: 7,
+          },
         }),
       )
 
@@ -139,7 +149,12 @@ describe('gacha', () => {
       // Check result
       expect(result).toEqual(
         expect.objectContaining({
-          data: 10 + 3,
+          data: {
+            state: 'win',
+            bet: 3,
+            win: 6,
+            balance: 13,
+          },
         }),
       )
 

@@ -1,5 +1,5 @@
 import tmi from 'tmi.js'
-import commands from './bot'
+import commands, { isError } from './bot'
 
 type ICommand = [string, string | undefined]
 
@@ -48,7 +48,7 @@ export async function twitchService() {
       case '!coin':
         result = await commands.coin(username)
 
-        if (result.error) {
+        if (isError(result)) {
           await client.say(channel, `@${username} มี 0 armcoin.`)
           return
         }
@@ -69,6 +69,25 @@ export async function twitchService() {
         }
 
         result = await commands.gacha(username, amount)
+
+        if (isError(result)) {
+          if (result.error == 'not_enough_coin') {
+            await client.say(channel, `@${username} มี ArmCoin ไม่พอ!.`)
+          }
+          return
+        }
+
+        if (result.data.state == 'win') {
+          await client.say(
+            channel,
+            `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+          )
+        } else if (result.data.state == 'lose') {
+          await client.say(
+            channel,
+            `@${username} ลงทุน ${result.data.bet} -> แตก! (${result.data.balance}).`,
+          )
+        }
 
         break
       case '!give':
