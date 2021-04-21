@@ -1,13 +1,13 @@
 import { Db } from './db'
-
+import gacha from './commands/gacha'
 const db = new Db()
 
-interface Result {
+export interface Result {
   error?: string
   data?: number
 }
 
-interface ErrorResult extends Result {
+export interface ErrorResult extends Result {
   error: string
 }
 
@@ -28,6 +28,7 @@ export const commands = {
 
     return { data: player.coins }
   },
+  gacha,
 }
 
 export default commands

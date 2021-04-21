@@ -60,9 +60,6 @@ export async function twitchService() {
       case '!kick':
         console.log('TODO')
         break
-      case '!load':
-        console.log('TODO')
-        break
       case '!payday':
         console.log('TODO')
         break
@@ -70,9 +67,6 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!reset':
-        console.log('TODO')
-        break
-      case '!save':
         console.log('TODO')
         break
       case '!sentry':
