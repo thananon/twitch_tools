@@ -1,6 +1,8 @@
 import tmi from 'tmi.js'
 import commands from './bot'
 
+type ICommand = [string, string | undefined]
+
 export async function twitchService() {
   const client = new tmi.Client({
     options: {
@@ -22,9 +24,15 @@ export async function twitchService() {
 
   client.on('message', async (channel, tags, message, self) => {
     if (self) return
+    if (message[0] !== '!') return
+
+    const username = tags!.username!
+    const [cmdName, cmdArg] = message.split(/\s+/, 2) as ICommand
+
+    let result
 
     // ! Commands
-    switch (message) {
+    switch (cmdName) {
       case '!github':
         client.say(channel, 'https://github.com/thananon/twitch_tools')
         break
@@ -38,8 +46,7 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!coin':
-        const username = tags!.username!
-        const result = await commands.coin(username)
+        result = await commands.coin(username)
 
         if (result.error) {
           await client.say(channel, `@${username} มี 0 armcoin.`)
@@ -50,6 +57,19 @@ export async function twitchService() {
         break
       case '!draw':
         console.log('TODO')
+        break
+      case '!gacha':
+        let amount
+
+        if (cmdArg) {
+          let group = cmdArg.match(/(\d+)/)
+          if (group && group[1]) {
+            amount = Number.parseInt(group[1])
+          }
+        }
+
+        result = await commands.gacha(username, amount)
+
         break
       case '!give':
         console.log('TODO')

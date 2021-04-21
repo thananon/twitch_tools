@@ -11,7 +11,7 @@ async function gacha(
   username?: string | null,
   amount: number = 1,
 ): Promise<GachaResult | ErrorResult> {
-  if (!username) {
+  if (!username || amount <= 0 || Number.isNaN(amount)) {
     return { error: 'input_invalid' }
   }
 

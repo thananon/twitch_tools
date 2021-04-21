@@ -28,6 +28,30 @@ describe('gacha', () => {
     expect(commands.gacha).toBeDefined()
   })
 
+  describe('bad amount', () => {
+    it('returns error for negative coins', async () => {
+      const result = await commands.gacha(username, -1)
+
+      // Check result
+      expect(result).toEqual(
+        expect.objectContaining({
+          error: 'input_invalid',
+        }),
+      )
+    })
+
+    it('returns error for NaN coins', async () => {
+      const result = await commands.gacha(username, NaN)
+
+      // Check result
+      expect(result).toEqual(
+        expect.objectContaining({
+          error: 'input_invalid',
+        }),
+      )
+    })
+  })
+
   describe('losing', () => {
     it('deducts 1 coin from player if not specify amount', async () => {
       const result = await commands.gacha(username)

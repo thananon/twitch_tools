@@ -6,8 +6,9 @@ import commands from '../services/bot'
 
 jest.mock('tmi.js')
 
-beforeAll(() => {
+beforeAll(async () => {
   jest.clearAllMocks()
+  await twitchService()
 })
 
 beforeEach(async () => {
@@ -48,8 +49,6 @@ const exampleMessage = {
 }
 
 it('connects with twitch via tmi', async () => {
-  await twitchService()
-
   expect(tmi.Client).toBeCalledTimes(1)
 
   await mockMessage(exampleMessage)
@@ -73,7 +72,7 @@ describe('on message event', () => {
   })
 
   describe('!allin', () => {
-    it('does something', () => {})
+    it.only('does something', () => {})
   })
 
   describe('!auction', () => {
@@ -121,6 +120,49 @@ describe('on message event', () => {
 
       expect(commands.coin).toHaveBeenCalledWith('armzi')
       expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 7 armcoin.`)
+    })
+  })
+
+  describe('!gacha', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'gacha')
+    })
+
+    it('calls gacha command with amount extracted from message', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(1)
+      expect(commands.gacha).toBeCalledWith('armzi')
+    })
+
+    it('calls gacha command with specified amount casted to integer', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha 3',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(1)
+      expect(commands.gacha).toBeCalledWith(['armzi', 3])
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha 123.45',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(2)
+      expect(commands.gacha).toBeCalledWith(['armzi', 123])
     })
   })
 
