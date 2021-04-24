@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/thananon/twitch_tools#readme",
   "dependencies": {
-    "@prisma/client": "^2.20.1",
+    "@prisma/client": "^2.21.2",
     "axios": "^0.21.1",
     "discord.js": "^12.5.2",
     "dotenv": "^8.2.0",
