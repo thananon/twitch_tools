@@ -19,6 +19,7 @@ beforeEach(async () => {
 afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
+
 afterAll(async () => {
   await prisma.$disconnect()
 })

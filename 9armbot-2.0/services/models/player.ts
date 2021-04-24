@@ -3,14 +3,21 @@ import { Player as PrismaPlayer } from '@prisma/client'
 
 const db = new Db()
 
-// TODO: Add tests
 class Player {
   username: string
   info: PrismaPlayer
 
+  // Note : use Player.withUsername to automatically load player info
   constructor(username: string) {
     this.username = username
-    this.readInfo()
+  }
+
+  public static async withUsername(username: string) {
+    const player = new Player(username)
+
+    await player.readInfo()
+
+    return player
   }
 
   async readInfo(): Promise<PrismaPlayer> {
@@ -32,6 +39,7 @@ class Player {
   async giveCoin(amount: number) {
     const currentCoins = await this.coins()
     await db.updatePlayer(this.username, { coins: currentCoins + amount })
+    return currentCoins + amount
   }
 
   /* Try to deduct player's coin with amount given.
