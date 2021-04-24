@@ -54,6 +54,14 @@ class Player {
       return false
     }
   }
+
+  async isAdmin() {
+    if (!this.info) {
+      await this.readInfo()
+    }
+
+    return this.info.is_admin
+  }
 }
 
 export default Player

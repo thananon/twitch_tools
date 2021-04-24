@@ -94,4 +94,22 @@ describe('Player', () => {
       expect(await player.coins()).toEqual(10)
     })
   })
+
+  describe('#isAdmin', () => {
+    it('returns true if player is admin', async () => {
+      await prisma.player.create({ data: { username: 'foo', coins: 10 } })
+      await prisma.player.create({
+        data: { username: 'bar', coins: 10, is_admin: true },
+      })
+
+      const player = new Player('foo')
+      const adminPlayer = new Player('bar')
+
+      await player.readInfo()
+      await adminPlayer.readInfo()
+
+      expect(await player.isAdmin()).toBeFalsy()
+      expect(await adminPlayer.isAdmin()).toBeTruthy()
+    })
+  })
 })
