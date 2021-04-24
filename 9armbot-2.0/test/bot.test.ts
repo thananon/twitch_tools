@@ -1,5 +1,6 @@
 import commands from '../services/bot'
 import prisma from '../../prisma/client'
+import Player from '../services/models/player'
 
 beforeEach(async () => {
   await prisma.player.deleteMany()

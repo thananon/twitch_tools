@@ -125,7 +125,15 @@ describe('on message event', () => {
 
   describe('!gacha', () => {
     beforeEach(() => {
-      jest.spyOn(commands, 'gacha')
+      jest.spyOn(commands, 'gacha').mockResolvedValue({
+        data: { state: 'win', bet: 1, win: 2, balance: 3 },
+      })
+    })
+
+    afterEach(() => {
+      ;(commands.gacha as jest.MockedFunction<
+        typeof commands.gacha
+      >).mockReset()
     })
 
     it('calls gacha command with amount extracted from message', async () => {
@@ -138,7 +146,7 @@ describe('on message event', () => {
       })
 
       expect(commands.gacha).toBeCalledTimes(1)
-      expect(commands.gacha).toBeCalledWith('armzi')
+      expect(commands.gacha).toBeCalledWith('armzi', undefined)
     })
 
     it('calls gacha command with specified amount casted to integer', async () => {
@@ -151,7 +159,7 @@ describe('on message event', () => {
       })
 
       expect(commands.gacha).toBeCalledTimes(1)
-      expect(commands.gacha).toBeCalledWith(['armzi', 3])
+      expect(commands.gacha).toBeCalledWith('armzi', 3)
 
       await mockMessage({
         channel: '#9armbot',
@@ -162,7 +170,7 @@ describe('on message event', () => {
       })
 
       expect(commands.gacha).toBeCalledTimes(2)
-      expect(commands.gacha).toBeCalledWith(['armzi', 123])
+      expect(commands.gacha).toBeCalledWith('armzi', 123)
     })
   })
 
@@ -171,7 +179,30 @@ describe('on message event', () => {
   })
 
   describe('!give', () => {
-    it('does something', () => {})
+    beforeEach(() => {
+      jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+        data: 10,
+      })
+    })
+
+    afterEach(() => {
+      ;(commands.giveCoin as jest.MockedFunction<
+        typeof commands.giveCoin
+      >).mockReset()
+    })
+
+    it('sends give command with username and coin amount', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!give foo 10',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.giveCoin).toBeCalledTimes(1)
+      expect(commands.giveCoin).toBeCalledWith('armzi', 'foo', 10)
+    })
   })
 
   describe('!income', () => {

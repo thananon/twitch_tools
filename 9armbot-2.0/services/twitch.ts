@@ -1,8 +1,6 @@
 import tmi from 'tmi.js'
 import commands, { isError } from './bot'
 
-type ICommand = [string, string | undefined]
-
 export async function twitchService() {
   const client = new tmi.Client({
     options: {
@@ -27,9 +25,9 @@ export async function twitchService() {
     if (message[0] !== '!') return
 
     const username = tags!.username!
-    const [cmdName, cmdArg] = message.split(/\s+/, 2) as ICommand
+    const [cmdName, ...cmdArgs] = message.split(/\s+/)
 
-    let result
+    let result, amount
 
     // ! Commands
     switch (cmdName) {
@@ -59,10 +57,8 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!gacha':
-        let amount
-
-        if (cmdArg) {
-          let group = cmdArg.match(/(\d+)/)
+        if (cmdArgs.length) {
+          let group = cmdArgs[0].match(/(\d+)/)
           if (group && group[1]) {
             amount = Number.parseInt(group[1])
           }
@@ -91,7 +87,21 @@ export async function twitchService() {
 
         break
       case '!give':
-        console.log('TODO')
+        if (cmdArgs) {
+          let group = cmdArgs.join(' ').match(/(\S+)\s(\d+)?/)
+          if (group && group[1] && group[2]) {
+            amount = Number.parseInt(group[2])
+
+            result = await commands.giveCoin(username, group[1], amount)
+
+            if (!isError(result)) {
+              await client.say(
+                channel,
+                `@${username} เสกเงินให้ ${group[1]} จำนวน ${amount} (${result.data}).`,
+              )
+            }
+          }
+        }
         break
       case '!income':
         console.log('TODO')

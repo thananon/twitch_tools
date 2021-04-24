@@ -1,5 +1,7 @@
 import { Db } from './db'
 import gacha from './commands/gacha'
+import giveCoin from './commands/give-coin'
+
 const db = new Db()
 
 export type Result = DataResult | ErrorResult
@@ -34,6 +36,7 @@ export const commands = {
     return { data: player.coins }
   },
   gacha,
+  giveCoin,
 }
 
 export default commands
