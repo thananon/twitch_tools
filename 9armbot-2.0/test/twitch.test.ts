@@ -72,7 +72,7 @@ describe('on message event', () => {
   })
 
   describe('!allin', () => {
-    it.only('does something', () => {})
+    it('does something', () => {})
   })
 
   describe('!auction', () => {
