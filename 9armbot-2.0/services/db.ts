@@ -35,7 +35,7 @@ export class Db implements DbInterface {
 
     const newPlayer = await prisma.player.create({
       data: {
-        username,
+        username: username.toLowerCase(),
       },
     })
 
@@ -51,7 +51,7 @@ export class Db implements DbInterface {
 
     player = await prisma.player.update({
       where: {
-        username,
+        username: username.toLowerCase(),
       },
       data: {
         status: data.status,
@@ -67,7 +67,7 @@ export class Db implements DbInterface {
 
   public async getPlayerbyUsername(username: string) {
     return await prisma.player.findFirst({
-      where: { username },
+      where: { username: username.toLowerCase() },
     })
   }
 }
