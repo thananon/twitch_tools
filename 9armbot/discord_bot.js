@@ -95,7 +95,7 @@ class discordBot {
             if (group && group[1]) {
                 group[1] = group[1].toLowerCase();
                 let coin = this.getCoins(group[1])
-                if (coin) {
+                if (coin != null) {
                     this.showCoinsDialog(msg.channel.id, group[1], coin)
                 } else {
                     this.sendChat(msg.channel.id, `ไม่พบ username <${group[1]}> โปรดใส่ Twitch username..`)
