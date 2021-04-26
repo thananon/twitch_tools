@@ -1,4 +1,4 @@
-import { ErrorResult, DataResult } from '../bot'
+import { ErrorResult, DataResult, isError } from '../bot'
 import Player from '../models/player'
 
 export interface GiveCoinResult extends DataResult {
@@ -23,4 +23,17 @@ async function giveCoin(
   return { data: currentCoin }
 }
 
-export default giveCoin
+async function giveCoinToList (
+  fromUsername: string,
+  giveoutList: Array<string>,
+  amount: number = 1
+): Promise<GiveCoinResult | ErrorResult> {
+  giveoutList.forEach(async function(toUsername) {
+    let e = await giveCoin(fromUsername, toUsername, amount)
+    if (isError(e)) console.log(e)
+    console.log(`give ${toUsername} ${amount} armcoins.`)
+  })
+  return {data: giveoutList.length} // TODO: have different return code
+}
+
+export { giveCoin, giveCoinToList }

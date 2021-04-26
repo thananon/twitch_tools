@@ -1,6 +1,20 @@
 import tmi from 'tmi.js'
 import commands, { isError } from './bot'
 
+const axios = require('axios')
+
+/* return online { chatters, mods, total } */
+async function getViewerList() {
+  const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
+  const { data } = await axios.get(url)
+  console.log(data)
+  return {
+    viewers: data.chatters.viewers,
+    mods: data.chatters.moderators,
+    total: data.chatter_count
+  }
+}
+
 export async function twitchService() {
   const client = new tmi.Client({
     options: {
@@ -33,6 +47,10 @@ export async function twitchService() {
     switch (cmdName) {
       case '!github':
         client.say(channel, 'https://github.com/thananon/twitch_tools')
+        break
+      case '!fetch':
+        // test cmd; precursor to give coin to everyone.
+        console.log(getViewerList())
         break
       case '!allin':
         console.log('TODO')
@@ -110,7 +128,10 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!payday':
-        console.log('TODO')
+        let twitch = await getViewerList()
+        let rt = await commands.giveCoinToList(username, twitch.viewers, 1)
+        if (isError(rt)) console.log("giveToList Failed") // TODO
+
         break
       case '!raffle':
         console.log('TODO')
