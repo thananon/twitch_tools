@@ -11,7 +11,7 @@ async function getViewerList() {
   return {
     viewers: data.chatters.viewers,
     mods: data.chatters.moderators,
-    total: data.chatter_count
+    total: data.chatter_count,
   }
 }
 
@@ -21,6 +21,7 @@ async function payday(amount: number = 1) {
   /* Give coins to online players/mods */
   await commands.giveCoinToList(twitch.viewers, amount)
   await commands.giveCoinToList(twitch.mods, amount)
+
   console.log(`payday: ${amount} armcoin to ${twitch.total} viewers.`)
 }
 
@@ -146,9 +147,11 @@ export async function twitchService() {
         break
       case '!payday':
         let player = await Player.withUsername(username)
-        if (await player.isAdmin() === true) await payday()
+        if (player.info.is_admin) {
+          await payday()
+        }
         break
-      case '!payout': /* placeholder for subscription event */
+      case '!payout': // placeholder for subscription event
         await subscriptionPayout(username)
         break
       case '!raffle':

@@ -55,7 +55,7 @@ class Player {
     }
   }
 
- async isAdmin() {
+  async isAdmin() {
     if (!this.info) {
       await this.readInfo()
     }
