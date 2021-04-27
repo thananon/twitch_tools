@@ -26,22 +26,7 @@ afterAll(async () => {
 })
 
 describe('giveCoin', () => {
-  describe('when sender is not admin', () => {
-    it('does nothing', async () => {
-      const result = await commands.giveCoin('foo', 'bar')
-
-      expect(result).toEqual({ error: 'not_admin' })
-    })
-  })
-
-  describe('when sender is admin', () => {
     it('gives 10 coins to player by default', async () => {
-      await prisma.player.update({
-        where: { username },
-        data: {
-          is_admin: true,
-        },
-      })
 
       await prisma.player.create({
         data: {
@@ -50,11 +35,10 @@ describe('giveCoin', () => {
         },
       })
 
-      const result = await commands.giveCoin('foo', 'bar')
+      const result = await commands.giveCoin('bar')
+      let player = await Player.withUsername('bar')
 
       expect(result).toEqual({ data: 10 + 5 })
-
-      expect(await new Player('bar').coins()).toEqual(15)
-    })
-  })
+      expect(await player.coins()).toEqual(15)
+   })
 })

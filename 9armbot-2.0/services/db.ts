@@ -59,6 +59,7 @@ export class Db implements DbInterface {
         roll_counter: data.roll_counter,
         twitch_id: data.twitch_id,
         discord_id: data.discord_id,
+        is_admin: data.is_admin,
       },
     })
 

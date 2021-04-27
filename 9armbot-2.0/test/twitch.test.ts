@@ -201,7 +201,7 @@ describe('on message event', () => {
       })
 
       expect(commands.giveCoin).toBeCalledTimes(1)
-      expect(commands.giveCoin).toBeCalledWith('armzi', 'foo', 10)
+      expect(commands.giveCoin).toBeCalledWith('foo', 10)
     })
   })
 

@@ -1,5 +1,6 @@
 import tmi from 'tmi.js'
 import commands, { isError } from './bot'
+import Player from './models/player'
 
 const axios = require('axios')
 
@@ -7,12 +8,28 @@ const axios = require('axios')
 async function getViewerList() {
   const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
   const { data } = await axios.get(url)
-  console.log(data)
   return {
     viewers: data.chatters.viewers,
     mods: data.chatters.moderators,
     total: data.chatter_count
   }
+}
+
+async function payday(amount: number = 1) {
+  const twitch = await getViewerList()
+
+  /* Give coins to online players/mods */
+  await commands.giveCoinToList(twitch.viewers, amount)
+  await commands.giveCoinToList(twitch.mods, amount)
+  console.log(`payday: ${amount} armcoin to ${twitch.total} viewers.`)
+}
+
+async function subscriptionPayout(username: string) {
+  console.log(`subscriptionPayout: ${username}`)
+  let player = await Player.withUsername(username)
+  player.giveCoin(10)
+  await payday()
+  // TODO: emit msg/notification
 }
 
 export async function twitchService() {
@@ -110,7 +127,7 @@ export async function twitchService() {
           if (group && group[1] && group[2]) {
             amount = Number.parseInt(group[2])
 
-            result = await commands.giveCoin(username, group[1], amount)
+            result = await commands.giveCoin(group[1], amount)
 
             if (!isError(result)) {
               await client.say(
@@ -128,10 +145,11 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!payday':
-        let twitch = await getViewerList()
-        let rt = await commands.giveCoinToList(username, twitch.viewers, 1)
-        if (isError(rt)) console.log("giveToList Failed") // TODO
-
+        let player = await Player.withUsername(username)
+        if (await player.isAdmin() === true) await payday()
+        break
+      case '!payout': /* placeholder for subscription event */
+        await subscriptionPayout(username)
         break
       case '!raffle':
         console.log('TODO')
