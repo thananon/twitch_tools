@@ -1,5 +1,6 @@
 import { DataResult } from '../bot'
 import Player from '../models/player'
+import prisma from '../../../prisma/client'
 
 export interface GiveCoinResult extends DataResult {
   data: number
@@ -14,14 +15,16 @@ async function giveCoin(
   return { data: currentCoin }
 }
 
-async function giveCoinToList (
+async function giveCoinToList(
   giveoutList: Array<string>,
-  amount: number = 1
+  amount: number = 1,
 ): Promise<GiveCoinResult> {
-  giveoutList.forEach(async function(toUsername) {
-    await giveCoin(toUsername, amount)
+  const players = await prisma.player.updateMany({
+    where: { username: { in: giveoutList.map((name) => name.toLowerCase()) } },
+    data: { coins: { increment: amount } },
   })
-  return {data: giveoutList.length} // TODO: have different return code
+
+  return { data: players.count } // TODO: have different return code
 }
 
 export { giveCoin, giveCoinToList }
