@@ -53,9 +53,9 @@ export async function twitchService() {
   await client.connect()
 
   client.on('join', async (_channel, username, _self) => {
-    const player = Player.withUsername(username)
+    const player = await Player.withUsername(username)
 
-    console.log(`${(await player).info.username} has joined chat!`)
+    console.log(`${player.info.username} has joined chat!`)
   })
 
   client.on('part', (_channel, username, _self) => {
