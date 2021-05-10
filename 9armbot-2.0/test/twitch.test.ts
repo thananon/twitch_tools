@@ -1,6 +1,16 @@
+const mockFeed = jest.fn()
+jest.mock('../services/widget', () => {
+  return jest.fn().mockImplementation(() => {
+    return { feed: mockFeed }
+  })
+})
+
 import tmi from 'tmi.js'
+import axios from 'axios'
+import MockAdapter from 'axios-mock-adapter'
+
 import { client, mockMessage } from '../../__mocks__/tmi.js'
-import { twitchService } from '../services/twitch'
+import { subscriptionPayout, twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
 
@@ -246,7 +256,40 @@ describe('on message event', () => {
   })
 })
 
-describe('on subscription event', () => {})
+describe('on subscription event', () => {
+  describe('#subscriptionPayout function', () => {
+    beforeEach(() => {
+      // Mock Twitch chatters API
+      const mock = new MockAdapter(axios)
+      const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
+      mock.onGet(url).reply(200, {
+        chatter_count: 3,
+        chatters: {
+          viewers: ['foo'],
+          moderators: ['bar'],
+          vips: ['baz'],
+        },
+      })
+    })
+
+    it('gives 10 coins to subscriber & 1 coin to 3 viewers', async () => {
+      const username = 'foo'
+      const total = 3
+
+      await subscriptionPayout(username)
+
+      expect(mockFeed).toHaveBeenCalledTimes(2)
+      expect(mockFeed).toHaveBeenNthCalledWith(
+        1,
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 armcoin จากการ Subscribe`,
+      )
+      expect(mockFeed).toHaveBeenNthCalledWith(
+        2,
+        `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 armcoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${username}</b>`,
+      )
+    })
+  })
+})
 
 describe('on resub event', () => {})
 

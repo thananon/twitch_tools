@@ -29,11 +29,17 @@ class Widget {
     return this.clientOnly ? 'widget' : `widget::${name}`
   }
 
-  testWidget(message: string = 'test') {
-    this.socket.emit(this.getSocketName('killfeed'), {
-      id: 'killfeed',
-      message: `<b class="badge bg-primary">${message}</b> <i class="fas fa-pizza-slice"></i>`,
+  feed(message: string, feedType: string = 'killfeed') {
+    this.socket.emit(this.getSocketName(feedType), {
+      id: feedType,
+      message,
     })
+  }
+
+  testWidget(testMessage: string = 'test') {
+    this.feed(
+      `<b class="badge bg-primary">${testMessage}</b> <i class="fas fa-pizza-slice"></i>`,
+    )
   }
 }
 

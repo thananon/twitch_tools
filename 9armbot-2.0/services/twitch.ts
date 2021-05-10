@@ -3,34 +3,45 @@ import tmi from 'tmi.js'
 import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
+import Widget from './widget'
+
+const widget = new Widget(false)
 
 /* return online { chatters, mods, total } */
-async function getViewerList() {
+async function getTwitchChatters() {
   const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
   const { data } = await axios.get(url)
+
   return {
-    viewers: data.chatters.viewers,
-    mods: data.chatters.moderators,
-    total: data.chatter_count,
+    viewers: data.chatters.viewers as string[],
+    mods: data.chatters.moderators as string[],
+    vips: data.chatters.vips as string[],
   }
 }
 
-async function payday(amount: number = 1) {
-  const twitch = await getViewerList()
+async function payday(amount: number = 1, subscriber: string) {
+  const chatters = await getTwitchChatters()
+  const players = [...chatters.vips, ...chatters.viewers, ...chatters.mods]
+  await commands.giveCoinToList(players, amount)
 
-  /* Give coins to online players/mods */
-  await commands.giveCoinToList(twitch.viewers, amount)
-  await commands.giveCoinToList(twitch.mods, amount)
+  widget.feed(
+    `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${players.length}</b> คนได้รับ 1 armcoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${subscriber}</b>`,
+  )
 
-  console.log(`payday: ${amount} armcoin to ${twitch.total} viewers.`)
+  return {
+    playersPaidCount: players.length,
+  }
 }
 
-async function subscriptionPayout(username: string) {
-  console.log(`subscriptionPayout: ${username}`)
+export async function subscriptionPayout(username: string) {
   let player = await Player.withUsername(username)
-  player.giveCoin(10)
-  await payday()
-  // TODO: emit msg/notification
+  await player.giveCoin(10)
+
+  widget.feed(
+    `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 armcoin จากการ Subscribe`,
+  )
+
+  return await payday(1, username)
 }
 
 export async function twitchService() {
@@ -78,7 +89,7 @@ export async function twitchService() {
         break
       case '!fetch':
         // test cmd; precursor to give coin to everyone.
-        console.log(getViewerList())
+        console.log(getTwitchChatters())
         break
       case '!allin':
         console.log('TODO')
@@ -158,11 +169,18 @@ export async function twitchService() {
       case '!payday':
         let player = await Player.withUsername(username)
         if (player.info.is_admin) {
-          await payday()
+          await payday(1, username)
         }
         break
       case '!payout': // placeholder for subscription event
-        await subscriptionPayout(username)
+        if (devMode) {
+          const { playersPaidCount } = await subscriptionPayout(username)
+
+          client.say(
+            channel,
+            `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 armcoin.`,
+          )
+        }
         break
       case '!raffle':
         console.log('TODO')
