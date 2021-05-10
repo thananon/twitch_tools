@@ -1,5 +1,6 @@
 import Discord from 'discord.js'
 import commands, { isError } from './bot'
+import { testWidget } from './widget'
 
 const helpers = {
   buildEmbedMessage: (
@@ -70,6 +71,11 @@ export async function discordService() {
         break
       case '!command':
         console.log('TODO')
+        break
+      case '!testwidget':
+        if (process.env.NODE_ENV === 'development') {
+          await testWidget()
+        }
         break
       default:
         break
