@@ -135,10 +135,18 @@ export async function twitchService() {
             channel,
             `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
           )
+
+          widget.feed(
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+          )
         } else if (result.data.state == 'lose') {
           await client.say(
             channel,
             `@${username} ลงทุน ${result.data.bet} -> แตก! (${result.data.balance}).`,
+          )
+
+          widget.feed(
+            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} ArmCoin (${result.data.balance})`,
           )
         }
 
