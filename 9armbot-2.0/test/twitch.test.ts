@@ -270,6 +270,8 @@ describe('on subscription event', () => {
           vips: ['baz'],
         },
       })
+
+      mockFeed.mockClear()
     })
 
     it('gives 10 coins to subscriber & 1 coin to 3 viewers', async () => {
