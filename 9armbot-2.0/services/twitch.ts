@@ -1,8 +1,8 @@
+import axios from 'axios'
 import tmi from 'tmi.js'
 import commands, { isError } from './bot'
 import Player from './models/player'
-
-const axios = require('axios')
+import { devMode } from '../config'
 
 /* return online { chatters, mods, total } */
 async function getViewerList() {
@@ -36,7 +36,7 @@ async function subscriptionPayout(username: string) {
 export async function twitchService() {
   const client = new tmi.Client({
     options: {
-      debug: [undefined, 'development'].includes(process.env.NODE_ENV),
+      debug: devMode,
     },
     connection: { reconnect: true },
     identity: {

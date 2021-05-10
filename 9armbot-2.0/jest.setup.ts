@@ -6,6 +6,15 @@ dotenvFlow.config({
   purge_dotenv: true,
 })
 
+// Mock entire webapp
+jest.mock('../webapp', () => ({
+  express: jest.fn(),
+  socket: jest.fn(),
+  port: null,
+  host: null,
+  url: null,
+}))
+
 beforeAll(async () => {
   await prisma.player.deleteMany()
 })
