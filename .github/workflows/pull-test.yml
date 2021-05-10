@@ -33,6 +33,8 @@ jobs:
         run: npm test
       - name: Test (2.0)
         run: npm run test-2.0
+      - name: Build
+        run: npm run build-2.0
 
   build-linux:
     runs-on: ubuntu-20.04
@@ -47,3 +49,5 @@ jobs:
         run: npm test
       - name: Test (2.0)
         run: npm run test-2.0
+      - name: Build
+        run: npm run build-2.0

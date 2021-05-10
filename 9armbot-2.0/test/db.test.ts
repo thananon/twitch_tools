@@ -16,8 +16,8 @@ afterAll(async () => {
 
 describe('CRUD players', () => {
   describe('#createPlayer', () => {
-    it('can create new player by username (twitch for now)', async () => {
-      await db.createPlayer('foo')
+    it('can create new player by lowercased username (twitch for now)', async () => {
+      await db.createPlayer('FoO')
 
       expect(await db.read()).toEqual({
         players: [
@@ -30,9 +30,9 @@ describe('CRUD players', () => {
     })
 
     it('does not create new player if username is existed', async () => {
-      await db.createPlayer('foo')
-      await db.createPlayer('foo')
-      await db.createPlayer('foo')
+      await db.createPlayer('Foo')
+      await db.createPlayer('fOo')
+      await db.createPlayer('foO')
 
       expect(await db.read()).toEqual({
         players: [
@@ -53,7 +53,7 @@ describe('CRUD players', () => {
     it('returns player if found by username', async () => {
       await db.createPlayer('foo')
 
-      expect(await db.getPlayerbyUsername('foo')).toEqual(
+      expect(await db.getPlayerbyUsername('Foo')).toEqual(
         expect.objectContaining({
           id: expect.any(Number),
           username: 'foo',
@@ -68,7 +68,7 @@ describe('CRUD players', () => {
     it('updates player with supplied data', async () => {
       await db.createPlayer('foo')
 
-      await db.updatePlayer('foo', {
+      await db.updatePlayer('Foo', {
         username: 'DONTCHANGEME',
         status: 'online',
         coins: 10,

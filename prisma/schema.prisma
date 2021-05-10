@@ -18,6 +18,7 @@ model Player {
   roll_counter Int      @default(0)
   twitch_id    String?
   discord_id   String?
+  is_admin     Boolean  @default(false)
 
   @@index([username])
   @@index([status])

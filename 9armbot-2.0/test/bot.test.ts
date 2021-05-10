@@ -1,5 +1,6 @@
 import commands from '../services/bot'
 import prisma from '../../prisma/client'
+import Player from '../services/models/player'
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
@@ -37,8 +38,11 @@ describe('commands', () => {
       })
 
       const result = await commands.coin('foo')
+      let p = await Player.withUsername('foo')
+      let coins = await p.coins()
 
       expect(result).toEqual({ data: 7 })
+      expect(coins).toEqual(7)
     })
   })
 })

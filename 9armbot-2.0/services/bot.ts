@@ -1,18 +1,25 @@
 import { Db } from './db'
+import gacha from './commands/gacha'
+import { giveCoin, giveCoinToList } from './commands/give-coin'
 
 const db = new Db()
 
-interface Result {
-  error?: string
-  data?: number
+export type Result = DataResult | ErrorResult
+
+export interface DataResult {
+  data: number | Record<string, unknown>
 }
 
-interface ErrorResult extends Result {
+export interface ErrorResult {
   error: string
 }
 
-interface CoinResult extends Result {
+interface CoinResult extends DataResult {
   data: number
+}
+
+export function isError(result: Result): result is ErrorResult {
+  return (result as ErrorResult).error !== undefined
 }
 
 export const commands = {
@@ -28,6 +35,9 @@ export const commands = {
 
     return { data: player.coins }
   },
+  gacha,
+  giveCoin,
+  giveCoinToList,
 }
 
 export default commands

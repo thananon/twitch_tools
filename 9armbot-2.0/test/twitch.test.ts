@@ -6,8 +6,9 @@ import commands from '../services/bot'
 
 jest.mock('tmi.js')
 
-beforeAll(() => {
+beforeAll(async () => {
   jest.clearAllMocks()
+  await twitchService()
 })
 
 beforeEach(async () => {
@@ -48,8 +49,6 @@ const exampleMessage = {
 }
 
 it('connects with twitch via tmi', async () => {
-  await twitchService()
-
   expect(tmi.Client).toBeCalledTimes(1)
 
   await mockMessage(exampleMessage)
@@ -124,12 +123,86 @@ describe('on message event', () => {
     })
   })
 
+  describe('!gacha', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'gacha').mockResolvedValue({
+        data: { state: 'win', bet: 1, win: 2, balance: 3 },
+      })
+    })
+
+    afterEach(() => {
+      ;(commands.gacha as jest.MockedFunction<
+        typeof commands.gacha
+      >).mockReset()
+    })
+
+    it('calls gacha command with amount extracted from message', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(1)
+      expect(commands.gacha).toBeCalledWith('armzi', undefined)
+    })
+
+    it('calls gacha command with specified amount casted to integer', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha 3',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(1)
+      expect(commands.gacha).toBeCalledWith('armzi', 3)
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha 123.45',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(2)
+      expect(commands.gacha).toBeCalledWith('armzi', 123)
+    })
+  })
+
   describe('!draw', () => {
     it('does something', () => {})
   })
 
   describe('!give', () => {
-    it('does something', () => {})
+    beforeEach(() => {
+      jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+        data: 10,
+      })
+    })
+
+    afterEach(() => {
+      ;(commands.giveCoin as jest.MockedFunction<
+        typeof commands.giveCoin
+      >).mockReset()
+    })
+
+    it('sends give command with username and coin amount', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!give foo 10',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.giveCoin).toBeCalledTimes(1)
+      expect(commands.giveCoin).toBeCalledWith('foo', 10)
+    })
   })
 
   describe('!income', () => {

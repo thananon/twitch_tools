@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-import commands from './bot'
+import commands, { isError } from './bot'
 
 const helpers = {
   buildEmbedMessage: (
@@ -41,7 +41,7 @@ export async function discordService() {
           const username = group[1].toLowerCase()
           const result = await commands.coin(username)
 
-          if (result.error) {
+          if (isError(result)) {
             await msg.channel.send(
               `ไม่พบ username <${group[1]}> โปรดใส่ Twitch username..`,
             )
