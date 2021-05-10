@@ -10,6 +10,7 @@ import _ from 'lodash'
 import { Db } from './services/db'
 import commands from './services/bot'
 import Player from './services/models/player'
+import Widget from './services/widget'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,
@@ -18,6 +19,7 @@ const replServer = repl.start({
 replServer.setupHistory('./.node_repl_history', () => {})
 
 const db = new Db()
+const widget = new Widget(true)
 
 const dbName = process.env.DATABASE_URL!.split(':')[1]
 console.log(`Database "${dbName}" loaded, press enter to continue.`)
@@ -28,8 +30,11 @@ console.log(`Database "${dbName}" loaded, press enter to continue.`)
 replServer.context.db = db
 replServer.context.Player = Player
 
-// Bot commands eg. `await bot.coins(username)`
+// Bot commands eg. `await bot.coin(username)`
 replServer.context.bot = commands
+
+// Widget commands eg. `widget.testWidget()`
+replServer.context.widget = widget
 
 // Lodash (_ is reserved, use l or __ instead)
 replServer.context.l = _

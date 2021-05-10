@@ -1,7 +1,9 @@
 import Discord from 'discord.js'
 import commands, { isError } from './bot'
-import { testWidget } from './widget'
 import { devMode } from '../config'
+import Widget from './widget'
+
+const widget = new Widget(false)
 
 const helpers = {
   buildEmbedMessage: (
@@ -75,7 +77,7 @@ export async function discordService() {
         break
       case '!testwidget':
         if (devMode) {
-          await testWidget()
+          await widget.testWidget()
         }
         break
       default:

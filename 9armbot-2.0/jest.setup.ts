@@ -9,7 +9,11 @@ dotenvFlow.config({
 // Mock entire webapp
 jest.mock('../webapp', () => ({
   express: jest.fn(),
-  socket: jest.fn(),
+  socket: {
+    io: jest.fn().mockImplementation(() => ({
+      on: jest.fn(),
+    })),
+  },
   port: null,
   host: null,
   url: null,
