@@ -25,7 +25,7 @@ async function payday(amount: number = 1, subscriber: string) {
   await commands.giveCoinToList(players, amount)
 
   widget.feed(
-    `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${players.length}</b> คนได้รับ 1 armcoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${subscriber}</b>`,
+    `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${players.length}</b> คนได้รับ 1 ArmCoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${subscriber}</b>`,
   )
 
   return {
@@ -38,7 +38,7 @@ export async function subscriptionPayout(username: string) {
   await player.giveCoin(10)
 
   widget.feed(
-    `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 armcoin จากการ Subscribe`,
+    `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 ArmCoin จากการ Subscribe`,
   )
 
   return await payday(1, username)
@@ -104,11 +104,11 @@ export async function twitchService() {
         result = await commands.coin(username)
 
         if (isError(result)) {
-          await client.say(channel, `@${username} มี 0 armcoin.`)
+          await client.say(channel, `@${username} มี 0 ArmCoin.`)
           return
         }
 
-        await client.say(channel, `@${username} มี ${result.data} armcoin.`)
+        await client.say(channel, `@${username} มี ${result.data} ArmCoin.`)
         break
       case '!draw':
         console.log('TODO')
@@ -186,7 +186,7 @@ export async function twitchService() {
 
           client.say(
             channel,
-            `${username} ได้รับ 10 armcoin จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 armcoin.`,
+            `${username} ได้รับ 10 ArmCoin จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 ArmCoin.`,
           )
         }
         break
