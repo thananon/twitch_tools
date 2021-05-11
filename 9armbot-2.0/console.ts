@@ -11,6 +11,7 @@ import { Db } from './services/db'
 import commands from './services/bot'
 import Player from './services/models/player'
 import Widget from './services/widget'
+import Setting from './services/setting'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,
@@ -35,6 +36,10 @@ replServer.context.bot = commands
 
 // Widget commands eg. `widget.testWidget()`
 replServer.context.widget = widget
+
+Setting.init().then((setting) => {
+  replServer.context.setting = setting
+})
 
 // Lodash (_ is reserved, use l or __ instead)
 replServer.context.l = _

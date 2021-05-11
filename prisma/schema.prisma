@@ -11,18 +11,26 @@ generator client {
 }
 
 model Player {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
+  id           Int     @id @default(autoincrement())
+  username     String  @unique
   status       String?
-  coins        Int      @default(0)
-  roll_counter Int      @default(0)
+  coins        Int     @default(0)
+  roll_counter Int     @default(0)
   twitch_id    String?
   discord_id   String?
-  is_admin     Boolean  @default(false)
+  is_admin     Boolean @default(false)
 
   @@index([username])
   @@index([status])
   @@index([coins])
   @@index([twitch_id])
   @@index([discord_id])
+}
+
+model Setting {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  data_type   String  @default("string")
+  data        String
 }
