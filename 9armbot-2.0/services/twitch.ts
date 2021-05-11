@@ -178,13 +178,14 @@ export async function twitchService() {
         console.log('TODO')
         break
       case '!market':
-        if (cmdArgs[0] == 'open') {
-          await setting.setMarketState('open')
+        const marketState = cmdArgs[0]
+        if (marketState == 'open') {
+          await setting.setMarketState(marketState)
           widget.feed(
             `<i class="fas fa-shopping-bag"></i> ตลาดเปิดแล้ว ไอ้พวกเวร`,
           )
-        } else if (cmdArgs[0] == 'close') {
-          await setting.setMarketState('close')
+        } else if (marketState == 'close') {
+          await setting.setMarketState(marketState)
           widget.feed(`<i class="fas fa-stop-circle"> ปิดตลาด!</i>`)
         }
 
