@@ -1,7 +1,10 @@
 import prisma from '../../prisma/client'
 
+const SYNC_INTERVAL = 10000
+
 export default class Setting {
   private data: Record<string, string | boolean | number> = {}
+  private log: boolean
 
   private constructor() {}
 
@@ -28,18 +31,36 @@ export default class Setting {
     this.data.marketState = record.data
   }
 
+  startAutoSync(log = true) {
+    this.log = log
+
+    setInterval(() => {
+      this.sync()
+    }, SYNC_INTERVAL)
+  }
+
   async sync() {
-    await prisma.setting.update({
+    const record = await prisma.setting.findFirst({
       where: { name: 'market_state' },
-      data: { data: this.data.marketState.toString() },
     })
+
+    this.data.marketState = record!.data
+
+    if (this.log) {
+      console.log('Synchronized Settings', { data: this.data })
+    }
   }
 
   get marketState() {
     return this.data.marketState as 'open' | 'close'
   }
 
-  set marketState(state: 'open' | 'close') {
+  async setMarketState(state: 'open' | 'close') {
     this.data.marketState = state
+
+    await prisma.setting.update({
+      where: { name: 'market_state' },
+      data: { data: this.data.marketState.toString() },
+    })
   }
 }

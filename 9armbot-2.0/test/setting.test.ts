@@ -27,29 +27,35 @@ describe('#init', () => {
 
       expect(setting.marketState).toEqual('close')
     })
+  })
 
-    it("can be changed to 'open' and update the database after sync", async () => {
+  describe('setMarketState', () => {
+    it("can be changed to 'open' and update the database", async () => {
       const setting = await Setting.init()
 
-      setting.marketState = 'open'
+      await setting.setMarketState('open')
 
       expect(setting.marketState).toEqual('open')
+    })
+  })
 
-      const marketStateBeforeSync = await prisma.setting.findFirst({
+  describe('sync', () => {
+    it('loads the current database state', async () => {
+      const setting = await Setting.init()
+
+      expect(setting.marketState).toEqual('close')
+
+      // Update database directly
+      await prisma.setting.update({
         where: { name: 'market_state' },
+        data: { data: 'open' },
       })
 
-      expect(marketStateBeforeSync).not.toBeNull()
-      expect(marketStateBeforeSync?.data).toEqual('close') // Not sync yet
+      expect(setting.marketState).toEqual('close')
 
       await setting.sync()
 
-      const marketStateAfterSync = await prisma.setting.findFirst({
-        where: { name: 'market_state' },
-      })
-
-      expect(marketStateAfterSync).not.toBeNull()
-      expect(marketStateAfterSync?.data).toEqual('open') // Sync'ed
+      expect(setting.marketState).toEqual('open')
     })
   })
 })

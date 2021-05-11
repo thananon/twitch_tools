@@ -38,6 +38,7 @@ replServer.context.bot = commands
 replServer.context.widget = widget
 
 Setting.init().then((setting) => {
+  setting.startAutoSync(false)
   replServer.context.setting = setting
 })
 

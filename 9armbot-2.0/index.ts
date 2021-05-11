@@ -12,7 +12,8 @@ dotenvFlow.config({
 async function main() {
   await twitchService()
   await discordService()
-  await Setting.init()
+  const setting = await Setting.init()
+  setting.startAutoSync()
 
   console.log('9armbot 2.0 Running...')
 }
