@@ -13,6 +13,7 @@ import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { subscriptionPayout, twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
+import Setting from '../services/setting'
 
 jest.mock('tmi.js')
 
@@ -141,9 +142,9 @@ describe('on message event', () => {
     })
 
     afterEach(() => {
-      ;(commands.gacha as jest.MockedFunction<
-        typeof commands.gacha
-      >).mockReset()
+      ;(
+        commands.gacha as jest.MockedFunction<typeof commands.gacha>
+      ).mockReset()
     })
 
     it('calls gacha command with amount extracted from message', async () => {
@@ -196,9 +197,9 @@ describe('on message event', () => {
     })
 
     afterEach(() => {
-      ;(commands.giveCoin as jest.MockedFunction<
-        typeof commands.giveCoin
-      >).mockReset()
+      ;(
+        commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+      ).mockReset()
     })
 
     it('sends give command with username and coin amount', async () => {
@@ -225,6 +226,46 @@ describe('on message event', () => {
 
   describe('!load', () => {
     it('does something', () => {})
+  })
+
+  describe('!market', () => {
+    it('!market open : opens the market', async () => {
+      const setting = await Setting.init()
+      await setting.setMarketState('close')
+
+      expect(setting.marketState).toEqual('close')
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!market open',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      await setting.sync()
+
+      expect(setting.marketState).toEqual('open')
+    })
+
+    it('!market close : closes the market', async () => {
+      const setting = await Setting.init()
+      await setting.setMarketState('open')
+
+      expect(setting.marketState).toEqual('open')
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!market close',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      await setting.sync()
+
+      expect(setting.marketState).toEqual('close')
+    })
   })
 
   describe('!payday', () => {

@@ -4,6 +4,7 @@ import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
 import Widget from './widget'
+import Setting from './setting'
 
 const widget = new Widget(false)
 
@@ -45,6 +46,8 @@ export async function subscriptionPayout(username: string) {
 }
 
 export async function twitchService() {
+  const setting = await Setting.init()
+
   const client = new tmi.Client({
     options: {
       debug: devMode,
@@ -173,6 +176,18 @@ export async function twitchService() {
         break
       case '!kick':
         console.log('TODO')
+        break
+      case '!market':
+        if (cmdArgs[0] == 'open') {
+          await setting.setMarketState('open')
+          widget.feed(
+            `<i class="fas fa-shopping-bag"></i> ตลาดเปิดแล้ว ไอ้พวกเวร`,
+          )
+        } else if (cmdArgs[0] == 'close') {
+          await setting.setMarketState('close')
+          widget.feed(`<i class="fas fa-stop-circle"> ปิดตลาด!</i>`)
+        }
+
         break
       case '!payday':
         let player = await Player.withUsername(username)
