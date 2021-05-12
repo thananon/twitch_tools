@@ -17,7 +17,7 @@ export default class Setting {
   }
 
   async setup() {
-    const record = await prisma.setting.upsert({
+    const marketState = await prisma.setting.upsert({
       where: { name: 'market_state' },
       create: {
         name: 'market_state',
@@ -28,7 +28,19 @@ export default class Setting {
       update: {},
     })
 
-    this.data.marketState = record.data
+    const gachaRate = await prisma.setting.upsert({
+      where: { name: 'gacha_rate' },
+      create: {
+        name: 'gacha_rate',
+        data_type: 'number',
+        data: '0.4',
+        description: 'เรทกาชา (0 - 1)',
+      },
+      update: {},
+    })
+
+    this.data.marketState = marketState.data
+    this.data.gachaRate = Number(gachaRate.data)
   }
 
   startAutoSync(log = true) {
@@ -40,11 +52,15 @@ export default class Setting {
   }
 
   async sync() {
-    const record = await prisma.setting.findFirst({
+    const marketState = await prisma.setting.findFirst({
       where: { name: 'market_state' },
     })
+    const gachaRate = await prisma.setting.findFirst({
+      where: { name: 'gacha_rate' },
+    })
 
-    this.data.marketState = record!.data
+    this.data.marketState = marketState!.data
+    this.data.gachaRate = Number(gachaRate!.data)
 
     if (this.log) {
       console.log('Synchronized Settings', { data: this.data })
@@ -61,6 +77,19 @@ export default class Setting {
     await prisma.setting.update({
       where: { name: 'market_state' },
       data: { data: this.data.marketState.toString() },
+    })
+  }
+
+  get gachaRate(): number {
+    return this.data.gachaRate as number
+  }
+
+  async setGachaRate(rate: number | string) {
+    this.data.gachaRate = Number(rate)
+
+    await prisma.setting.update({
+      where: { name: 'gacha_rate' },
+      data: { data: this.data.gachaRate.toString() },
     })
   }
 }

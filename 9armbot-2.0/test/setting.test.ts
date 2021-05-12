@@ -39,6 +39,32 @@ describe('#init', () => {
     })
   })
 
+  describe('gachaRate', () => {
+    it('returns as 0.4 by default', async () => {
+      const setting = await Setting.init()
+
+      expect(setting.gachaRate).toEqual(0.4)
+    })
+  })
+
+  describe('setGachaRate', () => {
+    it('changes the gacha rate to specified value', async () => {
+      const setting = await Setting.init()
+
+      await setting.setGachaRate(0.5)
+
+      expect(setting.gachaRate).toEqual(0.5)
+    })
+
+    it('supports setting with string', async () => {
+      const setting = await Setting.init()
+
+      await setting.setGachaRate('0.6')
+
+      expect(setting.gachaRate).toEqual(0.6)
+    })
+  })
+
   describe('sync', () => {
     it('loads the current database state', async () => {
       const setting = await Setting.init()
