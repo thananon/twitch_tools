@@ -146,7 +146,7 @@ export async function twitchService() {
         break
       case '!gacha':
         if (cmdArgs.length) {
-          let group = cmdArgs[0].match(/(\d+)/)
+          let group = cmdArgs[0].match(/(-?\d+)/)
           if (group && group[1]) {
             amount = Number.parseInt(group[1])
           }

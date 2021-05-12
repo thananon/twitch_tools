@@ -183,6 +183,19 @@ describe('on message event', () => {
       expect(commands.gacha).toBeCalledWith('armzi', undefined)
     })
 
+    it('also calls gacha command with negative value', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!gacha -3',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.gacha).toBeCalledTimes(1)
+      expect(commands.gacha).toBeCalledWith('armzi', -3)
+    })
+
     it('calls gacha command with specified amount casted to integer', async () => {
       await mockMessage({
         channel: '#9armbot',
