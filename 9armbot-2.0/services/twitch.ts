@@ -105,7 +105,16 @@ export async function twitchService() {
           return
         }
 
-        if (result.data.state == 'win') {
+        if (result.data.state == 'win_jackpot') {
+          await client.say(
+            channel,
+            `ALL-IN JACKPOT!! @${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+          )
+
+          widget.feed(
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> ALL-IN JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+          )
+        } else if (result.data.state == 'win') {
           await client.say(
             channel,
             `@${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin`,
@@ -161,7 +170,16 @@ export async function twitchService() {
           return
         }
 
-        if (result.data.state == 'win') {
+        if (result.data.state == 'win_jackpot') {
+          await client.say(
+            channel,
+            `JACKPOT!! @${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+          )
+
+          widget.feed(
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+          )
+        } else if (result.data.state == 'win') {
           await client.say(
             channel,
             `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,

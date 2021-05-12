@@ -6,7 +6,7 @@ const db = new Db()
 
 export interface AllInResult extends DataResult {
   data: {
-    state: 'win' | 'lose'
+    state: 'win' | 'lose' | 'win_jackpot'
     bet: number
     win: number
     balance: number
@@ -45,9 +45,19 @@ export async function allin(
   // FIXME: use global setting?
   const setting = await Setting.init()
 
-  if (Math.random() < setting.gachaRate) {
+  const dice = Math.random()
+
+  if (dice < setting.jackpotRate) {
+    // Win jackpot
+    const winAmount = Math.round(bet * (5 + Math.random() * 5)) * 2
+    coins += winAmount
+
+    result.win = winAmount
+    result.state = 'win_jackpot'
+    result.balance = coins
+  } else if (dice < setting.gachaRate) {
     // Win
-    const winAmount = bet * 5 // TODO: change amount
+    const winAmount = Math.round(bet * (2 + Math.random() * 3)) * 2
     coins += winAmount
 
     result.win = winAmount

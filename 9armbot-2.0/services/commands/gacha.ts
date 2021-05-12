@@ -6,7 +6,7 @@ const db = new Db()
 
 export interface GachaResult extends DataResult {
   data: {
-    state: 'win' | 'lose'
+    state: 'win' | 'lose' | 'win_jackpot'
     bet: number
     win: number
     balance: number
@@ -48,7 +48,7 @@ async function gacha(
   const dice = Math.random()
   if (dice < setting.jackpotRate) {
     // Win jackpot
-    const winAmount = bet * 10 // TODO: change amount
+    const winAmount = Math.round(bet * (5 + Math.random() * 5))
     coins += winAmount
 
     result.win = winAmount
@@ -56,7 +56,7 @@ async function gacha(
     result.balance = coins
   } else if (dice < setting.gachaRate) {
     // Win
-    const winAmount = bet * 2 // TODO: change amount
+    const winAmount = Math.round(bet * (2 + Math.random() * 3))
     coins += winAmount
 
     result.win = winAmount

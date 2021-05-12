@@ -15,6 +15,11 @@ beforeEach(async () => {
       coins: 10,
     },
   })
+
+  const setting = await Setting.init()
+
+  await setting.setGachaRate('0.4')
+  await setting.setJackpotRate('0.01')
 })
 
 afterEach(() => {
@@ -103,6 +108,7 @@ describe('gacha', () => {
         const setting = await Setting.init()
 
         await setting.setGachaRate('0.3')
+        await setting.setJackpotRate('0.3')
       })
 
       it('loses', async () => {
@@ -210,6 +216,7 @@ describe('gacha', () => {
         const setting = await Setting.init()
 
         await setting.setGachaRate('0.3')
+        await setting.setJackpotRate('0.01')
       })
 
       it('wins', async () => {
@@ -232,6 +239,7 @@ describe('gacha', () => {
 
         const setting = await Setting.init()
 
+        await setting.setGachaRate('0.5')
         await setting.setJackpotRate('0.3')
       })
 
@@ -249,6 +257,4 @@ describe('gacha', () => {
       })
     })
   })
-
-  describe('winning jackpot', () => {})
 })

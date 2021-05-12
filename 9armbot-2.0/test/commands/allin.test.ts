@@ -15,6 +15,11 @@ beforeEach(async () => {
       coins: 10,
     },
   })
+
+  const setting = await Setting.init()
+
+  await setting.setGachaRate('0.4')
+  await setting.setJackpotRate('0.01')
 })
 
 afterEach(() => {
@@ -84,6 +89,7 @@ describe('allin', () => {
         const setting = await Setting.init()
 
         await setting.setGachaRate('0.3')
+        await setting.setJackpotRate('0.2')
       })
 
       it('loses', async () => {
@@ -103,27 +109,27 @@ describe('allin', () => {
 
   describe('winning', () => {
     beforeEach(async () => {
-      jest.spyOn(global.Math, 'random').mockReturnValue(0)
+      jest.spyOn(global.Math, 'random').mockReturnValue(0.05)
     })
 
-    it('win big amount of coin (TODO)', async () => {
+    it('win big amount of coin', async () => {
       const result = await commands.allin(username)
 
       // Check result
       expect(result).toEqual(
         expect.objectContaining({
-          data: {
+          data: expect.objectContaining({
             state: 'win',
             bet: 10,
-            win: 50,
-            balance: 50,
+            win: 44,
+            balance: 44,
           },
         }),
       )
 
       // Check db
       const player = await prisma.player.findFirst({ where: { username } })
-      expect(player!.coins).toEqual(50)
+      expect(player!.coins).toEqual(44)
     })
 
     describe('considers gachaRate (win)', () => {
@@ -133,6 +139,7 @@ describe('allin', () => {
         const setting = await Setting.init()
 
         await setting.setGachaRate('0.5')
+        await setting.setJackpotRate('0.2')
       })
 
       it('wins', async () => {
@@ -148,7 +155,29 @@ describe('allin', () => {
         )
       })
     })
-  })
 
-  describe('winning jackpot', () => {})
+    describe('considers jackpotRate (win)', () => {
+      beforeEach(async () => {
+        jest.spyOn(global.Math, 'random').mockReturnValue(0.2)
+
+        const setting = await Setting.init()
+
+        await setting.setGachaRate('0.5')
+        await setting.setJackpotRate('0.3')
+      })
+
+      it('wins jackpot', async () => {
+        const result = await commands.allin(username)
+
+        // Check result
+        expect(result).toEqual(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              state: 'win_jackpot',
+            }),
+          }),
+        )
+      })
+    })
+  })
 })
