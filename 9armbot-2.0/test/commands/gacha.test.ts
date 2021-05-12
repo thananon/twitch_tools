@@ -1,5 +1,6 @@
 import commands from '../../services/bot'
 import prisma from '../../../prisma/client'
+import Setting from '../../services/setting'
 
 const username = 'foo'
 
@@ -94,6 +95,29 @@ describe('gacha', () => {
       const player = await prisma.player.findFirst({ where: { username } })
       expect(player!.coins).toEqual(10 - 3)
     })
+
+    describe('considers gachaRate (lose)', () => {
+      beforeEach(async () => {
+        jest.spyOn(global.Math, 'random').mockReturnValue(0.5)
+
+        const setting = await Setting.init()
+
+        await setting.setGachaRate('0.3')
+      })
+
+      it('loses', async () => {
+        const result = await commands.gacha(username, 3)
+
+        // Check result
+        expect(result).toEqual(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              state: 'lose',
+            }),
+          }),
+        )
+      })
+    })
   })
 
   describe('no coin', () => {
@@ -177,6 +201,29 @@ describe('gacha', () => {
       // Check db
       const player = await prisma.player.findFirst({ where: { username } })
       expect(player!.coins).toEqual(10)
+    })
+
+    describe('considers gachaRate (win)', () => {
+      beforeEach(async () => {
+        jest.spyOn(global.Math, 'random').mockReturnValue(0.2)
+
+        const setting = await Setting.init()
+
+        await setting.setGachaRate('0.3')
+      })
+
+      it('wins', async () => {
+        const result = await commands.gacha(username, 3)
+
+        // Check result
+        expect(result).toEqual(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              state: 'win',
+            }),
+          }),
+        )
+      })
     })
   })
 

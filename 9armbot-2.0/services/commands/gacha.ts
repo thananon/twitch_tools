@@ -1,5 +1,6 @@
 import { ErrorResult, DataResult } from '../bot'
 import { Db } from '../db'
+import Setting from '../setting'
 
 const db = new Db()
 
@@ -41,8 +42,10 @@ async function gacha(
 
   coins -= bet
 
-  // TODO: reimplement roll()
-  if (Math.random() < 0.1) {
+  // FIXME: use global setting?
+  const setting = await Setting.init()
+
+  if (Math.random() < setting.gachaRate) {
     // Win
     const winAmount = bet * 2 // TODO: change amount
     coins += winAmount
