@@ -123,7 +123,7 @@ describe('allin', () => {
             bet: 10,
             win: 44,
             balance: 44,
-          },
+          }),
         }),
       )
 
