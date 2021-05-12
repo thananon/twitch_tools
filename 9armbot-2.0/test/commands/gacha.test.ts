@@ -181,6 +181,4 @@ describe('gacha', () => {
   })
 
   describe('winning jackpot', () => {})
-
-  describe('all-in mode', () => {})
 })

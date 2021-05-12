@@ -83,7 +83,30 @@ describe('on message event', () => {
   })
 
   describe('!allin', () => {
-    it('does something', () => {})
+    beforeEach(() => {
+      jest.spyOn(commands, 'allin').mockResolvedValue({
+        data: { state: 'win', bet: 1, win: 10, balance: 10 },
+      })
+    })
+
+    afterEach(() => {
+      ;(
+        commands.allin as jest.MockedFunction<typeof commands.allin>
+      ).mockReset()
+    })
+
+    it('calls allin command with amount extracted from message', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!allin',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(commands.allin).toBeCalledTimes(1)
+      expect(commands.allin).toBeCalledWith('armzi')
+    })
   })
 
   describe('!auction', () => {

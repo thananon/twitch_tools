@@ -95,7 +95,35 @@ export async function twitchService() {
         console.log(getTwitchChatters())
         break
       case '!allin':
-        console.log('TODO')
+        // TODO: random win
+        result = await commands.allin(username)
+
+        if (isError(result)) {
+          if (result.error == 'not_enough_coin') {
+            await client.say(channel, `@${username} มี ArmCoin ไม่พอ!.`)
+          }
+          return
+        }
+
+        if (result.data.state == 'win') {
+          await client.say(
+            channel,
+            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin`,
+          )
+
+          widget.feed(
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin`,
+          )
+        } else if (result.data.state == 'lose') {
+          await client.say(
+            channel,
+            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> แตก!`,
+          )
+
+          widget.feed(
+            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} ArmCoin`,
+          )
+        }
         break
       case '!auction':
         console.log('TODO')
