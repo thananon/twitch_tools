@@ -39,8 +39,20 @@ export default class Setting {
       update: {},
     })
 
+    const jackpotRate = await prisma.setting.upsert({
+      where: { name: 'jackpot_rate' },
+      create: {
+        name: 'jackpot_rate',
+        data_type: 'number',
+        data: '0.01',
+        description: 'เรทกาชา Jackpot (0 - 1)',
+      },
+      update: {},
+    })
+
     this.data.marketState = marketState.data
     this.data.gachaRate = Number(gachaRate.data)
+    this.data.jackpotRate = Number(jackpotRate.data)
   }
 
   startAutoSync(log = true) {
@@ -58,9 +70,13 @@ export default class Setting {
     const gachaRate = await prisma.setting.findFirst({
       where: { name: 'gacha_rate' },
     })
+    const jackpotRate = await prisma.setting.findFirst({
+      where: { name: 'jackpot_rate' },
+    })
 
     this.data.marketState = marketState!.data
     this.data.gachaRate = Number(gachaRate!.data)
+    this.data.jackpotRate = Number(jackpotRate!.data)
 
     if (this.log) {
       console.log('Synchronized Settings', { data: this.data })
@@ -90,6 +106,19 @@ export default class Setting {
     await prisma.setting.update({
       where: { name: 'gacha_rate' },
       data: { data: this.data.gachaRate.toString() },
+    })
+  }
+
+  get jackpotRate(): number {
+    return this.data.jackpotRate as number
+  }
+
+  async setJackpotRate(rate: number | string) {
+    this.data.jackpotRate = Number(rate)
+
+    await prisma.setting.update({
+      where: { name: 'jackpot_rate' },
+      data: { data: this.data.jackpotRate.toString() },
     })
   }
 }

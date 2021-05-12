@@ -45,7 +45,16 @@ async function gacha(
   // FIXME: use global setting?
   const setting = await Setting.init()
 
-  if (Math.random() < setting.gachaRate) {
+  const dice = Math.random()
+  if (dice < setting.jackpotRate) {
+    // Win jackpot
+    const winAmount = bet * 10 // TODO: change amount
+    coins += winAmount
+
+    result.win = winAmount
+    result.state = 'win_jackpot'
+    result.balance = coins
+  } else if (dice < setting.gachaRate) {
     // Win
     const winAmount = bet * 2 // TODO: change amount
     coins += winAmount

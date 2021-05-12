@@ -65,6 +65,32 @@ describe('#init', () => {
     })
   })
 
+  describe('jackpotRate', () => {
+    it('returns as 0.01 by default', async () => {
+      const setting = await Setting.init()
+
+      expect(setting.jackpotRate).toEqual(0.01)
+    })
+  })
+
+  describe('setJackpotRate', () => {
+    it('changes the gacha rate to specified value', async () => {
+      const setting = await Setting.init()
+
+      await setting.setJackpotRate(0.05)
+
+      expect(setting.jackpotRate).toEqual(0.05)
+    })
+
+    it('supports setting with string', async () => {
+      const setting = await Setting.init()
+
+      await setting.setJackpotRate('0.06')
+
+      expect(setting.jackpotRate).toEqual(0.06)
+    })
+  })
+
   describe('sync', () => {
     it('loads the current database state', async () => {
       const setting = await Setting.init()

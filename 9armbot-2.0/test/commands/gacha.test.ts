@@ -165,7 +165,7 @@ describe('gacha', () => {
 
   describe('winning', () => {
     beforeEach(async () => {
-      jest.spyOn(global.Math, 'random').mockReturnValue(0)
+      jest.spyOn(global.Math, 'random').mockReturnValue(0.05)
     })
 
     it('win same amount of coin (TODO)', async () => {
@@ -220,6 +220,29 @@ describe('gacha', () => {
           expect.objectContaining({
             data: expect.objectContaining({
               state: 'win',
+            }),
+          }),
+        )
+      })
+    })
+
+    describe('considers jackpotRate (win)', () => {
+      beforeEach(async () => {
+        jest.spyOn(global.Math, 'random').mockReturnValue(0.2)
+
+        const setting = await Setting.init()
+
+        await setting.setJackpotRate('0.3')
+      })
+
+      it('wins jackpot', async () => {
+        const result = await commands.gacha(username, 3)
+
+        // Check result
+        expect(result).toEqual(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              state: 'win_jackpot',
             }),
           }),
         )
