@@ -126,7 +126,7 @@ export async function twitchService() {
         } else if (result.data.state == 'lose') {
           await client.say(
             channel,
-            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> แตก!`,
+            `@${username} ลงหมดหน้าตัก ${result.data.bet} $ARM -> แตก!`,
           )
 
           widget.feed(
@@ -191,7 +191,7 @@ export async function twitchService() {
         } else if (result.data.state == 'lose') {
           await client.say(
             channel,
-            `@${username} ลงทุน ${result.data.bet} -> แตก! (${result.data.balance}).`,
+            `@${username} ลงทุน ${result.data.bet} $ARM -> แตก! (${result.data.balance}).`,
           )
 
           widget.feed(
