@@ -122,7 +122,7 @@ describe('on message event', () => {
       jest.spyOn(commands, 'coin')
     })
 
-    it('returns 0 ArmCoins if player not existed', async () => {
+    it('returns 0 $ARMs if player not existed', async () => {
       await mockMessage({
         channel: '#9armbot',
         message: '!coin',
@@ -132,7 +132,7 @@ describe('on message event', () => {
       })
 
       expect(commands.coin).toHaveBeenCalledWith('armzi')
-      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 0 ArmCoin.`)
+      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 0 $ARM.`)
     })
 
     it("returns player's coin amount", async () => {
@@ -153,7 +153,7 @@ describe('on message event', () => {
       })
 
       expect(commands.coin).toHaveBeenCalledWith('armzi')
-      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 7 ArmCoin.`)
+      expect(client.say).toBeCalledWith('#9armbot', `@armzi มี 7 $ARM.`)
     })
   })
 
@@ -360,11 +360,11 @@ describe('on subscription event', () => {
       expect(mockFeed).toHaveBeenCalledTimes(2)
       expect(mockFeed).toHaveBeenNthCalledWith(
         1,
-        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 ArmCoin จากการ Subscribe`,
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 $ARM จากการ Subscribe`,
       )
       expect(mockFeed).toHaveBeenNthCalledWith(
         2,
-        `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 ArmCoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${username}</b>`,
+        `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 $ARM <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${username}</b>`,
       )
     })
   })
