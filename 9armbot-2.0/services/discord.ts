@@ -27,15 +27,11 @@ const helpers = {
 
 type SendMessageParams = Parameters<Message['channel']['send']>
 
-async function botSay(
-  channel: Message['channel'],
-  content: SendMessageParams[0],
-  options?: SendMessageParams[1],
-) {
+async function botSay(channel: Message['channel'], ...args: SendMessageParams) {
   if (silentBotMode) {
-    console.log(`[Silent Mode] Bot: ${JSON.stringify(content)}`)
+    console.log(`[Silent Mode] Bot: ${JSON.stringify(args[0])}`)
   } else {
-    return await channel.send.apply(channel, [content, options])
+    return await channel.send.apply(channel, args)
   }
 }
 
