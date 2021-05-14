@@ -1,4 +1,4 @@
-import Setting from '../services/setting'
+import { Setting } from '../services/setting'
 import prisma from '../../prisma/client'
 
 beforeEach(async () => {
@@ -11,7 +11,8 @@ afterAll(async () => {
 
 describe('#init', () => {
   it('creates default settings in database', async () => {
-    await Setting.init()
+    const setting = new Setting()
+    await setting.onReady()
 
     const marketState = await prisma.setting.findFirst({
       where: { name: 'market_state' },
@@ -23,7 +24,8 @@ describe('#init', () => {
 
   describe('marketState', () => {
     it('returns market state as close', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+      await setting.onReady()
 
       expect(setting.marketState).toEqual('close')
     })
@@ -31,7 +33,9 @@ describe('#init', () => {
 
   describe('setMarketState', () => {
     it("can be changed to 'open' and update the database", async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       await setting.setMarketState('open')
 
@@ -41,7 +45,9 @@ describe('#init', () => {
 
   describe('gachaRate', () => {
     it('returns as 0.4 by default', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       expect(setting.gachaRate).toEqual(0.4)
     })
@@ -49,7 +55,9 @@ describe('#init', () => {
 
   describe('setGachaRate', () => {
     it('changes the gacha rate to specified value', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       await setting.setGachaRate(0.5)
 
@@ -57,7 +65,9 @@ describe('#init', () => {
     })
 
     it('supports setting with string', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       await setting.setGachaRate('0.6')
 
@@ -67,7 +77,9 @@ describe('#init', () => {
 
   describe('jackpotRate', () => {
     it('returns as 0.01 by default', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       expect(setting.jackpotRate).toEqual(0.01)
     })
@@ -75,7 +87,9 @@ describe('#init', () => {
 
   describe('setJackpotRate', () => {
     it('changes the gacha rate to specified value', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       await setting.setJackpotRate(0.05)
 
@@ -83,7 +97,9 @@ describe('#init', () => {
     })
 
     it('supports setting with string', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       await setting.setJackpotRate('0.06')
 
@@ -93,7 +109,9 @@ describe('#init', () => {
 
   describe('sync', () => {
     it('loads the current database state', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
+
+      await setting.onReady()
 
       expect(setting.marketState).toEqual('close')
 

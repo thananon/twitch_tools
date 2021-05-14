@@ -2,18 +2,40 @@ import prisma from '../../prisma/client'
 
 const SYNC_INTERVAL = 10000
 
-export default class Setting {
+/**
+ * Setting
+ *   A class to initialize bot settings & sync across processes
+ * Usage :
+ *   1. Initialize new setting
+ *     setting = new Setting()
+ *   2. Wait for setup
+ *     await setting.onReady()
+ *       OR
+ *     setting.onReady(callback)
+ *   3. Get the data
+ *     setting.gachaRate
+ *   4. Set the data & save in database
+ *     await setting.setGachaRate(newRate)
+ */
+export class Setting {
   private data: Record<string, string | boolean | number> = {}
   private log: boolean
+  private onReadyCallbacks: Array<Function> = []
 
-  private constructor() {}
+  constructor() {
+    this.setup().then(() => {
+      this.onReadyCallbacks.map((cb) => cb())
+    })
+  }
 
-  public static async init() {
-    const setting = new Setting()
+  async onReady(callback?: (_: Setting) => void): Promise<Setting> {
+    return new Promise((resolve) => {
+      const cb = () => {
+        callback ? callback(this) : resolve(this)
+      }
 
-    await setting.setup()
-
-    return setting
+      this.onReadyCallbacks.push(cb)
+    })
   }
 
   async setup() {
@@ -122,3 +144,7 @@ export default class Setting {
     })
   }
 }
+
+let sharedSetting = new Setting()
+
+export default sharedSetting

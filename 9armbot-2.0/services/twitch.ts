@@ -4,7 +4,7 @@ import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
 import Widget from './widget'
-import Setting from './setting'
+import setting from './setting'
 
 const widget = new Widget(false)
 
@@ -46,8 +46,6 @@ export async function subscriptionPayout(username: string) {
 }
 
 export async function twitchService() {
-  const setting = await Setting.init()
-
   const client = new tmi.Client({
     options: {
       debug: devMode,
@@ -225,6 +223,7 @@ export async function twitchService() {
         break
       case '!market':
         const marketState = cmdArgs[0]
+
         if (marketState == 'open') {
           await setting.setMarketState(marketState)
           widget.feed(
