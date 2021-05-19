@@ -5,8 +5,11 @@ import Player from './models/player'
 import { devMode } from '../config'
 import Widget from './widget'
 import Setting from './setting'
+import { Db } from './db'
+import prisma from '../../prisma/client'
 
 const widget = new Widget(false)
+const db = new Db()
 
 const silentBotMode = ['1', 'true'].includes(
   process.env.SILENT_BOT_MODE as string,
@@ -77,10 +80,19 @@ export async function twitchService() {
 
   await client.connect()
 
-  client.on('join', async (_channel, username, _self) => {
-    const player = await Player.withUsername(username)
+  // Cache existing player names from db
+  const existingPlayerNames = new Set(
+    (await prisma.player.findMany({ select: { username: true } })).map(
+      (p) => p.username,
+    ),
+  )
 
-    console.log(`${player.info.username} has joined chat!`)
+  client.on('join', async (_channel, username, _self) => {
+    // Ensure new players are created on join
+    if (!existingPlayerNames.has(username.toLowerCase())) {
+      existingPlayerNames.add(username.toLowerCase())
+      await db.createPlayer(username)
+    }
   })
 
   client.on('part', (_channel, username, _self) => {
@@ -89,9 +101,17 @@ export async function twitchService() {
 
   client.on('message', async (channel, tags, message, self) => {
     if (self) return
-    if (message[0] !== '!') return
 
     const username = tags!.username!
+
+    // Ensure new players are created on message
+    if (username && !existingPlayerNames.has(username.toLowerCase())) {
+      existingPlayerNames.add(username.toLowerCase())
+      await db.createPlayer(username)
+    }
+
+    if (message[0] !== '!') return
+
     const [cmdName, ...cmdArgs] = message.split(/\s+/)
 
     let result, amount
