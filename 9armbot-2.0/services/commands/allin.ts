@@ -4,7 +4,7 @@ import Setting from '../setting'
 
 const db = new Db()
 
-export interface GachaResult extends DataResult {
+export interface AllInResult extends DataResult {
   data: {
     state: 'win' | 'lose' | 'win_jackpot'
     bet: number
@@ -13,11 +13,10 @@ export interface GachaResult extends DataResult {
   }
 }
 
-async function gacha(
+export async function allin(
   username?: string | null,
-  bet: number = 1,
-): Promise<GachaResult | ErrorResult> {
-  if (!username || bet <= 0 || Number.isNaN(bet)) {
+): Promise<AllInResult | ErrorResult> {
+  if (!username) {
     return { error: 'input_invalid' }
   }
 
@@ -29,10 +28,11 @@ async function gacha(
 
   let { coins } = player
 
-  if (coins < bet) {
+  if (coins == 0) {
     return { error: 'not_enough_coin' }
   }
 
+  const bet = coins
   let result = {
     bet,
     win: 0,
@@ -40,15 +40,16 @@ async function gacha(
     balance: 0,
   }
 
-  coins -= bet
+  coins = 0
 
   // FIXME: use global setting?
   const setting = await Setting.init()
 
   const dice = Math.random()
+
   if (dice < setting.jackpotRate) {
     // Win jackpot
-    const winAmount = Math.round(bet * (5 + Math.random() * 5))
+    const winAmount = Math.round(bet * (5 + Math.random() * 5)) * 2
     coins += winAmount
 
     result.win = winAmount
@@ -56,7 +57,7 @@ async function gacha(
     result.balance = coins
   } else if (dice < setting.gachaRate) {
     // Win
-    const winAmount = Math.round(bet * (2 + Math.random() * 3))
+    const winAmount = Math.round(bet * (2 + Math.random() * 3)) * 2
     coins += winAmount
 
     result.win = winAmount
@@ -69,7 +70,5 @@ async function gacha(
 
   await db.updatePlayer(player.username, { coins })
 
-  return { data: result } as GachaResult
+  return { data: result } as AllInResult
 }
-
-export default gacha

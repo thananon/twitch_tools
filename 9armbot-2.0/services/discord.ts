@@ -1,5 +1,13 @@
-import Discord from 'discord.js'
+import Discord, { Message } from 'discord.js'
 import commands, { isError } from './bot'
+import { devMode } from '../config'
+import Widget from './widget'
+
+const widget = new Widget(false)
+
+const silentBotMode = ['1', 'true'].includes(
+  process.env.SILENT_BOT_MODE as string,
+)
 
 const helpers = {
   buildEmbedMessage: (
@@ -17,6 +25,22 @@ const helpers = {
   },
 }
 
+type SendMessageParams = Parameters<Message['channel']['send']>
+
+async function botSay(
+  channel: Message['channel'],
+  content: SendMessageParams[0],
+  options?: SendMessageParams[1],
+) {
+  if (silentBotMode) {
+    console.log(`[Silent Mode] Bot: ${JSON.stringify(content)}`)
+  } else if (options) {
+    return await channel.send.apply(channel, [content, options])
+  } else {
+    return await channel.send.apply(channel, [content])
+  }
+}
+
 export async function discordService() {
   const client = new Discord.Client()
 
@@ -32,7 +56,7 @@ export async function discordService() {
     // ! Commands
     switch (msg.content.split(/\s+/)[0]) {
       case '!github':
-        await msg.channel.send('https://github.com/thananon/twitch_tools')
+        await botSay(msg.channel, 'https://github.com/thananon/twitch_tools')
         break
 
       case '!coin':
@@ -42,7 +66,8 @@ export async function discordService() {
           const result = await commands.coin(username)
 
           if (isError(result)) {
-            await msg.channel.send(
+            await botSay(
+              msg.channel,
               `ไม่พบ username <${group[1]}> โปรดใส่ Twitch username..`,
             )
             return
@@ -51,15 +76,16 @@ export async function discordService() {
           let embed = helpers.buildEmbedMessage([
             {
               name: `<${username}>`,
-              value: `มียอดคงเหลือ ${result.data} armcoin`,
+              value: `มียอดคงเหลือ ${result.data} ArmCoin`,
             },
           ])
 
-          await msg.channel.send(embed)
+          await botSay(msg.channel, embed)
           return
         }
 
-        await msg.channel.send(
+        await botSay(
+          msg.channel,
           'ใส่ username ของ twitch สิวะ ไม่บอกแล้วจะไปรู้ได้ไงว่า id twitch เอ็งคืออะไร คิดดิคิด...',
         )
 
@@ -70,6 +96,11 @@ export async function discordService() {
         break
       case '!command':
         console.log('TODO')
+        break
+      case '!testwidget':
+        if (devMode) {
+          await widget.testWidget()
+        }
         break
       default:
         break

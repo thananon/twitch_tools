@@ -1,6 +1,7 @@
 import { Db } from './db'
 import gacha from './commands/gacha'
 import { giveCoin, giveCoinToList } from './commands/give-coin'
+import { allin } from './commands/allin'
 
 const db = new Db()
 
@@ -36,6 +37,7 @@ export const commands = {
     return { data: player.coins }
   },
   gacha,
+  allin,
   giveCoin,
   giveCoinToList,
 }
