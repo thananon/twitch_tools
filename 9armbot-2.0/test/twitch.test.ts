@@ -79,10 +79,13 @@ describe('on message event', () => {
   })
 
   describe('!allin', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'allin').mockResolvedValue({
         data: { state: 'win', bet: 1, win: 10, balance: 10 },
       })
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     afterEach(() => {
@@ -114,8 +117,11 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'coin')
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     it('returns 0 ArmCoins if player not existed', async () => {

@@ -22,6 +22,8 @@ jest.mock('../webapp', () => ({
 
 beforeAll(async () => {
   await prisma.player.deleteMany()
+  await prisma.setting.deleteMany()
+
   await setting.init()
 })
 

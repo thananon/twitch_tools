@@ -1,10 +1,6 @@
 import setting from '../services/setting'
 import prisma from '../../prisma/client'
 
-// beforeEach(async () => {
-
-// })
-
 beforeEach(async () => {
   await prisma.setting.deleteMany()
   await setting.init()
