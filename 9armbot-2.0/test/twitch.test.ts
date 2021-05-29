@@ -218,6 +218,65 @@ describe('on message event', () => {
       expect(commands.gacha).toBeCalledTimes(2)
       expect(commands.gacha).toBeCalledWith('armzi', 123)
     })
+
+    describe('when user is not subscribed, and market is not opened', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('does not call gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            subscriber: false,
+          },
+        })
+
+        expect(commands.gacha).not.toBeCalled()
+      })
+    })
+
+    describe('when market is closed, but user is subscribed', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('calls gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            subscriber: true,
+          },
+        })
+
+        expect(commands.gacha).toBeCalledTimes(1)
+      })
+    })
+
+    describe('when market is closed, but user has founder badge', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('calls gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            badges: {
+              founder: '1',
+            },
+          },
+        })
+
+        expect(commands.gacha).toBeCalledTimes(1)
+      })
+    })
   })
 
   describe('!draw', () => {
@@ -243,6 +302,7 @@ describe('on message event', () => {
         message: '!give foo 10',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 
@@ -274,6 +334,7 @@ describe('on message event', () => {
         message: '!market open',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 
@@ -292,6 +353,7 @@ describe('on message event', () => {
         message: '!market close',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 
