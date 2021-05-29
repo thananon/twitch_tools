@@ -73,7 +73,9 @@ function isMarketAuthorized(tags: ChatUserstate) {
   }
 
   if (devMode) {
-    console.log('[Dev Mode] User not authorized, please open the market.')
+    console.log(
+      `[Dev Mode] User @${tags.username} not authorized, please open the market.`,
+    )
   }
 
   return false
@@ -333,11 +335,13 @@ export async function twitchService() {
         const marketState = cmdArgs[0]
         if (marketState == 'open') {
           await setting.setMarketState(marketState)
+          botSay(client, channel, 'Market Opened!')
           widget.feed(
             `<i class="fas fa-shopping-bag"></i> ตลาดเปิดแล้ว ไอ้พวกเวร`,
           )
         } else if (marketState == 'close') {
           await setting.setMarketState(marketState)
+          botSay(client, channel, 'Market Closed!')
           widget.feed(`<i class="fas fa-stop-circle"> ปิดตลาด!</i>`)
         }
 
