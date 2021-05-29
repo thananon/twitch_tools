@@ -10,8 +10,18 @@ import { discordService } from './services/discord'
 import setting from './services/setting'
 
 async function main() {
-  await twitchService()
-  await discordService()
+  try {
+    await twitchService()
+  } catch (error) {
+    console.error('Cannot start Twitch service', { error })
+  }
+
+  try {
+    await discordService()
+  } catch (error) {
+    console.error('Cannot start Discord service', { error })
+  }
+
   await setting.init()
   setting.startAutoSync()
 
