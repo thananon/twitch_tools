@@ -1,6 +1,6 @@
 import { ErrorResult, DataResult } from '../bot'
 import { Db } from '../db'
-import Setting from '../setting'
+import setting from '../setting'
 
 const db = new Db()
 
@@ -41,9 +41,6 @@ export async function allin(
   }
 
   coins = 0
-
-  // FIXME: use global setting?
-  const setting = await Setting.init()
 
   const dice = Math.random()
 

@@ -2,18 +2,12 @@ import prisma from '../../prisma/client'
 
 const SYNC_INTERVAL = 10000
 
-export default class Setting {
+class Setting {
   private data: Record<string, string | boolean | number> = {}
   private log: boolean
 
-  private constructor() {}
-
-  public static async init() {
-    const setting = new Setting()
-
-    await setting.setup()
-
-    return setting
+  async init() {
+    await this.setup()
   }
 
   async setup() {
@@ -56,10 +50,16 @@ export default class Setting {
   }
 
   startAutoSync(log = true) {
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Autosync mode is disabled in testing.')
+      return
+    }
+
     this.log = log
 
     setInterval(() => {
       this.sync()
+      console.log('Settings synced')
     }, SYNC_INTERVAL)
   }
 
@@ -122,3 +122,11 @@ export default class Setting {
     })
   }
 }
+
+const setting = new Setting()
+
+if (process.env.NODE_ENV != 'test') {
+  console.log('Setting initialized')
+}
+
+export default setting

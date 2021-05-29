@@ -4,7 +4,7 @@ import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
 import Widget from './widget'
-import Setting from './setting'
+import setting from './setting'
 import { Db } from './db'
 import prisma from '../../prisma/client'
 
@@ -60,8 +60,6 @@ export async function subscriptionPayout(username: string) {
 }
 
 export async function twitchService() {
-  const setting = await Setting.init()
-
   const client = new tmi.Client({
     options: {
       debug: devMode,

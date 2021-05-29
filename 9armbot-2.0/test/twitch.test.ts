@@ -13,7 +13,7 @@ import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { subscriptionPayout, twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
-import Setting from '../services/setting'
+import setting from '../services/setting'
 
 jest.mock('tmi.js')
 
@@ -24,10 +24,6 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
-})
-
-afterAll(async () => {
-  await prisma.$disconnect()
 })
 
 // Tmi has no type for events :cry:
@@ -158,10 +154,13 @@ describe('on message event', () => {
   })
 
   describe('!gacha', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'gacha').mockResolvedValue({
         data: { state: 'win', bet: 1, win: 2, balance: 3 },
       })
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     afterEach(() => {
@@ -266,7 +265,6 @@ describe('on message event', () => {
 
   describe('!market', () => {
     it('!market open : opens the market', async () => {
-      const setting = await Setting.init()
       await setting.setMarketState('close')
 
       expect(setting.marketState).toEqual('close')
@@ -285,7 +283,6 @@ describe('on message event', () => {
     })
 
     it('!market close : closes the market', async () => {
-      const setting = await Setting.init()
       await setting.setMarketState('open')
 
       expect(setting.marketState).toEqual('open')

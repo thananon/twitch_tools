@@ -1,5 +1,6 @@
 import dotenvFlow from 'dotenv-flow'
 import prisma from '../prisma/client'
+import setting from './services/setting'
 
 dotenvFlow.config({
   default_node_env: 'test',
@@ -21,4 +22,9 @@ jest.mock('../webapp', () => ({
 
 beforeAll(async () => {
   await prisma.player.deleteMany()
+  await setting.init()
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
 })

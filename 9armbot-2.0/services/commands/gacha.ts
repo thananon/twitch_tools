@@ -1,6 +1,6 @@
 import { ErrorResult, DataResult } from '../bot'
 import { Db } from '../db'
-import Setting from '../setting'
+import setting from '../setting'
 
 const db = new Db()
 
@@ -41,9 +41,6 @@ async function gacha(
   }
 
   coins -= bet
-
-  // FIXME: use global setting?
-  const setting = await Setting.init()
 
   const dice = Math.random()
   if (dice < setting.jackpotRate) {

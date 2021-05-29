@@ -1,6 +1,6 @@
 import commands from '../../services/bot'
 import prisma from '../../../prisma/client'
-import Setting from '../../services/setting'
+import setting from '../../services/setting'
 
 const username = 'foo'
 
@@ -16,18 +16,12 @@ beforeEach(async () => {
     },
   })
 
-  const setting = await Setting.init()
-
   await setting.setGachaRate('0.4')
   await setting.setJackpotRate('0.01')
 })
 
 afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
-})
-
-afterAll(async () => {
-  await prisma.$disconnect()
 })
 
 describe('allin', () => {
@@ -86,8 +80,6 @@ describe('allin', () => {
       beforeEach(async () => {
         jest.spyOn(global.Math, 'random').mockReturnValue(0.5)
 
-        const setting = await Setting.init()
-
         await setting.setGachaRate('0.3')
         await setting.setJackpotRate('0.2')
       })
@@ -136,8 +128,6 @@ describe('allin', () => {
       beforeEach(async () => {
         jest.spyOn(global.Math, 'random').mockReturnValue(0.3)
 
-        const setting = await Setting.init()
-
         await setting.setGachaRate('0.5')
         await setting.setJackpotRate('0.2')
       })
@@ -159,8 +149,6 @@ describe('allin', () => {
     describe('considers jackpotRate (win)', () => {
       beforeEach(async () => {
         jest.spyOn(global.Math, 'random').mockReturnValue(0.2)
-
-        const setting = await Setting.init()
 
         await setting.setGachaRate('0.5')
         await setting.setJackpotRate('0.3')

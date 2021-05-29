@@ -10,10 +10,6 @@ beforeEach(async () => {
   await prisma.player.deleteMany()
 })
 
-afterAll(async () => {
-  await prisma.$disconnect()
-})
-
 describe('CRUD players', () => {
   describe('#createPlayer', () => {
     it('can create new player by lowercased username (twitch for now)', async () => {
