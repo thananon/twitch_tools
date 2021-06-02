@@ -138,6 +138,25 @@ export async function twitchService() {
       await db.createPlayer(username)
     }
 
+    if (tags['custom-reward-id']) {
+      const rewardId = tags['custom-reward-id']
+
+      if (rewardId === '3a13ba8f-2a09-4765-abe0-7e028cdcaf28') {
+        await commands.giveCoin(username, 1)
+        await botSay(client, channel, `@${username} แลก 1 $ARM`)
+      }
+
+      if (rewardId === '041ca23b-47b3-4d91-8fb9-d37f96c17f47') {
+        await commands.giveCoin(username, 10)
+        await botSay(client, channel, `@${username} แลก 10 $ARM`)
+      }
+
+      if (rewardId === 'e22b1088-dfba-45a4-bcad-d79a8306ef7c') {
+        await commands.giveCoin(username, 50)
+        await botSay(client, channel, `@${username} แลก 50 $ARM`)
+      }
+    }
+
     if (message[0] !== '!') return
 
     const [cmdName, ...cmdArgs] = message.split(/\s+/)

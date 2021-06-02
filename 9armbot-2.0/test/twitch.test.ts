@@ -64,6 +64,60 @@ it('connects with twitch via tmi', async () => {
 })
 
 describe('on message event', () => {
+  describe('redeem channel points', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'giveCoin')
+    })
+
+    afterEach(() => {
+      ;(
+        commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+      ).mockReset()
+    })
+
+    it('gives 1 $ARM for custom-reward-id 3a13ba8f-2a09-4765-abe0-7e028cdcaf28', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: 'hello',
+        tags: {
+          username: 'foo',
+          'custom-reward-id': '3a13ba8f-2a09-4765-abe0-7e028cdcaf28',
+        },
+      })
+
+      expect(commands.giveCoin).toBeCalledTimes(1)
+      expect(commands.giveCoin).toBeCalledWith('foo', 1)
+    })
+
+    it('gives 10 $ARM for custom-reward-id 041ca23b-47b3-4d91-8fb9-d37f96c17f47', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: 'hello',
+        tags: {
+          username: 'foo',
+          'custom-reward-id': '041ca23b-47b3-4d91-8fb9-d37f96c17f47',
+        },
+      })
+
+      expect(commands.giveCoin).toBeCalledTimes(1)
+      expect(commands.giveCoin).toBeCalledWith('foo', 10)
+    })
+
+    it('gives 50 $ARM for custom-reward-id e22b1088-dfba-45a4-bcad-d79a8306ef7c', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: 'hello',
+        tags: {
+          username: 'foo',
+          'custom-reward-id': 'e22b1088-dfba-45a4-bcad-d79a8306ef7c',
+        },
+      })
+
+      expect(commands.giveCoin).toBeCalledTimes(1)
+      expect(commands.giveCoin).toBeCalledWith('foo', 50)
+    })
+  })
+
   describe('!github', () => {
     it('makes the bot say repo url to channel', async () => {
       await mockMessage({
