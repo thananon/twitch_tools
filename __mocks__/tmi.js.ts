@@ -1,28 +1,29 @@
 // FIXME : Refactor & Fix typing
 
-import tmi, { ClientBase } from "tmi.js";
+import tmi, { ClientBase } from "tmi.js"
 
-const unmockedClient = new tmi.Client({});
-const mockedTmi = jest.createMockFromModule("tmi.js") as typeof tmi;
+const unmockedClient = new tmi.Client({})
+const mockedTmi = jest.createMockFromModule("tmi.js") as typeof tmi
 
-const listeners: { [key: string]: Function } = {};
+const listeners: { [key: string]: Function } = {}
 
 export const client = {
   ...unmockedClient,
   connect: jest.fn().mockResolvedValue(() => {
-    console.log("connect called");
+    console.log("connect called")
   }),
   on: jest.fn().mockImplementation((event, listener) => {
-    listeners[event] = listener;
+    listeners[event] = listener
   }) as ClientBase["on"],
-};
+  timeout: jest.fn(),
+}
 
 jest.spyOn(tmi, "Client").mockImplementation(() => {
-  return (client as unknown) as tmi.Client;
-});
+  return client as unknown as tmi.Client
+})
 
 export const mockMessage = async function (payload: {
-  channel?: string;
+  channel?: string
   tags?: {
     // Allow 2-level hash
     [x: string]:
@@ -30,18 +31,18 @@ export const mockMessage = async function (payload: {
       | null
       | boolean
       | {
-          [x: string]: string;
-        };
-  };
-  message: string;
-  self?: boolean;
+          [x: string]: string
+        }
+  }
+  message: string
+  self?: boolean
 }) {
-  payload.tags = payload.tags || {};
-  payload.self = !!payload.self;
+  payload.tags = payload.tags || {}
+  payload.self = !!payload.self
 
-  const callback = listeners["message"];
-  await callback(payload.channel, payload.tags, payload.message, payload.self);
-  return unmockedClient;
-};
+  const callback = listeners["message"]
+  await callback(payload.channel, payload.tags, payload.message, payload.self)
+  return unmockedClient
+}
 
-export default mockedTmi;
+export default mockedTmi

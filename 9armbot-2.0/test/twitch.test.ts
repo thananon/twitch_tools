@@ -444,7 +444,46 @@ describe('on message event', () => {
   })
 
   describe('!thanos', () => {
-    it('does something', () => {})
+    const viewers = [
+      'foo1',
+      'foo2',
+      'foo3',
+      'foo4',
+      'foo5',
+      'foo6',
+      'foo7',
+      'foo8',
+    ]
+    beforeEach(() => {
+      // Mock Twitch chatters API
+      const mock = new MockAdapter(axios)
+      const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
+      mock.onGet(url).reply(200, {
+        chatter_count: 3,
+        chatters: {
+          viewers,
+          moderators: ['bar', 'iamsafe'],
+          vips: ['baz', 'iamalsosafe'],
+        },
+      })
+    })
+
+    it('timeout half of the viewers (4 from 8)', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!thanos',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      expect(client.timeout).toBeCalledTimes(4)
+
+      const timedoutPlayers = client.timeout.mock.calls.map((args) => args[1])
+      expect(timedoutPlayers.length).toEqual(4)
+      expect(viewers).toEqual(expect.arrayContaining(timedoutPlayers))
+    })
   })
 
   describe('!time', () => {
