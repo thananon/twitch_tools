@@ -10,7 +10,11 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 
 import { client, mockMessage } from '../../__mocks__/tmi.js'
-import { subscriptionPayout, twitchService } from '../services/twitch'
+import {
+  getRafflePlayers,
+  subscriptionPayout,
+  twitchService,
+} from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
 import setting from '../services/setting'
@@ -427,7 +431,40 @@ describe('on message event', () => {
     it('does something', () => {})
   })
 
-  describe('!raffle', () => {
+  describe('!raffle (amount)', () => {
+    beforeEach(() => {
+      jest.spyOn(commands, 'deductCoin')
+    })
+
+    afterEach(() => {
+      ;(
+        commands.deductCoin as jest.MockedFunction<typeof commands.deductCoin>
+      ).mockReset()
+    })
+
+    it('deducts 1 $ARM and add name to raffle list', async () => {
+      expect(getRafflePlayers()).toEqual([])
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(getRafflePlayers()).toEqual(['armzi'])
+
+      expect(commands.deductCoin).toHaveBeenCalledTimes(1)
+      expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 1)
+    })
+  })
+
+  describe('!raffle start', () => {
+    it('does something', () => {})
+  })
+
+  describe('!raffle stop', () => {
     it('does something', () => {})
   })
 

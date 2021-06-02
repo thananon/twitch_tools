@@ -14,6 +14,12 @@ const THANOS_SNAP_SECONDS = 180
 const widget = new Widget(false)
 const db = new Db()
 
+const rafflePlayers: string[] = []
+
+export function getRafflePlayers(): string[] {
+  return rafflePlayers
+}
+
 const silentBotMode = ['1', 'true'].includes(
   process.env.SILENT_BOT_MODE as string,
 )
@@ -394,11 +400,13 @@ export async function twitchService() {
         }
         break
       case '!raffle':
-        if (!isAdmin(tags)) {
-          break
-        }
+        amount = 1
+        result = await commands.deductCoin(username, amount)
+        rafflePlayers.push(username)
 
-        console.log('TODO')
+        widget.feed(
+          `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
+        )
         break
       case '!reset':
         if (!isAdmin(tags)) {

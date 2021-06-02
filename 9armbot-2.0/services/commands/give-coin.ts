@@ -15,6 +15,19 @@ async function giveCoin(
   return { data: currentCoin }
 }
 
+async function deductCoin(
+  toUsername: string,
+  amount: number,
+): Promise<GiveCoinResult> {
+  const player = await Player.withUsername(toUsername)
+  const updatedPlayer = await prisma.player.update({
+    where: { username: player.username },
+    data: { coins: player.info.coins - amount },
+  })
+
+  return { data: updatedPlayer.coins }
+}
+
 async function giveCoinToList(
   giveoutList: Array<string>,
   amount: number = 1,
@@ -27,4 +40,4 @@ async function giveCoinToList(
   return { data: players.count } // TODO: have different return code
 }
 
-export { giveCoin, giveCoinToList }
+export { giveCoin, giveCoinToList, deductCoin }
