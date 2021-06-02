@@ -27,6 +27,25 @@ describe('deductCoin', () => {
     expect(result).toEqual({ data: 2 })
     expect(await player.coins()).toEqual(2)
   })
+
+  describe('when user does not have enough coins', () => {
+    it('returns error', async () => {
+      await prisma.player.create({
+        data: {
+          username: 'foo',
+          coins: 5,
+        },
+      })
+
+      const result = await commands.deductCoin('foo', 10)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          error: 'not_enough_coin',
+        }),
+      )
+    })
+  })
 })
 
 describe('giveCoin', () => {

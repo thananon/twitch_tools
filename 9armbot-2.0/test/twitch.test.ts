@@ -433,7 +433,9 @@ describe('on message event', () => {
 
   describe('!raffle (amount)', () => {
     beforeEach(() => {
-      jest.spyOn(commands, 'deductCoin')
+      jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+        data: 1,
+      })
     })
 
     afterEach(() => {
@@ -457,6 +459,28 @@ describe('on message event', () => {
 
       expect(commands.deductCoin).toHaveBeenCalledTimes(1)
       expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 1)
+    })
+
+    describe('when deductCoin returns error', () => {
+      beforeEach(async () => {
+        jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+          error: 'not_enough_coin',
+        })
+
+        client.timeout.mockClear()
+      })
+
+      it('punishes player by timeout', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(client.timeout).toBeCalledTimes(1)
+      })
     })
   })
 
@@ -503,6 +527,8 @@ describe('on message event', () => {
           vips: ['baz', 'iamalsosafe'],
         },
       })
+
+      client.timeout.mockClear()
     })
 
     it('timeout half of the viewers (4 from 8)', async () => {

@@ -1,4 +1,4 @@
-import { DataResult } from '../bot'
+import { DataResult, ErrorResult } from '../bot'
 import Player from '../models/player'
 import prisma from '../../../prisma/client'
 
@@ -18,8 +18,13 @@ async function giveCoin(
 async function deductCoin(
   toUsername: string,
   amount: number,
-): Promise<GiveCoinResult> {
+): Promise<GiveCoinResult | ErrorResult> {
   const player = await Player.withUsername(toUsername)
+
+  if (player.info.coins < amount) {
+    return { error: 'not_enough_coin' }
+  }
+
   const updatedPlayer = await prisma.player.update({
     where: { username: player.username },
     data: { coins: player.info.coins - amount },

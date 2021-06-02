@@ -402,6 +402,18 @@ export async function twitchService() {
       case '!raffle':
         amount = 1
         result = await commands.deductCoin(username, amount)
+
+        if (isError(result)) {
+          client.timeout(
+            channel,
+            username,
+            THANOS_SNAP_SECONDS,
+            'ไม่มีตังจ่ายค่าตั๋ว',
+          )
+
+          return
+        }
+
         rafflePlayers.push(username)
 
         widget.feed(
