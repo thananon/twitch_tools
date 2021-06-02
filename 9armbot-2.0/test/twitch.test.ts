@@ -12,6 +12,7 @@ import MockAdapter from 'axios-mock-adapter'
 import { client, mockMessage } from '../../__mocks__/tmi.js'
 import {
   getRafflePlayers,
+  resetRafflePlayers,
   subscriptionPayout,
   twitchService,
 } from '../services/twitch'
@@ -431,8 +432,10 @@ describe('on message event', () => {
     it('does something', () => {})
   })
 
-  describe('!raffle (amount)', () => {
+  describe('!raffle', () => {
     beforeEach(() => {
+      resetRafflePlayers()
+
       jest.spyOn(commands, 'deductCoin').mockResolvedValue({
         data: 1,
       })
@@ -459,6 +462,33 @@ describe('on message event', () => {
 
       expect(commands.deductCoin).toHaveBeenCalledTimes(1)
       expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 1)
+    })
+
+    describe('!raffle with amount', () => {
+      beforeEach(() => {
+        resetRafflePlayers()
+
+        jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+          data: 3,
+        })
+      })
+
+      it('deducts $ARM by amount and add name multiple times to raffle list', async () => {
+        expect(getRafflePlayers()).toEqual([])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+        expect(commands.deductCoin).toHaveBeenCalledTimes(1)
+        expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 3)
+      })
     })
 
     describe('when deductCoin returns error', () => {

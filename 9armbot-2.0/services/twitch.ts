@@ -20,6 +20,10 @@ export function getRafflePlayers(): string[] {
   return rafflePlayers
 }
 
+export function resetRafflePlayers(): void {
+  rafflePlayers.splice(0, rafflePlayers.length)
+}
+
 const silentBotMode = ['1', 'true'].includes(
   process.env.SILENT_BOT_MODE as string,
 )
@@ -401,24 +405,37 @@ export async function twitchService() {
         break
       case '!raffle':
         amount = 1
-        result = await commands.deductCoin(username, amount)
 
-        if (isError(result)) {
-          client.timeout(
-            channel,
-            username,
-            THANOS_SNAP_SECONDS,
-            'ไม่มีตังจ่ายค่าตั๋ว',
-          )
-
-          return
+        if (cmdArgs.length) {
+          let group = cmdArgs[0].match(/(-?\d+)/)
+          if (group && group[1]) {
+            amount = Math.abs(Number.parseInt(group[1]))
+          }
         }
 
-        rafflePlayers.push(username)
+        if (amount >= 1) {
+          result = await commands.deductCoin(username, amount)
 
-        widget.feed(
-          `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
-        )
+          if (isError(result)) {
+            client.timeout(
+              channel,
+              username,
+              THANOS_SNAP_SECONDS,
+              'ไม่มีตังจ่ายค่าตั๋ว',
+            )
+
+            return
+          }
+
+          for (let i = 0; i < amount; i++) {
+            rafflePlayers.push(username)
+          }
+
+          widget.feed(
+            `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
+          )
+        }
+
         break
       case '!reset':
         if (!isAdmin(tags)) {
