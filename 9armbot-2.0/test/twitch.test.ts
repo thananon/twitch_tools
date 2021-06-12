@@ -13,7 +13,7 @@ import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { subscriptionPayout, twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
-import Setting from '../services/setting'
+import { Setting } from '../services/setting'
 
 jest.mock('tmi.js')
 
@@ -266,7 +266,7 @@ describe('on message event', () => {
 
   describe('!market', () => {
     it('!market open : opens the market', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
       await setting.setMarketState('close')
 
       expect(setting.marketState).toEqual('close')
@@ -285,7 +285,7 @@ describe('on message event', () => {
     })
 
     it('!market close : closes the market', async () => {
-      const setting = await Setting.init()
+      const setting = new Setting()
       await setting.setMarketState('open')
 
       expect(setting.marketState).toEqual('open')
