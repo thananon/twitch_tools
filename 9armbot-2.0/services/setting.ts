@@ -5,7 +5,6 @@ const SYNC_INTERVAL = 10000
 class Setting {
   private data: Record<string, string | boolean | number> = {}
   private log: boolean
-  private onReadyCallbacks: Array<Function> = []
 
   async init() {
     await this.setup()

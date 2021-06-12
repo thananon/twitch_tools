@@ -24,7 +24,6 @@ async function main() {
 
   await setting.init()
   setting.startAutoSync()
-  setting.onReady(() => console.log('Setting Ready'))
 
   console.log('9armbot 2.0 Running...')
 }
