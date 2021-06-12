@@ -12,10 +12,6 @@ afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
 
-afterAll(async () => {
-  await prisma.$disconnect()
-})
-
 describe('giveCoin', () => {
   it('gives 10 coins to player by default', async () => {
     const result = await commands.giveCoin('foo')

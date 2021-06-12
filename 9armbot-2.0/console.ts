@@ -39,9 +39,8 @@ replServer.context.bot = commands
 // Widget commands eg. `widget.testWidget()`
 replServer.context.widget = widget
 
-setting.startAutoSync()
-
-setting.onReady(() => {
+setting.init().then(() => {
+  setting.startAutoSync(false)
   replServer.context.setting = setting
 })
 

@@ -13,7 +13,7 @@ import { client, mockMessage } from '../../__mocks__/tmi.js'
 import { subscriptionPayout, twitchService } from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
-import { Setting } from '../services/setting'
+import setting from '../services/setting'
 
 jest.mock('tmi.js')
 
@@ -24,10 +24,6 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
-})
-
-afterAll(async () => {
-  await prisma.$disconnect()
 })
 
 // Tmi has no type for events :cry:
@@ -83,10 +79,13 @@ describe('on message event', () => {
   })
 
   describe('!allin', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'allin').mockResolvedValue({
         data: { state: 'win', bet: 1, win: 10, balance: 10 },
       })
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     afterEach(() => {
@@ -118,8 +117,11 @@ describe('on message event', () => {
   })
 
   describe('!coin', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'coin')
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     it('returns 0 $ARMs if player not existed', async () => {
@@ -158,10 +160,13 @@ describe('on message event', () => {
   })
 
   describe('!gacha', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.spyOn(commands, 'gacha').mockResolvedValue({
         data: { state: 'win', bet: 1, win: 2, balance: 3 },
       })
+
+      // Open market by default
+      await setting.setMarketState('open')
     })
 
     afterEach(() => {
@@ -219,6 +224,65 @@ describe('on message event', () => {
       expect(commands.gacha).toBeCalledTimes(2)
       expect(commands.gacha).toBeCalledWith('armzi', 123)
     })
+
+    describe('when user is not subscribed, and market is not opened', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('does not call gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            subscriber: false,
+          },
+        })
+
+        expect(commands.gacha).not.toBeCalled()
+      })
+    })
+
+    describe('when market is closed, but user is subscribed', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('calls gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            subscriber: true,
+          },
+        })
+
+        expect(commands.gacha).toBeCalledTimes(1)
+      })
+    })
+
+    describe('when market is closed, but user has founder badge', () => {
+      beforeEach(async () => {
+        await setting.setMarketState('close')
+      })
+
+      it('calls gacha command', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!gacha',
+          tags: {
+            username: 'armzi',
+            badges: {
+              founder: '1',
+            },
+          },
+        })
+
+        expect(commands.gacha).toBeCalledTimes(1)
+      })
+    })
   })
 
   describe('!draw', () => {
@@ -244,6 +308,7 @@ describe('on message event', () => {
         message: '!give foo 10',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 
@@ -266,7 +331,6 @@ describe('on message event', () => {
 
   describe('!market', () => {
     it('!market open : opens the market', async () => {
-      const setting = new Setting()
       await setting.setMarketState('close')
 
       expect(setting.marketState).toEqual('close')
@@ -276,6 +340,7 @@ describe('on message event', () => {
         message: '!market open',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 
@@ -285,7 +350,6 @@ describe('on message event', () => {
     })
 
     it('!market close : closes the market', async () => {
-      const setting = new Setting()
       await setting.setMarketState('open')
 
       expect(setting.marketState).toEqual('open')
@@ -295,6 +359,7 @@ describe('on message event', () => {
         message: '!market close',
         tags: {
           username: 'armzi',
+          badges: { broadcaster: '1' },
         },
       })
 

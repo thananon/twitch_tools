@@ -2,40 +2,12 @@ import prisma from '../../prisma/client'
 
 const SYNC_INTERVAL = 10000
 
-/**
- * Setting
- *   A class to initialize bot settings & sync across processes
- * Usage :
- *   1. Initialize new setting
- *     setting = new Setting()
- *   2. Wait for setup
- *     await setting.onReady()
- *       OR
- *     setting.onReady(callback)
- *   3. Get the data
- *     setting.gachaRate
- *   4. Set the data & save in database
- *     await setting.setGachaRate(newRate)
- */
-export class Setting {
+class Setting {
   private data: Record<string, string | boolean | number> = {}
   private log: boolean
-  private onReadyCallbacks: Array<Function> = []
 
-  constructor() {
-    this.setup().then(() => {
-      this.onReadyCallbacks.map((cb) => cb())
-    })
-  }
-
-  async onReady(callback?: (_: Setting) => void): Promise<Setting> {
-    return new Promise((resolve) => {
-      const cb = () => {
-        callback ? callback(this) : resolve(this)
-      }
-
-      this.onReadyCallbacks.push(cb)
-    })
+  async init() {
+    await this.setup()
   }
 
   async setup() {
@@ -78,10 +50,16 @@ export class Setting {
   }
 
   startAutoSync(log = true) {
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Autosync mode is disabled in testing.')
+      return
+    }
+
     this.log = log
 
     setInterval(() => {
       this.sync()
+      console.log('Settings synced')
     }, SYNC_INTERVAL)
   }
 
@@ -145,6 +123,10 @@ export class Setting {
   }
 }
 
-let sharedSetting = new Setting()
+const setting = new Setting()
 
-export default sharedSetting
+if (process.env.NODE_ENV != 'test') {
+  console.log('Setting initialized')
+}
+
+export default setting

@@ -6,10 +6,6 @@ beforeEach(async () => {
   await prisma.player.deleteMany()
 })
 
-afterAll(async () => {
-  await prisma.$disconnect()
-})
-
 describe('Player', () => {
   it('initializes with username', async () => {
     const player = new Player('foo')

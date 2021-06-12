@@ -24,10 +24,6 @@ afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
 
-afterAll(async () => {
-  await prisma.$disconnect()
-})
-
 describe('allin', () => {
   it('exists', () => {
     expect(commands.allin).toBeDefined()

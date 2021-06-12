@@ -24,10 +24,6 @@ afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
 
-afterAll(async () => {
-  await prisma.$disconnect()
-})
-
 describe('gacha', () => {
   it('exists', () => {
     expect(commands.gacha).toBeDefined()

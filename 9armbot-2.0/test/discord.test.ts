@@ -6,16 +6,13 @@ import commands from '../services/bot'
 
 jest.mock('discord.js')
 
-beforeAll(() => {
+beforeEach(async () => {
   jest.clearAllMocks()
+  await discordService()
 })
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
-})
-
-afterAll(async () => {
-  await prisma.$disconnect()
 })
 
 const exampleMessage = {
@@ -78,8 +75,6 @@ const exampleMessage = {
 }
 
 it('connects with discord', async () => {
-  await discordService()
-
   expect(Discord.Client).toBeCalledTimes(1)
 
   await mockMessage(exampleMessage)

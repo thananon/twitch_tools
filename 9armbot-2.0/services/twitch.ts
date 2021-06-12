@@ -1,5 +1,5 @@
 import axios from 'axios'
-import tmi from 'tmi.js'
+import tmi, { ChatUserstate } from 'tmi.js'
 import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
@@ -57,6 +57,36 @@ export async function subscriptionPayout(username: string) {
   )
 
   return await payday(1, username)
+}
+
+function isMarketAuthorized(tags: ChatUserstate) {
+  if (tags.badges && 'founder' in tags.badges) {
+    return true
+  }
+
+  if (tags.subscriber) {
+    return true
+  }
+
+  if (setting.marketState == 'open') {
+    return true
+  }
+
+  if (devMode) {
+    console.log(
+      `[Dev Mode] User @${tags.username} not authorized, please open the market.`,
+    )
+  }
+
+  return false
+}
+
+function isMod(tags: ChatUserstate) {
+  return !!tags.mod
+}
+
+function isAdmin(tags: ChatUserstate) {
+  return tags.badges && 'broadcaster' in tags.badges
 }
 
 export async function twitchService() {
@@ -120,11 +150,18 @@ export async function twitchService() {
         botSay(client, channel, 'https://github.com/thananon/twitch_tools')
         break
       case '!fetch':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         // test cmd; precursor to give coin to everyone.
         console.log(getTwitchChatters())
         break
       case '!allin':
-        // TODO: random win
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
+
         result = await commands.allin(username)
 
         if (isError(result)) {
@@ -167,12 +204,23 @@ export async function twitchService() {
         }
         break
       case '!auction':
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
         console.log('TODO')
         break
       case '!botstat':
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!coin':
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
+
         result = await commands.coin(username)
 
         if (isError(result)) {
@@ -183,9 +231,17 @@ export async function twitchService() {
         await botSay(client, channel, `@${username} มี ${result.data} $ARM.`)
         break
       case '!draw':
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!gacha':
+        if (!isMarketAuthorized(tags)) {
+          break
+        }
+
         if (cmdArgs.length) {
           let group = cmdArgs[0].match(/(-?\d+)/)
           if (group && group[1]) {
@@ -236,6 +292,10 @@ export async function twitchService() {
 
         break
       case '!give':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         if (cmdArgs) {
           let group = cmdArgs.join(' ').match(/(\S+)\s(\d+)?/)
           if (group && group[1] && group[2]) {
@@ -254,32 +314,54 @@ export async function twitchService() {
         }
         break
       case '!income':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!kick':
+        if (!isAdmin(tags) && !isMod(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!market':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         const marketState = cmdArgs[0]
 
         if (marketState == 'open') {
           await setting.setMarketState(marketState)
+          botSay(client, channel, 'Market Opened!')
           widget.feed(
             `<i class="fas fa-shopping-bag"></i> ตลาดเปิดแล้ว ไอ้พวกเวร`,
           )
         } else if (marketState == 'close') {
           await setting.setMarketState(marketState)
+          botSay(client, channel, 'Market Closed!')
           widget.feed(`<i class="fas fa-stop-circle"> ปิดตลาด!</i>`)
         }
 
         break
       case '!payday':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         let player = await Player.withUsername(username)
         if (player.info.is_admin) {
           await payday(1, username)
         }
         break
       case '!payout': // placeholder for subscription event
+        if (!isAdmin(tags)) {
+          break
+        }
+
         if (devMode) {
           const { playersPaidCount } = await subscriptionPayout(username)
 
@@ -291,15 +373,31 @@ export async function twitchService() {
         }
         break
       case '!raffle':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!reset':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!sentry':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!thanos':
+        if (!isAdmin(tags)) {
+          break
+        }
+
         console.log('TODO')
         break
       case '!time':
