@@ -129,7 +129,7 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await botSay(channel, `@${username} มี $ARM ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี $ARM ไม่พอ!.`)
           }
           return
         }
@@ -176,11 +176,11 @@ export async function twitchService() {
         result = await commands.coin(username)
 
         if (isError(result)) {
-          await botSay(channel, `@${username} มี 0 $ARM.`)
+          await botSay(client, channel, `@${username} มี 0 $ARM.`)
           return
         }
 
-        await botSay(channel, `@${username} มี ${result.data} $ARM.`)
+        await botSay(client, channel, `@${username} มี ${result.data} $ARM.`)
         break
       case '!draw':
         console.log('TODO')
@@ -197,7 +197,7 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await botSay(channel, `@${username} มี $ARM ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี $ARM ไม่พอ!.`)
           }
           return
         }
