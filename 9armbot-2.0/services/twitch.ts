@@ -7,6 +7,9 @@ import Widget from './widget'
 import setting from './setting'
 import { Db } from './db'
 import prisma from '../../prisma/client'
+import shuffle from 'lodash/shuffle'
+
+const THANOS_SNAP_SECONDS = 180
 
 const widget = new Widget(false)
 const db = new Db()
@@ -417,7 +420,38 @@ export async function twitchService() {
           break
         }
 
-        console.log('TODO')
+        const players = (await getTwitchChatters()).viewers
+        const halfOfPlayers = shuffle(players).slice(
+          0,
+          Math.ceil(players.length / 2.0),
+        )
+        const snappedCount = halfOfPlayers.length
+
+        const snappedPlayers = halfOfPlayers.map(async (username, idx) => {
+          console.log(`Snapping ${username} (${idx + 1}/${snappedCount})`)
+
+          client.timeout(
+            channel,
+            username,
+            THANOS_SNAP_SECONDS,
+            'โดนทานอสดีดนิ้ว',
+          )
+
+          widget.feed(
+            `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${
+              idx + 1
+            }/${snappedCount})`,
+          )
+
+          return username
+        })
+
+        client.say(
+          channel,
+          `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทหายตัวไป....`,
+        )
+
+        await Promise.all(snappedPlayers)
         break
       case '!time':
         console.log('TODO')
