@@ -12,6 +12,7 @@ import commands from './services/bot'
 import Player from './services/models/player'
 import Widget from './services/widget'
 import setting from './services/setting'
+import prisma from '../prisma/client'
 
 const replServer = repl.start({
   prompt: `9armbot(${process.env.NODE_ENV || 'development'}) > `,
@@ -29,6 +30,7 @@ console.log(`Database "${dbName}" loaded, press enter to continue.`)
 //   Since it is asynchronous function you have to use await keyword.
 //   Type `db.` then press Tab to see all available commands
 replServer.context.db = db
+replServer.context.prisma = prisma
 replServer.context.Player = Player
 
 // Bot commands eg. `await bot.coin(username)`

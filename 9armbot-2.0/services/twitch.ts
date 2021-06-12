@@ -5,10 +5,16 @@ import Player from './models/player'
 import { devMode } from '../config'
 import Widget from './widget'
 import setting from './setting'
+import { Db } from './db'
+import prisma from '../../prisma/client'
 
 const widget = new Widget(false)
+const db = new Db()
 
-/* return online { chatters, mods, total } */
+const silentBotMode = ['1', 'true'].includes(
+  process.env.SILENT_BOT_MODE as string,
+)
+
 async function getTwitchChatters() {
   const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
   const { data } = await axios.get(url)
@@ -17,6 +23,14 @@ async function getTwitchChatters() {
     viewers: data.chatters.viewers as string[],
     mods: data.chatters.moderators as string[],
     vips: data.chatters.vips as string[],
+  }
+}
+
+async function botSay(client: tmi.Client, channel: string, message: string) {
+  if (silentBotMode) {
+    console.log(`[Silent Mode] ${client.getUsername()}: ${message}`)
+  } else {
+    return await client.say.apply(client, [channel, message])
   }
 }
 
@@ -64,10 +78,19 @@ export async function twitchService() {
 
   await client.connect()
 
-  client.on('join', async (_channel, username, _self) => {
-    const player = await Player.withUsername(username)
+  // Cache existing player names from db
+  const existingPlayerNames = new Set(
+    (await prisma.player.findMany({ select: { username: true } })).map(
+      (p) => p.username,
+    ),
+  )
 
-    console.log(`${player.info.username} has joined chat!`)
+  client.on('join', async (_channel, username, _self) => {
+    // Ensure new players are created on join
+    if (!existingPlayerNames.has(username.toLowerCase())) {
+      existingPlayerNames.add(username.toLowerCase())
+      await db.createPlayer(username)
+    }
   })
 
   client.on('part', (_channel, username, _self) => {
@@ -76,9 +99,17 @@ export async function twitchService() {
 
   client.on('message', async (channel, tags, message, self) => {
     if (self) return
-    if (message[0] !== '!') return
 
     const username = tags!.username!
+
+    // Ensure new players are created on message
+    if (username && !existingPlayerNames.has(username.toLowerCase())) {
+      existingPlayerNames.add(username.toLowerCase())
+      await db.createPlayer(username)
+    }
+
+    if (message[0] !== '!') return
+
     const [cmdName, ...cmdArgs] = message.split(/\s+/)
 
     let result, amount
@@ -86,7 +117,7 @@ export async function twitchService() {
     // ! Commands
     switch (cmdName) {
       case '!github':
-        client.say(channel, 'https://github.com/thananon/twitch_tools')
+        botSay(client, channel, 'https://github.com/thananon/twitch_tools')
         break
       case '!fetch':
         // test cmd; precursor to give coin to everyone.
@@ -98,13 +129,14 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await client.say(channel, `@${username} มี ArmCoin ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี ArmCoin ไม่พอ!.`)
           }
           return
         }
 
         if (result.data.state == 'win_jackpot') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `ALL-IN JACKPOT!! @${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
           )
@@ -113,7 +145,8 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> ALL-IN JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
           )
         } else if (result.data.state == 'win') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `@${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin`,
           )
@@ -122,7 +155,8 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin`,
           )
         } else if (result.data.state == 'lose') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `@${username} ลงหมดหน้าตัก ${result.data.bet} -> แตก!`,
           )
@@ -142,11 +176,11 @@ export async function twitchService() {
         result = await commands.coin(username)
 
         if (isError(result)) {
-          await client.say(channel, `@${username} มี 0 ArmCoin.`)
+          await botSay(client, channel, `@${username} มี 0 ArmCoin.`)
           return
         }
 
-        await client.say(channel, `@${username} มี ${result.data} ArmCoin.`)
+        await botSay(client, channel, `@${username} มี ${result.data} ArmCoin.`)
         break
       case '!draw':
         console.log('TODO')
@@ -163,13 +197,14 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await client.say(channel, `@${username} มี ArmCoin ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี ArmCoin ไม่พอ!.`)
           }
           return
         }
 
         if (result.data.state == 'win_jackpot') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `JACKPOT!! @${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
           )
@@ -178,7 +213,8 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
           )
         } else if (result.data.state == 'win') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
           )
@@ -187,7 +223,8 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
           )
         } else if (result.data.state == 'lose') {
-          await client.say(
+          await botSay(
+            client,
             channel,
             `@${username} ลงทุน ${result.data.bet} -> แตก! (${result.data.balance}).`,
           )
@@ -207,7 +244,8 @@ export async function twitchService() {
             result = await commands.giveCoin(group[1], amount)
 
             if (!isError(result)) {
-              await client.say(
+              await botSay(
+                client,
                 channel,
                 `@${username} เสกเงินให้ ${group[1]} จำนวน ${amount} (${result.data}).`,
               )
@@ -245,7 +283,8 @@ export async function twitchService() {
         if (devMode) {
           const { playersPaidCount } = await subscriptionPayout(username)
 
-          client.say(
+          botSay(
+            client,
             channel,
             `${username} ได้รับ 10 ArmCoin จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 ArmCoin.`,
           )
