@@ -76,7 +76,7 @@ export async function discordService() {
           let embed = helpers.buildEmbedMessage([
             {
               name: `<${username}>`,
-              value: `มียอดคงเหลือ ${result.data} ArmCoin`,
+              value: `มียอดคงเหลือ ${result.data} $ARM`,
             },
           ])
 

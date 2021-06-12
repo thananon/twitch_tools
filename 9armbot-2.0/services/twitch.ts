@@ -40,7 +40,7 @@ async function payday(amount: number = 1, subscriber: string) {
   await commands.giveCoinToList(players, amount)
 
   widget.feed(
-    `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${players.length}</b> คนได้รับ 1 ArmCoin <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${subscriber}</b>`,
+    `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${players.length}</b> คนได้รับ 1 $ARM <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${subscriber}</b>`,
   )
 
   return {
@@ -53,7 +53,7 @@ export async function subscriptionPayout(username: string) {
   await player.giveCoin(10)
 
   widget.feed(
-    `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 ArmCoin จากการ Subscribe`,
+    `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 $ARM จากการ Subscribe`,
   )
 
   return await payday(1, username)
@@ -166,7 +166,7 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await botSay(client, channel, `@${username} มี ArmCoin ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี $ARM ไม่พอ!.`)
           }
           return
         }
@@ -175,31 +175,31 @@ export async function twitchService() {
           await botSay(
             client,
             channel,
-            `ALL-IN JACKPOT!! @${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+            `ALL-IN JACKPOT!! @${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} $ARM (${result.data.balance}).`,
           )
 
           widget.feed(
-            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> ALL-IN JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> ALL-IN JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
         } else if (result.data.state == 'win') {
           await botSay(
             client,
             channel,
-            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin`,
+            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> ได้รางวัล ${result.data.win} $ARM`,
           )
 
           widget.feed(
-            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin`,
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM`,
           )
         } else if (result.data.state == 'lose') {
           await botSay(
             client,
             channel,
-            `@${username} ลงหมดหน้าตัก ${result.data.bet} -> แตก!`,
+            `@${username} ลงหมดหน้าตัก ${result.data.bet} $ARM -> แตก!`,
           )
 
           widget.feed(
-            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} ArmCoin`,
+            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} $ARM`,
           )
         }
         break
@@ -224,11 +224,11 @@ export async function twitchService() {
         result = await commands.coin(username)
 
         if (isError(result)) {
-          await botSay(client, channel, `@${username} มี 0 ArmCoin.`)
+          await botSay(client, channel, `@${username} มี 0 $ARM.`)
           return
         }
 
-        await botSay(client, channel, `@${username} มี ${result.data} ArmCoin.`)
+        await botSay(client, channel, `@${username} มี ${result.data} $ARM.`)
         break
       case '!draw':
         if (!isMarketAuthorized(tags)) {
@@ -253,7 +253,7 @@ export async function twitchService() {
 
         if (isError(result)) {
           if (result.error == 'not_enough_coin') {
-            await botSay(client, channel, `@${username} มี ArmCoin ไม่พอ!.`)
+            await botSay(client, channel, `@${username} มี $ARM ไม่พอ!.`)
           }
           return
         }
@@ -262,31 +262,31 @@ export async function twitchService() {
           await botSay(
             client,
             channel,
-            `JACKPOT!! @${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+            `JACKPOT!! @${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} $ARM (${result.data.balance}).`,
           )
 
           widget.feed(
-            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
         } else if (result.data.state == 'win') {
           await botSay(
             client,
             channel,
-            `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} ArmCoin (${result.data.balance}).`,
+            `@${username} ลงทุน ${result.data.bet} -> ได้รางวัล ${result.data.win} $ARM (${result.data.balance}).`,
           )
 
           widget.feed(
-            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} ArmCoin (${result.data.balance})`,
+            `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
         } else if (result.data.state == 'lose') {
           await botSay(
             client,
             channel,
-            `@${username} ลงทุน ${result.data.bet} -> แตก! (${result.data.balance}).`,
+            `@${username} ลงทุน ${result.data.bet} $ARM -> แตก! (${result.data.balance}).`,
           )
 
           widget.feed(
-            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} ArmCoin (${result.data.balance})`,
+            `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} $ARM (${result.data.balance})`,
           )
         }
 
@@ -333,6 +333,7 @@ export async function twitchService() {
         }
 
         const marketState = cmdArgs[0]
+
         if (marketState == 'open') {
           await setting.setMarketState(marketState)
           botSay(client, channel, 'Market Opened!')
@@ -367,7 +368,7 @@ export async function twitchService() {
           botSay(
             client,
             channel,
-            `${username} ได้รับ 10 ArmCoin จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 ArmCoin.`,
+            `${username} ได้รับ 10 $ARM จากการ subscribe และสมาชิก ${playersPaidCount} รายได้รับ 1 $ARM.`,
           )
         }
         break

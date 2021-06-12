@@ -166,7 +166,7 @@ describe('gacha', () => {
       jest.spyOn(global.Math, 'random').mockReturnValue(0.05)
     })
 
-    it('win same amount of coin', async () => {
+    it('win some amount of coin', async () => {
       const result = await commands.gacha(username, 3)
 
       // Check result
