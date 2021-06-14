@@ -433,12 +433,15 @@ describe('on message event', () => {
   })
 
   describe('!raffle', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       resetRafflePlayers()
 
       jest.spyOn(commands, 'deductCoin').mockResolvedValue({
         data: 1,
       })
+
+      // Open raffle by default
+      await setting.setRaffleState('open')
     })
 
     afterEach(() => {
@@ -488,6 +491,28 @@ describe('on message event', () => {
 
         expect(commands.deductCoin).toHaveBeenCalledTimes(1)
         expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 3)
+      })
+    })
+
+    describe('when raffle state is not opened', () => {
+      beforeEach(async () => {
+        await setting.setRaffleState('close')
+      })
+
+      it('does not deduct coin and does not add player to raffle list', async () => {
+        expect(getRafflePlayers()).toEqual([])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual([])
+
+        expect(commands.deductCoin).toHaveBeenCalledTimes(0)
       })
     })
 

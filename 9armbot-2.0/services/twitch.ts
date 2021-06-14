@@ -426,6 +426,10 @@ export async function twitchService() {
           return
         }
 
+        if (setting.raffleState == 'close') {
+          return
+        }
+
         amount = 1
 
         if (cmdArgs.length) {
