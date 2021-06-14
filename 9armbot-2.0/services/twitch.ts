@@ -20,6 +20,11 @@ export function getRafflePlayers(): string[] {
   return rafflePlayers
 }
 
+export function drawRaffle(): string | undefined {
+  const index = Math.floor(Math.random() * rafflePlayers.length)
+  return rafflePlayers.splice(index, 1)[0]
+}
+
 export function resetRafflePlayers(): void {
   rafflePlayers.splice(0, rafflePlayers.length)
 }
@@ -262,13 +267,6 @@ export async function twitchService() {
 
         await botSay(client, channel, `@${username} มี ${result.data} ArmCoin.`)
         break
-      case '!draw':
-        if (!isMarketAuthorized(tags)) {
-          break
-        }
-
-        console.log('TODO')
-        break
       case '!gacha':
         if (!isMarketAuthorized(tags)) {
           break
@@ -474,6 +472,19 @@ export async function twitchService() {
           widget.feed(
             `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
           )
+        }
+
+        break
+      case '!draw':
+        if (!isAdmin(tags)) {
+          break
+        }
+
+        const winner = drawRaffle()
+
+        if (winner) {
+          widget.feed(`<b class="badge bg-primary">${winner}</b> ได้รับรางวัล`)
+          botSay(client, channel, `${winner} ได้รับรางวัล`)
         }
 
         break

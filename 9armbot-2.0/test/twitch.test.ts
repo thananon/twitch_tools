@@ -345,7 +345,54 @@ describe('on message event', () => {
   })
 
   describe('!draw', () => {
-    it('does something', () => {})
+    beforeEach(async () => {
+      // Open raffle
+      await setting.setRaffleState('open')
+      jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+        data: 1,
+      })
+
+      // Add players to array
+      resetRafflePlayers()
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle 3',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+      mockFeed.mockClear()
+      ;(
+        commands.deductCoin as jest.MockedFunction<typeof commands.deductCoin>
+      ).mockClear()
+      ;(client.say as jest.MockedFunction<typeof client.say>).mockClear()
+    })
+
+    it('randomize a name from rafflePlayer array', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!draw',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      expect(client.say).toBeCalledWith('#9armbot', 'armzi ได้รับรางวัล')
+
+      expect(mockFeed).toHaveBeenCalledTimes(1)
+      expect(mockFeed).toHaveBeenNthCalledWith(
+        1,
+        `<b class="badge bg-primary">armzi</b> ได้รับรางวัล`,
+      )
+
+      // Remove winner from array once
+      expect(getRafflePlayers()).toEqual(['armzi', 'armzi'])
+    })
   })
 
   describe('!give', () => {
