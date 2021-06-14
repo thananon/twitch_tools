@@ -410,9 +410,10 @@ export async function twitchService() {
           if (!isAdmin(tags)) {
             break
           }
+          resetRafflePlayers()
           await setting.setRaffleState('open')
-          botSay(client, channel, 'Raffle Start!')
-          widget.feed(`<i class="fas fa-ticket-alt"></i> Raffle Start!`)
+          botSay(client, channel, 'Raffle Started!')
+          widget.feed(`<i class="fas fa-ticket-alt"></i> Raffle Started!`)
 
           return
         } else if (raffleArg == 'stop') {
@@ -420,9 +421,22 @@ export async function twitchService() {
             break
           }
           await setting.setRaffleState('close')
-          botSay(client, channel, 'Raffle Closed!')
-          widget.feed(`<i class="fas fa-stop-circle"> Raffle Closed!</i>`)
+          botSay(client, channel, 'Raffle Stopped!')
+          widget.feed(`<i class="fas fa-stop-circle"> Raffle Stopped!</i>`)
 
+          return
+        } else if (raffleArg == 'status') {
+          if (!isAdmin(tags)) {
+            break
+          }
+
+          botSay(
+            client,
+            channel,
+            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${
+              getRafflePlayers().length
+            } $ARM Bought`,
+          )
           return
         }
 

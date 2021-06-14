@@ -537,28 +537,55 @@ describe('on message event', () => {
         expect(client.timeout).toBeCalledTimes(1)
       })
     })
-  })
 
-  describe('!raffle start', () => {
-    it('starts the raffle', async () => {
-      await setting.setRaffleState('close')
+    describe('!raffle start', () => {
+      it('starts the raffle', async () => {
+        await setting.setRaffleState('close')
 
-      expect(setting.raffleState).toEqual('close')
+        expect(setting.raffleState).toEqual('close')
 
-      await mockMessage({
-        channel: '#9armbot',
-        message: '!raffle start',
-        tags: {
-          username: 'armzi',
-          badges: { broadcaster: '1' },
-        },
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle start',
+          tags: {
+            username: 'armzi',
+            badges: { broadcaster: '1' },
+          },
+        })
+
+        await setting.sync()
+
+        expect(setting.raffleState).toEqual('open')
       })
 
-      await setting.sync()
+      it('clears rafflePlayers array', async () => {
+        await setting.setRaffleState('open')
 
-      expect(setting.raffleState).toEqual('open')
+        // Inject players into array
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle start',
+          tags: {
+            username: 'armzi',
+            badges: { broadcaster: '1' },
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual([])
+      })
     })
   })
+
   describe('!raffle stop', () => {
     it('stops the raffle', async () => {
       await setting.setRaffleState('open')
@@ -578,10 +605,6 @@ describe('on message event', () => {
 
       expect(setting.raffleState).toEqual('close')
     })
-  })
-
-  describe('!raffle stop', () => {
-    it('does something', () => {})
   })
 
   describe('!reset', () => {
