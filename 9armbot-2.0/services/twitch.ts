@@ -404,6 +404,28 @@ export async function twitchService() {
         }
         break
       case '!raffle':
+        const raffleArg = cmdArgs[0]
+
+        if (raffleArg == 'start') {
+          if (!isAdmin(tags)) {
+            break
+          }
+          await setting.setRaffleState('open')
+          botSay(client, channel, 'Raffle Start!')
+          widget.feed(`<i class="fas fa-ticket-alt"></i> Raffle Start!`)
+
+          return
+        } else if (raffleArg == 'stop') {
+          if (!isAdmin(tags)) {
+            break
+          }
+          await setting.setRaffleState('close')
+          botSay(client, channel, 'Raffle Closed!')
+          widget.feed(`<i class="fas fa-stop-circle"> Raffle Closed!</i>`)
+
+          return
+        }
+
         amount = 1
 
         if (cmdArgs.length) {

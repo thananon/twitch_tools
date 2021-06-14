@@ -30,6 +30,20 @@ describe('#init', () => {
     })
   })
 
+  describe('raffleState', () => {
+    it('returns raffle state as close', async () => {
+      expect(setting.raffleState).toEqual('close')
+    })
+  })
+
+  describe('setRaffleState', () => {
+    it("can be changed to 'open' and update the database", async () => {
+      await setting.setRaffleState('open')
+
+      expect(setting.raffleState).toEqual('open')
+    })
+  })
+
   describe('gachaRate', () => {
     it('returns as 0.4 by default', async () => {
       expect(setting.gachaRate).toEqual(0.4)

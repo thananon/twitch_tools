@@ -515,7 +515,44 @@ describe('on message event', () => {
   })
 
   describe('!raffle start', () => {
-    it('does something', () => {})
+    it('starts the raffle', async () => {
+      await setting.setRaffleState('close')
+
+      expect(setting.raffleState).toEqual('close')
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle start',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      await setting.sync()
+
+      expect(setting.raffleState).toEqual('open')
+    })
+  })
+  describe('!raffle stop', () => {
+    it('stops the raffle', async () => {
+      await setting.setRaffleState('open')
+
+      expect(setting.raffleState).toEqual('open')
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle stop',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      await setting.sync()
+
+      expect(setting.raffleState).toEqual('close')
+    })
   })
 
   describe('!raffle stop', () => {
