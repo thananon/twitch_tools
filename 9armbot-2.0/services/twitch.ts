@@ -570,4 +570,23 @@ export async function twitchService() {
       return await subscriptionPayout(username)
     },
   )
+
+  client.on(
+    'subgift',
+    async (
+      channel,
+      username,
+      _streakMonths,
+      recipient,
+      _methods,
+      _userstate,
+    ) => {
+      await commands.giveCoin(username, 10)
+      await subscriptionPayout(recipient)
+      await client.say(
+        channel,
+        `${username} ได้รับ 10 $ARM จากการ Gift ให้ ${recipient} armKraab `,
+      )
+    },
+  )
 }

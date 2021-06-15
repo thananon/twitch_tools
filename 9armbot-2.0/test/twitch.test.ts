@@ -13,6 +13,7 @@ import {
   client,
   mockMessage,
   mockResub,
+  mockSubgift,
   mockSubscription,
 } from '../../__mocks__/tmi.js'
 import {
@@ -787,6 +788,33 @@ describe('on resub event', () => {
 
     // TODO: Mock & test this
     // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('on subgift event', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 10,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('(untested) gives 10 $ARM for subgiftber', async () => {
+    await mockSubgift({ username: 'foo', recipient: 'bar' })
+
+    expect(client.on).toBeCalledWith('subgift', expect.any(Function))
+
+    // TODO: Mock & test this
+    // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 10)
   })
 })
 
