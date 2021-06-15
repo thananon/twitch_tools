@@ -43,6 +43,7 @@ async function gacha(
   coins -= bet
 
   const dice = Math.random()
+
   if (dice < setting.jackpotRate) {
     // Win jackpot
     const winAmount = Math.round(bet * (5 + Math.random() * 5))

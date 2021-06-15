@@ -148,7 +148,7 @@ describe('on message event', () => {
       })
 
       const expectedMessage = new Discord.MessageEmbed()
-        .addField(`<foo>`, `มียอดคงเหลือ 7 ArmCoin`)
+        .addField(`<foo>`, `มียอดคงเหลือ 7 $ARM`)
         .setFooter(
           'Contribute @ github: https://github.com/thananon/twitch_tools',
         )
