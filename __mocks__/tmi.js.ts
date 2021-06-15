@@ -86,4 +86,19 @@ export const mockSubgift = async function (payload: {
   return unmockedClient
 }
 
+export const mockSubmysterygift = async function (payload: {
+  username: string
+  numberOfSubs: Number
+}) {
+  const callback = listeners["submysterygift"]
+  await callback(
+    "_channel",
+    payload.username,
+    payload.numberOfSubs,
+    "_methods",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
 export default mockedTmi

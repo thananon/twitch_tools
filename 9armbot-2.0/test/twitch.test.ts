@@ -14,6 +14,7 @@ import {
   mockMessage,
   mockResub,
   mockSubgift,
+  mockSubmysterygift,
   mockSubscription,
 } from '../../__mocks__/tmi.js'
 import {
@@ -815,6 +816,31 @@ describe('on subgift event', () => {
     // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
     expect(commands.giveCoin).toBeCalledTimes(1)
     expect(commands.giveCoin).toBeCalledWith('foo', 10)
+  })
+})
+
+describe('on submysterygift event', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 10,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('(untested) gives (10 x number of subs) $ARM for submysterygiftber', async () => {
+    await mockSubmysterygift({ username: 'foo', numberOfSubs: 5 })
+
+    expect(client.on).toBeCalledWith('submysterygift', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 10 * 5)
   })
 })
 

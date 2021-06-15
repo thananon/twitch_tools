@@ -542,7 +542,8 @@ export async function twitchService() {
           return username
         })
 
-        client.say(
+        botSay(
+          client,
           channel,
           `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทหายตัวไป....`,
         )
@@ -583,9 +584,32 @@ export async function twitchService() {
     ) => {
       await commands.giveCoin(username, 10)
       await subscriptionPayout(recipient)
-      await client.say(
+
+      await botSay(
+        client,
         channel,
         `${username} ได้รับ 10 $ARM จากการ Gift ให้ ${recipient} armKraab `,
+      )
+    },
+  )
+
+  client.on(
+    'submysterygift',
+    async (channel, username, numberOfSubs, _methods, _userstate) => {
+      await commands.giveCoin(username, 10 * numberOfSubs)
+
+      await botSay(
+        client,
+        channel,
+        `${username} ได้รับ ${
+          10 * numberOfSubs
+        } armcoin จากการ Gift ให้สมาชิก ${numberOfSubs} คน armKraab `,
+      )
+
+      await widget.feed(
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${
+          10 * numberOfSubs
+        } armcoin จากการ gift sub x${numberOfSubs}`,
       )
     },
   )
