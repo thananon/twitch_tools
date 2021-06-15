@@ -556,4 +556,11 @@ export async function twitchService() {
         break
     }
   })
+
+  client.on(
+    'subscription',
+    async (_channel, username, _methods, _message, _userstate) => {
+      return await subscriptionPayout(username)
+    },
+  )
 }

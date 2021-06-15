@@ -45,4 +45,16 @@ export const mockMessage = async function (payload: {
   return unmockedClient
 }
 
+export const mockSubscription = async function (payload: { username: string }) {
+  const callback = listeners["subscription"]
+  await callback(
+    "_channel",
+    payload.username,
+    "_methods",
+    "_message",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
 export default mockedTmi
