@@ -355,7 +355,16 @@ export async function twitchService() {
           break
         }
 
-        console.log('TODO')
+        const kickDuration = 300 // Fixed rate for now
+
+        cmdArgs.forEach((name) => {
+          client.timeout(channel, name, kickDuration, 'นายสั่งเชือด')
+
+          widget.feed(
+            `<i class="fas fa-robot"></i> <b class="badge bg-info">${username}</b> <i class="fas fa-crosshairs"> </i>  <i class="fas fa-arrow-alt-circle-right"></i> <b class="badge bg-danger">${name}</b> (${kickDuration})`,
+          )
+        })
+
         break
       case '!market':
         if (!isAdmin(tags)) {

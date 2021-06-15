@@ -428,7 +428,53 @@ describe('on message event', () => {
   })
 
   describe('!kick', () => {
-    it('does something', () => {})
+    beforeEach(async () => {
+      client.timeout.mockClear()
+    })
+
+    it('timeouts the user for 300 seconds by default', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!kick noctisak47',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      expect(client.timeout).toBeCalledTimes(1)
+      expect(client.timeout).toBeCalledWith(
+        '#9armbot',
+        'noctisak47',
+        expect.any(Number),
+        expect.any(String),
+      )
+    })
+
+    it('supports kicking multiple users', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!kick noctisak47 xqcow',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      expect(client.timeout).toBeCalledTimes(2)
+      expect(client.timeout).toBeCalledWith(
+        '#9armbot',
+        'noctisak47',
+        expect.any(Number),
+        expect.any(String),
+      )
+      expect(client.timeout).toBeCalledWith(
+        '#9armbot',
+        'xqcow',
+        expect.any(Number),
+        expect.any(String),
+      )
+    })
   })
 
   describe('!load', () => {
