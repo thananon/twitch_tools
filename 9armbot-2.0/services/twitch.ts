@@ -14,6 +14,21 @@ const THANOS_SNAP_SECONDS = 180
 const widget = new Widget(false)
 const db = new Db()
 
+const rafflePlayers: string[] = []
+
+export function getRafflePlayers(): string[] {
+  return rafflePlayers
+}
+
+export function drawRaffle(): string | undefined {
+  const index = Math.floor(Math.random() * rafflePlayers.length)
+  return rafflePlayers.splice(index, 1)[0]
+}
+
+export function resetRafflePlayers(): void {
+  rafflePlayers.splice(0, rafflePlayers.length)
+}
+
 const silentBotMode = ['1', 'true'].includes(
   process.env.SILENT_BOT_MODE as string,
 )
@@ -252,13 +267,6 @@ export async function twitchService() {
 
         await botSay(client, channel, `@${username} มี ${result.data} $ARM.`)
         break
-      case '!draw':
-        if (!isMarketAuthorized(tags)) {
-          break
-        }
-
-        console.log('TODO')
-        break
       case '!gacha':
         if (!isMarketAuthorized(tags)) {
           break
@@ -395,11 +403,91 @@ export async function twitchService() {
         }
         break
       case '!raffle':
+        const raffleArg = cmdArgs[0]
+
+        if (raffleArg == 'start') {
+          if (!isAdmin(tags)) {
+            break
+          }
+          resetRafflePlayers()
+          await setting.setRaffleState('open')
+          botSay(client, channel, 'Raffle Started!')
+          widget.feed(`<i class="fas fa-ticket-alt"></i> Raffle Started!`)
+
+          return
+        } else if (raffleArg == 'stop') {
+          if (!isAdmin(tags)) {
+            break
+          }
+          await setting.setRaffleState('close')
+          botSay(client, channel, 'Raffle Stopped!')
+          widget.feed(`<i class="fas fa-stop-circle"> Raffle Stopped!</i>`)
+
+          return
+        } else if (raffleArg == 'status') {
+          if (!isAdmin(tags)) {
+            break
+          }
+
+          botSay(
+            client,
+            channel,
+            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${
+              getRafflePlayers().length
+            } $ARM Bought`,
+          )
+          return
+        }
+
+        if (setting.raffleState == 'close') {
+          return
+        }
+
+        amount = 1
+
+        if (cmdArgs.length) {
+          let group = cmdArgs[0].match(/(-?\d+)/)
+          if (group && group[1]) {
+            amount = Math.abs(Number.parseInt(group[1]))
+          }
+        }
+
+        if (amount >= 1) {
+          result = await commands.deductCoin(username, amount)
+
+          if (isError(result)) {
+            client.timeout(
+              channel,
+              username,
+              THANOS_SNAP_SECONDS,
+              'ไม่มีตังจ่ายค่าตั๋ว',
+            )
+
+            return
+          }
+
+          for (let i = 0; i < amount; i++) {
+            rafflePlayers.push(username)
+          }
+
+          widget.feed(
+            `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
+          )
+        }
+
+        break
+      case '!draw':
         if (!isAdmin(tags)) {
           break
         }
 
-        console.log('TODO')
+        const winner = drawRaffle()
+
+        if (winner) {
+          widget.feed(`<b class="badge bg-primary">${winner}</b> ได้รับรางวัล`)
+          botSay(client, channel, `${winner} ได้รับรางวัล`)
+        }
+
         break
       case '!reset':
         if (!isAdmin(tags)) {

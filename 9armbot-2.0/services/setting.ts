@@ -22,6 +22,17 @@ class Setting {
       update: {},
     })
 
+    const raffleState = await prisma.setting.upsert({
+      where: { name: 'raffle_state' },
+      create: {
+        name: 'raffle_state',
+        data_type: 'string',
+        data: 'close',
+        description: 'สถานะการจับฉลาก (open/close)',
+      },
+      update: {},
+    })
+
     const gachaRate = await prisma.setting.upsert({
       where: { name: 'gacha_rate' },
       create: {
@@ -45,6 +56,7 @@ class Setting {
     })
 
     this.data.marketState = marketState.data
+    this.data.raffleState = raffleState.data
     this.data.gachaRate = Number(gachaRate.data)
     this.data.jackpotRate = Number(jackpotRate.data)
   }
@@ -67,6 +79,9 @@ class Setting {
     const marketState = await prisma.setting.findFirst({
       where: { name: 'market_state' },
     })
+    const raffleState = await prisma.setting.findFirst({
+      where: { name: 'raffle_state' },
+    })
     const gachaRate = await prisma.setting.findFirst({
       where: { name: 'gacha_rate' },
     })
@@ -75,6 +90,7 @@ class Setting {
     })
 
     this.data.marketState = marketState!.data
+    this.data.raffleState = raffleState!.data
     this.data.gachaRate = Number(gachaRate!.data)
     this.data.jackpotRate = Number(jackpotRate!.data)
 
@@ -93,6 +109,19 @@ class Setting {
     await prisma.setting.update({
       where: { name: 'market_state' },
       data: { data: this.data.marketState.toString() },
+    })
+  }
+
+  get raffleState() {
+    return this.data.raffleState as 'open' | 'close'
+  }
+
+  async setRaffleState(state: 'open' | 'close') {
+    this.data.raffleState = state
+
+    await prisma.setting.update({
+      where: { name: 'raffle_state' },
+      data: { data: this.data.raffleState.toString() },
     })
   }
 

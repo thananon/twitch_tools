@@ -12,6 +12,42 @@ afterEach(() => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
 
+describe('deductCoin', () => {
+  it('deducts amount of coins from existing player', async () => {
+    await prisma.player.create({
+      data: {
+        username: 'foo',
+        coins: 5,
+      },
+    })
+
+    const result = await commands.deductCoin('foo', 3)
+    let player = await Player.withUsername('foo')
+
+    expect(result).toEqual({ data: 2 })
+    expect(await player.coins()).toEqual(2)
+  })
+
+  describe('when user does not have enough coins', () => {
+    it('returns error', async () => {
+      await prisma.player.create({
+        data: {
+          username: 'foo',
+          coins: 5,
+        },
+      })
+
+      const result = await commands.deductCoin('foo', 10)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          error: 'not_enough_coin',
+        }),
+      )
+    })
+  })
+})
+
 describe('giveCoin', () => {
   it('gives 10 coins to player by default', async () => {
     const result = await commands.giveCoin('foo')

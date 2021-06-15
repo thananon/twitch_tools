@@ -10,7 +10,12 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 
 import { client, mockMessage } from '../../__mocks__/tmi.js'
-import { subscriptionPayout, twitchService } from '../services/twitch'
+import {
+  getRafflePlayers,
+  resetRafflePlayers,
+  subscriptionPayout,
+  twitchService,
+} from '../services/twitch'
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
 import setting from '../services/setting'
@@ -340,7 +345,54 @@ describe('on message event', () => {
   })
 
   describe('!draw', () => {
-    it('does something', () => {})
+    beforeEach(async () => {
+      // Open raffle
+      await setting.setRaffleState('open')
+      jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+        data: 1,
+      })
+
+      // Add players to array
+      resetRafflePlayers()
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle 3',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+      mockFeed.mockClear()
+      ;(
+        commands.deductCoin as jest.MockedFunction<typeof commands.deductCoin>
+      ).mockClear()
+      ;(client.say as jest.MockedFunction<typeof client.say>).mockClear()
+    })
+
+    it('randomize a name from rafflePlayer array', async () => {
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!draw',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      expect(client.say).toBeCalledWith('#9armbot', 'armzi ได้รับรางวัล')
+
+      expect(mockFeed).toHaveBeenCalledTimes(1)
+      expect(mockFeed).toHaveBeenNthCalledWith(
+        1,
+        `<b class="badge bg-primary">armzi</b> ได้รับรางวัล`,
+      )
+
+      // Remove winner from array once
+      expect(getRafflePlayers()).toEqual(['armzi', 'armzi'])
+    })
   })
 
   describe('!give', () => {
@@ -428,7 +480,178 @@ describe('on message event', () => {
   })
 
   describe('!raffle', () => {
-    it('does something', () => {})
+    beforeEach(async () => {
+      resetRafflePlayers()
+
+      jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+        data: 1,
+      })
+
+      // Open raffle by default
+      await setting.setRaffleState('open')
+    })
+
+    afterEach(() => {
+      ;(
+        commands.deductCoin as jest.MockedFunction<typeof commands.deductCoin>
+      ).mockReset()
+    })
+
+    it('deducts 1 $ARM and add name to raffle list', async () => {
+      expect(getRafflePlayers()).toEqual([])
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle',
+        tags: {
+          username: 'armzi',
+        },
+      })
+
+      expect(getRafflePlayers()).toEqual(['armzi'])
+
+      expect(commands.deductCoin).toHaveBeenCalledTimes(1)
+      expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 1)
+    })
+
+    describe('!raffle with amount', () => {
+      beforeEach(() => {
+        resetRafflePlayers()
+
+        jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+          data: 3,
+        })
+      })
+
+      it('deducts $ARM by amount and add name multiple times to raffle list', async () => {
+        expect(getRafflePlayers()).toEqual([])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+        expect(commands.deductCoin).toHaveBeenCalledTimes(1)
+        expect(commands.deductCoin).toHaveBeenCalledWith('armzi', 3)
+      })
+    })
+
+    describe('when raffle state is not opened', () => {
+      beforeEach(async () => {
+        await setting.setRaffleState('close')
+      })
+
+      it('does not deduct coin and does not add player to raffle list', async () => {
+        expect(getRafflePlayers()).toEqual([])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual([])
+
+        expect(commands.deductCoin).toHaveBeenCalledTimes(0)
+      })
+    })
+
+    describe('when deductCoin returns error', () => {
+      beforeEach(async () => {
+        jest.spyOn(commands, 'deductCoin').mockResolvedValue({
+          error: 'not_enough_coin',
+        })
+
+        client.timeout.mockClear()
+      })
+
+      it('punishes player by timeout', async () => {
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(client.timeout).toBeCalledTimes(1)
+      })
+    })
+
+    describe('!raffle start', () => {
+      it('starts the raffle', async () => {
+        await setting.setRaffleState('close')
+
+        expect(setting.raffleState).toEqual('close')
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle start',
+          tags: {
+            username: 'armzi',
+            badges: { broadcaster: '1' },
+          },
+        })
+
+        await setting.sync()
+
+        expect(setting.raffleState).toEqual('open')
+      })
+
+      it('clears rafflePlayers array', async () => {
+        await setting.setRaffleState('open')
+
+        // Inject players into array
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle 3',
+          tags: {
+            username: 'armzi',
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual(['armzi', 'armzi', 'armzi'])
+
+        await mockMessage({
+          channel: '#9armbot',
+          message: '!raffle start',
+          tags: {
+            username: 'armzi',
+            badges: { broadcaster: '1' },
+          },
+        })
+
+        expect(getRafflePlayers()).toEqual([])
+      })
+    })
+  })
+
+  describe('!raffle stop', () => {
+    it('stops the raffle', async () => {
+      await setting.setRaffleState('open')
+
+      expect(setting.raffleState).toEqual('open')
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!raffle stop',
+        tags: {
+          username: 'armzi',
+          badges: { broadcaster: '1' },
+        },
+      })
+
+      await setting.sync()
+
+      expect(setting.raffleState).toEqual('close')
+    })
   })
 
   describe('!reset', () => {
@@ -466,6 +689,8 @@ describe('on message event', () => {
           vips: ['baz', 'iamalsosafe'],
         },
       })
+
+      client.timeout.mockClear()
     })
 
     it('timeout half of the viewers (4 from 8)', async () => {

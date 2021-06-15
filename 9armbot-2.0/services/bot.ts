@@ -1,6 +1,6 @@
 import { Db } from './db'
 import gacha from './commands/gacha'
-import { giveCoin, giveCoinToList } from './commands/give-coin'
+import { giveCoin, giveCoinToList, deductCoin } from './commands/give-coin'
 import { allin } from './commands/allin'
 
 const db = new Db()
@@ -40,6 +40,7 @@ export const commands = {
   allin,
   giveCoin,
   giveCoinToList,
+  deductCoin,
 }
 
 export default commands
