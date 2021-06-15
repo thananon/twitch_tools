@@ -9,7 +9,12 @@ import tmi from 'tmi.js'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 
-import { client, mockMessage, mockSubscription } from '../../__mocks__/tmi.js'
+import {
+  client,
+  mockMessage,
+  mockResub,
+  mockSubscription,
+} from '../../__mocks__/tmi.js'
 import {
   getRafflePlayers,
   resetRafflePlayers,
@@ -768,6 +773,17 @@ describe('on subscription event', () => {
     await mockSubscription({ username: 'foo' })
 
     expect(client.on).toBeCalledWith('subscription', expect.any(Function))
+
+    // TODO: Mock & test this
+    // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('on resub event', () => {
+  it('(untested) gives 10 $ARM for resubber', async () => {
+    await mockResub({ username: 'foo' })
+
+    expect(client.on).toBeCalledWith('resub', expect.any(Function))
 
     // TODO: Mock & test this
     // expect(subscriptionPayout).toHaveBeenCalledTimes(1)

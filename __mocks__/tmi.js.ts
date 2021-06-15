@@ -57,4 +57,17 @@ export const mockSubscription = async function (payload: { username: string }) {
   return unmockedClient
 }
 
+export const mockResub = async function (payload: { username: string }) {
+  const callback = listeners["resub"]
+  await callback(
+    "_channel",
+    payload.username,
+    2, // Months resubbed
+    "_methods",
+    "_message",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
 export default mockedTmi
