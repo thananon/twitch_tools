@@ -603,13 +603,13 @@ export async function twitchService() {
         channel,
         `${username} ได้รับ ${
           10 * numberOfSubs
-        } armcoin จากการ Gift ให้สมาชิก ${numberOfSubs} คน armKraab `,
+        } $ARM จากการ Gift Sub ให้สมาชิก ${numberOfSubs} คน armKraab`,
       )
 
       await widget.feed(
         `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${
           10 * numberOfSubs
-        } armcoin จากการ gift sub x${numberOfSubs}`,
+        } $ARM จากการ Gift Sub x ${numberOfSubs}`,
       )
     },
   )
