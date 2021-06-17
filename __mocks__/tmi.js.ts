@@ -101,4 +101,17 @@ export const mockSubmysterygift = async function (payload: {
   return unmockedClient
 }
 
+export const mockCheerBit = async function (payload: {
+  username: string
+  bits: Number
+}) {
+  const callback = listeners["cheer"]
+  await callback(
+    "_channel",
+    { username: payload.username, bits: payload.bits.toString() },
+    "_message"
+  )
+  return unmockedClient
+}
+
 export default mockedTmi

@@ -614,4 +614,19 @@ export async function twitchService() {
       )
     },
   )
+
+  client.on('cheer', async (_channel, tags, _message) => {
+    const bits = Number(tags.bits!)
+    const username = tags.username!
+
+    let amount = Math.floor(bits / 100)
+
+    if (amount > 0) {
+      await commands.giveCoin(username, amount)
+
+      widget.feed(
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${amount} $ARM จากการให้ ${bits} Bit`,
+      )
+    }
+  })
 }

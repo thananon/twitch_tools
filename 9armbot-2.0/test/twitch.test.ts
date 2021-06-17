@@ -11,6 +11,7 @@ import MockAdapter from 'axios-mock-adapter'
 
 import {
   client,
+  mockCheerBit,
   mockMessage,
   mockResub,
   mockSubgift,
@@ -879,6 +880,46 @@ describe('#subscriptionPayout function', () => {
   })
 })
 
-describe('on cheer event', () => {})
+describe('on cheer event (bit)', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 1,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('gives player 1 $ARM per 100 bits', async () => {
+    await mockCheerBit({ username: 'foo', bits: 100 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 1)
+  })
+
+  it('gives player 4 $ARM per 450 bits (round down)', async () => {
+    await mockCheerBit({ username: 'foo', bits: 450 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 4)
+  })
+
+  it('does nothing if player give less than 100 bits', async () => {
+    await mockCheerBit({ username: 'foo', bits: 99 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(0)
+  })
+})
 
 describe('on connected event', () => {})
