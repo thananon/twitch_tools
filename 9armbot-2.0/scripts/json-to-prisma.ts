@@ -28,12 +28,24 @@ async function main() {
 
   const count = players.length
 
-  async function migrate(player: PlayerV1_1, idx: number) {
+  const playersWithUpperCasedName: PlayerV1_1[] = []
+
+  async function migrate(
+    player: PlayerV1_1,
+    idx: number,
+    mergeCoins: Boolean = false,
+  ) {
     const counter = `${idx + 1}/${count} : ${player.username}`
 
     console.log('Start', counter)
 
-    await db.createPlayer(player.username)
+    if (!mergeCoins && !!player.username.match(/[A-Z]/)) {
+      console.log('Found player with uppercased name! Process them later...')
+      playersWithUpperCasedName.push(player)
+      return
+    }
+
+    const upsertedPlayer = await db.createPlayer(player.username)
 
     console.log('Created', counter)
 
@@ -42,20 +54,29 @@ async function main() {
       coins: player.coins,
       roll_counter: player.rollCounter,
     }
+
+    if (mergeCoins) {
+      playerData.coins += upsertedPlayer.coins
+    }
+
     await db.updatePlayer(player.username, playerData)
 
     console.log('Updated', counter)
 
-    const prismaPlayer = await db.getPlayerbyUsername(player.username)
+    const prismaPlayerForRecheck = await db.getPlayerbyUsername(player.username)
 
     if (
-      !prismaPlayer ||
-      prismaPlayer.username != player.username.toLowerCase() ||
-      prismaPlayer.status != player.status ||
-      prismaPlayer.coins != player.coins ||
-      prismaPlayer.roll_counter != player.rollCounter
+      !prismaPlayerForRecheck ||
+      prismaPlayerForRecheck.username != player.username.toLowerCase() ||
+      prismaPlayerForRecheck.status != player.status ||
+      prismaPlayerForRecheck.coins != playerData.coins ||
+      prismaPlayerForRecheck.roll_counter != player.rollCounter
     ) {
-      console.log('Player data mismatched!', { prismaPlayer, player })
+      console.log('Player data mismatched!', {
+        prismaPlayerForRecheck,
+        player,
+        playerData,
+      })
       process.exit(1)
     }
 
@@ -66,7 +87,17 @@ async function main() {
 
   // Run sequentially
   await players.reduce(
-    (p, player, idx) => p.then(() => migrate(player, idx)),
+    (p, player, idx) => p.then(() => migrate(player, idx, false)),
+    Promise.resolve(),
+  )
+
+  console.log(
+    'Processing players with uppercased names : ',
+    playersWithUpperCasedName.length,
+  )
+
+  await playersWithUpperCasedName.reduce(
+    (p, player, idx) => p.then(() => migrate(player, idx, true)),
     Promise.resolve(),
   )
 
