@@ -1,5 +1,5 @@
 // Migration players from JSON to Prisma
-// Usage : npx ts-node json-to-prisma.ts path/to/players.json
+// Usage : npx dotenv-flow -- npx ts-node 9armbot-2.0/scripts/json-to-prisma.ts path/to/players.json
 
 import { Db } from '../services/db'
 import fs from 'fs'
@@ -50,7 +50,7 @@ async function main() {
 
     if (
       !prismaPlayer ||
-      prismaPlayer.username != player.username ||
+      prismaPlayer.username != player.username.toLowerCase() ||
       prismaPlayer.status != player.status ||
       prismaPlayer.coins != player.coins ||
       prismaPlayer.roll_counter != player.rollCounter
