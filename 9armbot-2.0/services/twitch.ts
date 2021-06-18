@@ -543,7 +543,8 @@ export async function twitchService() {
           return username
         })
 
-        client.say(
+        botSay(
+          client,
           channel,
           `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทหายตัวไป....`,
         )
@@ -555,6 +556,77 @@ export async function twitchService() {
         break
       default:
         break
+    }
+  })
+
+  client.on(
+    'subscription',
+    async (_channel, username, _methods, _message, _userstate) => {
+      return await subscriptionPayout(username)
+    },
+  )
+
+  client.on(
+    'resub',
+    async (_channel, username, _months, _message, _userstate, _methods) => {
+      return await subscriptionPayout(username)
+    },
+  )
+
+  client.on(
+    'subgift',
+    async (
+      channel,
+      username,
+      _streakMonths,
+      recipient,
+      _methods,
+      _userstate,
+    ) => {
+      await commands.giveCoin(username, 10)
+      await subscriptionPayout(recipient)
+
+      await botSay(
+        client,
+        channel,
+        `${username} ได้รับ 10 $ARM จากการ Gift ให้ ${recipient} armKraab `,
+      )
+    },
+  )
+
+  client.on(
+    'submysterygift',
+    async (channel, username, numberOfSubs, _methods, _userstate) => {
+      await commands.giveCoin(username, 10 * numberOfSubs)
+
+      await botSay(
+        client,
+        channel,
+        `${username} ได้รับ ${
+          10 * numberOfSubs
+        } $ARM จากการ Gift Sub ให้สมาชิก ${numberOfSubs} คน armKraab`,
+      )
+
+      await widget.feed(
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${
+          10 * numberOfSubs
+        } $ARM จากการ Gift Sub x ${numberOfSubs}`,
+      )
+    },
+  )
+
+  client.on('cheer', async (_channel, tags, _message) => {
+    const bits = Number(tags.bits!)
+    const username = tags.username!
+
+    let amount = Math.floor(bits / 100)
+
+    if (amount > 0) {
+      await commands.giveCoin(username, amount)
+
+      widget.feed(
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${amount} $ARM จากการให้ ${bits} Bit`,
+      )
     }
   })
 }

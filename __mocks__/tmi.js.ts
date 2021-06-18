@@ -45,4 +45,73 @@ export const mockMessage = async function (payload: {
   return unmockedClient
 }
 
+export const mockSubscription = async function (payload: { username: string }) {
+  const callback = listeners["subscription"]
+  await callback(
+    "_channel",
+    payload.username,
+    "_methods",
+    "_message",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
+export const mockResub = async function (payload: { username: string }) {
+  const callback = listeners["resub"]
+  await callback(
+    "_channel",
+    payload.username,
+    2, // Months resubbed
+    "_methods",
+    "_message",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
+export const mockSubgift = async function (payload: {
+  username: string
+  recipient: string
+}) {
+  const callback = listeners["subgift"]
+  await callback(
+    "_channel",
+    payload.username,
+    2, // Months streak
+    payload.recipient,
+    "_methods",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
+export const mockSubmysterygift = async function (payload: {
+  username: string
+  numberOfSubs: Number
+}) {
+  const callback = listeners["submysterygift"]
+  await callback(
+    "_channel",
+    payload.username,
+    payload.numberOfSubs,
+    "_methods",
+    "_userstate"
+  )
+  return unmockedClient
+}
+
+export const mockCheerBit = async function (payload: {
+  username: string
+  bits: Number
+}) {
+  const callback = listeners["cheer"]
+  await callback(
+    "_channel",
+    { username: payload.username, bits: payload.bits.toString() },
+    "_message"
+  )
+  return unmockedClient
+}
+
 export default mockedTmi

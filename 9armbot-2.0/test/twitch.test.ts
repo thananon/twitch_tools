@@ -9,13 +9,22 @@ import tmi from 'tmi.js'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 
-import { client, mockMessage } from '../../__mocks__/tmi.js'
+import {
+  client,
+  mockCheerBit,
+  mockMessage,
+  mockResub,
+  mockSubgift,
+  mockSubmysterygift,
+  mockSubscription,
+} from '../../__mocks__/tmi.js'
 import {
   getRafflePlayers,
   resetRafflePlayers,
   subscriptionPayout,
   twitchService,
 } from '../services/twitch'
+
 import prisma from '../../prisma/client'
 import commands from '../services/bot'
 import setting from '../services/setting'
@@ -763,48 +772,154 @@ describe('on message event', () => {
 })
 
 describe('on subscription event', () => {
-  describe('#subscriptionPayout function', () => {
-    beforeEach(() => {
-      // Mock Twitch chatters API
-      const mock = new MockAdapter(axios)
-      const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
-      mock.onGet(url).reply(200, {
-        chatter_count: 3,
-        chatters: {
-          viewers: ['foo'],
-          moderators: ['bar'],
-          vips: ['baz'],
-        },
-      })
+  it('(untested) gives 10 $ARM for subber', async () => {
+    await mockSubscription({ username: 'foo' })
 
-      mockFeed.mockClear()
-    })
+    expect(client.on).toBeCalledWith('subscription', expect.any(Function))
 
-    it('gives 10 coins to subscriber & 1 coin to 3 viewers', async () => {
-      const username = 'foo'
-      const total = 3
-
-      await subscriptionPayout(username)
-
-      expect(mockFeed).toHaveBeenCalledTimes(2)
-      expect(mockFeed).toHaveBeenNthCalledWith(
-        1,
-        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 $ARM จากการ Subscribe`,
-      )
-      expect(mockFeed).toHaveBeenNthCalledWith(
-        2,
-        `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 $ARM <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${username}</b>`,
-      )
-    })
+    // TODO: Mock & test this
+    // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
   })
 })
 
-describe('on resub event', () => {})
+describe('on resub event', () => {
+  it('(untested) gives 10 $ARM for resubber', async () => {
+    await mockResub({ username: 'foo' })
 
-describe('on subgift event', () => {})
+    expect(client.on).toBeCalledWith('resub', expect.any(Function))
 
-describe('on submysterygift event', () => {})
+    // TODO: Mock & test this
+    // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
+  })
+})
 
-describe('on cheer event', () => {})
+describe('on subgift event', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 10,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('(untested) gives 10 $ARM for subgiftber', async () => {
+    await mockSubgift({ username: 'foo', recipient: 'bar' })
+
+    expect(client.on).toBeCalledWith('subgift', expect.any(Function))
+
+    // TODO: Mock & test this
+    // expect(subscriptionPayout).toHaveBeenCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 10)
+  })
+})
+
+describe('on submysterygift event', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 10,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('(untested) gives (10 x number of subs) $ARM for submysterygiftber', async () => {
+    await mockSubmysterygift({ username: 'foo', numberOfSubs: 5 })
+
+    expect(client.on).toBeCalledWith('submysterygift', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 10 * 5)
+  })
+})
+
+describe('#subscriptionPayout function', () => {
+  beforeEach(() => {
+    // Mock Twitch chatters API
+    const mock = new MockAdapter(axios)
+    const url = `${process.env.twitch_api}/group/user/${process.env.tmi_channel_name}/chatters`
+    mock.onGet(url).reply(200, {
+      chatter_count: 3,
+      chatters: {
+        viewers: ['foo'],
+        moderators: ['bar'],
+        vips: ['baz'],
+      },
+    })
+
+    mockFeed.mockClear()
+  })
+
+  it('gives 10 coins to subscriber & 1 coin to 3 viewers', async () => {
+    const username = 'foo'
+    const total = 3
+
+    await subscriptionPayout(username)
+
+    expect(mockFeed).toHaveBeenCalledTimes(2)
+    expect(mockFeed).toHaveBeenNthCalledWith(
+      1,
+      `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> 10 $ARM จากการ Subscribe`,
+    )
+    expect(mockFeed).toHaveBeenNthCalledWith(
+      2,
+      `<i class="fas fa-gift"></i> สมาชิก <b class="badge bg-info">${total}</b> คนได้รับ 1 $ARM <i class="fas fa-coins"></i> จากการ Subscribe ของ <b class="badge bg-primary">${username}</b>`,
+    )
+  })
+})
+
+describe('on cheer event (bit)', () => {
+  beforeEach(() => {
+    jest.spyOn(commands, 'giveCoin').mockResolvedValue({
+      data: 1,
+    })
+
+    mockFeed.mockClear()
+  })
+
+  afterEach(() => {
+    ;(
+      commands.giveCoin as jest.MockedFunction<typeof commands.giveCoin>
+    ).mockReset()
+  })
+
+  it('gives player 1 $ARM per 100 bits', async () => {
+    await mockCheerBit({ username: 'foo', bits: 100 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 1)
+  })
+
+  it('gives player 4 $ARM per 450 bits (round down)', async () => {
+    await mockCheerBit({ username: 'foo', bits: 450 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(1)
+    expect(commands.giveCoin).toBeCalledWith('foo', 4)
+  })
+
+  it('does nothing if player give less than 100 bits', async () => {
+    await mockCheerBit({ username: 'foo', bits: 99 })
+
+    expect(client.on).toBeCalledWith('cheer', expect.any(Function))
+
+    expect(commands.giveCoin).toBeCalledTimes(0)
+  })
+})
 
 describe('on connected event', () => {})
