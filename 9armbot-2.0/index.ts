@@ -10,6 +10,9 @@ import { discordService } from './services/discord'
 import setting from './services/setting'
 
 async function main() {
+  const dbName = process.env.DATABASE_URL!.split(':')[1]
+  console.log(`Use database: "${dbName}"`)
+
   try {
     await twitchService()
   } catch (error) {
