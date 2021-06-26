@@ -309,11 +309,11 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
         } else if (result.data.state == 'lose') {
-          await botSay(
-            client,
-            channel,
-            `@${username} ลงทุน ${result.data.bet} $ARM -> แตก! (${result.data.balance}).`,
-          )
+          // await botSay(
+          //   client,
+          //   channel,
+          //   `@${username} ลงทุน ${result.data.bet} $ARM -> แตก! (${result.data.balance}).`,
+          // )
 
           widget.feed(
             `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} $ARM (${result.data.balance})`,
