@@ -2,6 +2,7 @@ import Discord, { Message } from 'discord.js'
 import commands, { isError } from './bot'
 import { devMode } from '../config'
 import Widget from './widget'
+import prisma from '../../prisma/client'
 
 const widget = new Widget(false)
 
@@ -11,14 +12,14 @@ const silentBotMode = ['1', 'true'].includes(
 
 const helpers = {
   buildEmbedMessage: (
-    messages: { name: string; value: string }[],
+    messages: { name: string; value: string; inline?: boolean }[],
   ): Discord.MessageEmbed => {
     const messageEmbed = new Discord.MessageEmbed().setFooter(
       'Contribute @ github: https://github.com/thananon/twitch_tools',
     )
 
     messages.forEach((message) => {
-      messageEmbed.addField(message.name, message.value)
+      messageEmbed.addField(message.name, message.value, message.inline)
     })
 
     return messageEmbed
@@ -92,7 +93,32 @@ export async function discordService() {
         break
 
       case '!leader':
-        console.log('TODO')
+        // Get top 20 $ARM holders
+        const topPlayers = await prisma.player.findMany({
+          select: { username: true, coins: true },
+          orderBy: [{ coins: 'desc' }],
+          take: 20,
+        })
+
+        if (topPlayers.length) {
+          let embed = helpers.buildEmbedMessage(
+            topPlayers.map((player, idx) => ({
+              name: player.username,
+              value: String(player.coins),
+              inline: idx >= 5,
+            })),
+          )
+
+          embed
+            .setTitle('กลุ่มผู้นำ $ARM')
+            .setDescription('นายทุนผู้ถือเหรียญดิจิทัลที่มาแรงที่สุดในขณะนี้')
+            .setThumbnail(
+              'https://cdn.shopify.com/s/files/1/1955/3977/products/stonl_800x.png',
+            )
+
+          await botSay(msg.channel, embed)
+        }
+
         break
       case '!command':
         console.log('TODO')

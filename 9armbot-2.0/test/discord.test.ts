@@ -159,6 +159,46 @@ describe('on message event', () => {
   })
 
   describe('!leader', () => {
-    it('does something', () => {})
+    it('prints top $ARM holders', async () => {
+      await prisma.player.create({
+        data: {
+          username: 'foo',
+          coins: 7,
+        },
+      })
+      await prisma.player.create({
+        data: {
+          username: 'bar',
+          coins: 10,
+        },
+      })
+      await prisma.player.create({
+        data: {
+          username: 'baz',
+          coins: 5,
+        },
+      })
+
+      await mockMessage({
+        channel: {},
+        author: {},
+        content: '!leader',
+      })
+
+      const expectedMessage = new Discord.MessageEmbed()
+        .setTitle('กลุ่มผู้นำ $ARM')
+        .setDescription('นายทุนผู้ถือเหรียญดิจิทัลที่มาแรงที่สุดในขณะนี้')
+        .addField(`bar`, 10, false)
+        .addField(`foo`, 7, false)
+        .addField(`baz`, 5, false)
+        .setFooter(
+          'Contribute @ github: https://github.com/thananon/twitch_tools',
+        )
+        .setThumbnail(
+          'https://cdn.shopify.com/s/files/1/1955/3977/products/stonl_800x.png',
+        )
+
+      expect(channel.send).toBeCalledWith(expectedMessage)
+    })
   })
 })
