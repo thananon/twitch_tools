@@ -61,6 +61,24 @@ export async function discordService() {
         break
 
       case '!coin':
+        if (`${process.env.DISCORD_WHITELIST_CHANNELS}`.length) {
+          const whitelistChannels =
+            process.env.DISCORD_WHITELIST_CHANNELS!.split(',')
+
+          if (
+            msg.channel.type == 'text' &&
+            !whitelistChannels.includes(msg.channel.name!)
+          ) {
+            await botSay(
+              msg.channel,
+              `ไปถามในห้อง ${whitelistChannels
+                .map((c) => `#${c}`)
+                .join(', ')} หรือ dm นะจ๊ะ`,
+            )
+            return
+          }
+        }
+
         const group = msg.content.match(/!coin\s+([a-zA-Z0-9_]*)/)
         if (group && group[1]) {
           const username = group[1].toLowerCase()
