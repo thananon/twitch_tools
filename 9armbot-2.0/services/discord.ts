@@ -4,6 +4,7 @@ import { devMode } from '../config'
 import Widget from './widget'
 import prisma from '../../prisma/client'
 
+let client: Discord.Client
 const widget = new Widget(false)
 
 const silentBotMode = ['1', 'true'].includes(
@@ -42,8 +43,20 @@ async function botSay(
   }
 }
 
+export async function discordLog(
+  guildName: string,
+  channelName: string,
+  content: string,
+) {
+  const guild = client.guilds.cache.find((guild) => guild.name === guildName)!
+  const channel = guild.channels.cache.find(
+    (channel) => channel.name === channelName,
+  ) as Discord.TextChannel
+  return await botSay(channel, content)
+}
+
 export async function discordService() {
-  const client = new Discord.Client()
+  client = new Discord.Client()
 
   client.on('ready', () => {
     console.log('Logged into Discord as ' + client.user!.tag)
