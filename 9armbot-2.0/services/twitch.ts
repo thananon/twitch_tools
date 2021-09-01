@@ -1,5 +1,7 @@
 import axios from 'axios'
 import tmi, { ChatUserstate } from 'tmi.js'
+import shuffle from 'lodash/shuffle'
+
 import commands, { isError } from './bot'
 import Player from './models/player'
 import { devMode } from '../config'
@@ -7,9 +9,11 @@ import Widget from './widget'
 import setting from './setting'
 import { Db } from './db'
 import prisma from '../../prisma/client'
-import shuffle from 'lodash/shuffle'
+import { discordLog } from './discord'
 
 const THANOS_SNAP_SECONDS = 180
+const LOG_GUILD_NAME = 'หลังบ้านนายอาร์ม'
+const LOG_CHANNEL_NAME = 'gacha-log'
 
 const widget = new Widget(false)
 const db = new Db()
@@ -495,6 +499,12 @@ export async function twitchService() {
         if (winner) {
           widget.feed(`<b class="badge bg-primary">${winner}</b> ได้รับรางวัล`)
           botSay(client, channel, `${winner} ได้รับรางวัล`)
+
+          discordLog(
+            LOG_GUILD_NAME,
+            LOG_CHANNEL_NAME,
+            `Log: ${winner} ได้รับรางวัลจากการ !draw`,
+          )
         }
 
         break
@@ -553,6 +563,14 @@ export async function twitchService() {
         break
       case '!time':
         console.log('TODO')
+        break
+      case '!testlog':
+        if (!isAdmin(tags)) {
+          break
+        }
+
+        discordLog(LOG_GUILD_NAME, LOG_CHANNEL_NAME, `Log test`)
+
         break
       default:
         break
