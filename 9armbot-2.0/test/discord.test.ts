@@ -156,6 +156,95 @@ describe('on message event', () => {
       expect(commands.coin).toHaveBeenCalledWith('foo')
       expect(channel.send).toBeCalledWith(expectedMessage)
     })
+
+    describe('when DISCORD_WHITELIST_CHANNELS env is not empty', () => {
+      beforeEach(async () => {
+        process.env.DISCORD_WHITELIST_CHANNELS = 'foo_room,bar_room'
+      })
+
+      afterEach(async () => {
+        process.env.DISCORD_WHITELIST_CHANNELS = ''
+      })
+
+      it('accepts only message from those channels', async () => {
+        const username = 'foo'
+        await prisma.player.create({
+          data: {
+            username,
+            coins: 7,
+          },
+        })
+
+        await mockMessage({
+          channel: {
+            type: 'text',
+            name: 'foo_room',
+          },
+          author: {},
+          content: '!coin foo',
+        })
+
+        const expectedMessage = new Discord.MessageEmbed()
+          .addField(`<foo>`, `มียอดคงเหลือ 7 $ARM`)
+          .setFooter(
+            'Contribute @ github: https://github.com/thananon/twitch_tools',
+          )
+
+        expect(commands.coin).toHaveBeenCalledWith('foo')
+        expect(channel.send).toBeCalledWith(expectedMessage)
+      })
+
+      it('does not accept if channel is not in the whitelist', async () => {
+        const username = 'foo'
+        await prisma.player.create({
+          data: {
+            username,
+            coins: 7,
+          },
+        })
+
+        await mockMessage({
+          channel: {
+            type: 'text',
+            name: 'another_room',
+          },
+          author: {},
+          content: '!coin foo',
+        })
+
+        expect(commands.coin).not.toHaveBeenCalledWith('foo')
+        expect(channel.send).toBeCalledWith(
+          'ไปถามในห้อง #foo_room, #bar_room หรือ dm นะจ๊ะ',
+        )
+      })
+
+      it('accepts dm type message', async () => {
+        const username = 'foo'
+        await prisma.player.create({
+          data: {
+            username,
+            coins: 7,
+          },
+        })
+
+        await mockMessage({
+          channel: {
+            type: 'dm',
+          },
+          author: {},
+          content: '!coin foo',
+        })
+
+        const expectedMessage = new Discord.MessageEmbed()
+          .addField(`<foo>`, `มียอดคงเหลือ 7 $ARM`)
+          .setFooter(
+            'Contribute @ github: https://github.com/thananon/twitch_tools',
+          )
+
+        expect(commands.coin).toHaveBeenCalledWith('foo')
+        expect(channel.send).toBeCalledWith(expectedMessage)
+      })
+    })
   })
 
   describe('!leader', () => {
