@@ -233,11 +233,11 @@ export async function twitchService() {
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM`,
           )
         } else if (result.data.state == 'lose') {
-          await botSay(
-            client,
-            channel,
-            `@${username} ลงหมดหน้าตัก ${result.data.bet} $ARM -> แตก!`,
-          )
+          //await botSay(
+          //  client,
+          //  channel,
+          //  `@${username} ลงหมดหน้าตัก ${result.data.bet} $ARM -> แตก!`,
+          //)
 
           widget.feed(
             `<b class="badge bg-danger">${username}</b> <i class="fas fa-user-injured"></i> <i class="fas fa-level-down-alt"></i> -${result.data.bet} $ARM`,
@@ -302,6 +302,13 @@ export async function twitchService() {
           widget.feed(
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-coins"></i> JACKPOT!!! <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
+
+          discordLog(
+            LOG_GUILD_NAME,
+            LOG_CHANNEL_NAME,
+            `${username} ได้รับรางวัล JACKPOT ${result.data.win} $ARM`,
+          )
+
         } else if (result.data.state == 'win') {
           await botSay(
             client,
@@ -312,6 +319,13 @@ export async function twitchService() {
           widget.feed(
             `<b class="badge bg-primary">${username}</b> <i class="fas fa-hand-holding-usd"></i> <i class="fas fa-level-up-alt"></i> +${result.data.win} $ARM (${result.data.balance})`,
           )
+
+          discordLog(
+            LOG_GUILD_NAME,
+            LOG_CHANNEL_NAME,
+            `${username} ได้รับรางวัล ${result.data.win} $ARM`,
+          )
+
         } else if (result.data.state == 'lose') {
           // await botSay(
           //   client,
@@ -368,6 +382,8 @@ export async function twitchService() {
             `<i class="fas fa-robot"></i> <b class="badge bg-info">${username}</b> <i class="fas fa-crosshairs"> </i>  <i class="fas fa-arrow-alt-circle-right"></i> <b class="badge bg-danger">${name}</b> (${kickDuration})`,
           )
         })
+		 
+		 widget.displayGif('', 1) // blank message, id:1 == crit sound
 
         break
       case '!market':
@@ -486,6 +502,7 @@ export async function twitchService() {
           widget.feed(
             `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
           )
+
         }
 
         break
@@ -503,7 +520,7 @@ export async function twitchService() {
           discordLog(
             LOG_GUILD_NAME,
             LOG_CHANNEL_NAME,
-            `Log: ${winner} ได้รับรางวัลจากการ !draw`,
+            `${winner} ได้รับรางวัลจากการ !draw`,
           )
         }
 
@@ -645,6 +662,8 @@ export async function twitchService() {
       widget.feed(
         `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${amount} $ARM จากการให้ ${bits} Bit`,
       )
+
+	  widget.displayGif('', 0)
     }
   })
 }

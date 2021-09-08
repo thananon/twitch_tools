@@ -29,6 +29,14 @@ class Widget {
     return this.clientOnly ? 'widget' : `widget::${name}`
   }
 
+  displayGif(message: string, id: number, feedType: string = 'alerts') {
+    console.log(`${message} ${id}`)
+	this.socket.emit(this.getSocketName(feedType), {
+		itemKey: id,
+		message: message,
+	})
+  }
+
   feed(message: string, feedType: string = 'killfeed') {
     this.socket.emit(this.getSocketName(feedType), {
       id: feedType,
