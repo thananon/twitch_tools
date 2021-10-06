@@ -12,6 +12,7 @@ import prisma from '../../prisma/client'
 import { discordLog } from './discord'
 
 const THANOS_SNAP_SECONDS = 180
+const THANOS_SNAP_PEOPLE_PER_SECOND = 3 // Twitch IRC rate limit is 100 per 30 seconds ~ 3 per second
 const LOG_GUILD_NAME = 'หลังบ้านนายอาร์ม'
 const LOG_CHANNEL_NAME = 'gacha-log'
 
@@ -382,8 +383,8 @@ export async function twitchService() {
             `<i class="fas fa-robot"></i> <b class="badge bg-info">${username}</b> <i class="fas fa-crosshairs"> </i>  <i class="fas fa-arrow-alt-circle-right"></i> <b class="badge bg-danger">${name}</b> (${kickDuration})`,
           )
         })
-		 
-		 widget.displayGif('', 1) // blank message, id:1 == crit sound
+
+        widget.displayGif('', 1) // blank message, id:1 == crit sound
 
         break
       case '!market':
@@ -461,8 +462,7 @@ export async function twitchService() {
           botSay(
             client,
             channel,
-            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${
-              getRafflePlayers().length
+            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${getRafflePlayers().length
             } $ARM Bought`,
           )
           return
@@ -551,24 +551,44 @@ export async function twitchService() {
         )
         const snappedCount = halfOfPlayers.length
 
-        const snappedPlayers = halfOfPlayers.map(async (username, idx) => {
-          console.log(`Snapping ${username} (${idx + 1}/${snappedCount})`)
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-          client.timeout(
-            channel,
-            username,
-            THANOS_SNAP_SECONDS,
-            'โดนทานอสดีดนิ้ว',
-          )
+        let idx = 0
 
-          widget.feed(
-            `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${
-              idx + 1
-            }/${snappedCount})`,
-          )
+        botSay(
+          client,
+          channel,
+          `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทที่จะถูกดีดนิ้วด้วยความเร็ว ${THANOS_SNAP_PEOPLE_PER_SECOND}คน/วินาที`,
+        )
 
-          return username
-        })
+        await halfOfPlayers.reduce((p: Promise<null>, username) => {
+          return p.then(async () => {
+            idx += 1
+            console.log(`Snapping ${username} (${idx}/${snappedCount})`)
+
+            botSay(
+              client,
+              channel,
+              `@${username} โดนทานอสดีดนิ้ว`,
+            )
+
+            client.timeout(
+              channel,
+              username,
+              THANOS_SNAP_SECONDS,
+              'โดนทานอสดีดนิ้ว',
+            )
+
+            widget.feed(
+              `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${idx
+              }/${snappedCount})`,
+            )
+
+            await delay(1000 / THANOS_SNAP_PEOPLE_PER_SECOND)
+
+            return null
+          })
+        }, Promise.resolve(null))
 
         botSay(
           client,
@@ -576,7 +596,6 @@ export async function twitchService() {
           `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทหายตัวไป....`,
         )
 
-        await Promise.all(snappedPlayers)
         break
       case '!time':
         console.log('TODO')
@@ -637,14 +656,12 @@ export async function twitchService() {
       await botSay(
         client,
         channel,
-        `${username} ได้รับ ${
-          10 * numberOfSubs
+        `${username} ได้รับ ${10 * numberOfSubs
         } $ARM จากการ Gift Sub ให้สมาชิก ${numberOfSubs} คน armKraab`,
       )
 
       await widget.feed(
-        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${
-          10 * numberOfSubs
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${10 * numberOfSubs
         } $ARM จากการ Gift Sub x ${numberOfSubs}`,
       )
     },
@@ -663,7 +680,7 @@ export async function twitchService() {
         `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${amount} $ARM จากการให้ ${bits} Bit`,
       )
 
-	  widget.displayGif('', 0)
+      widget.displayGif('', 0)
     }
   })
 }
