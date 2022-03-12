@@ -1,6 +1,5 @@
 import commands from '../../services/bot'
 import prisma from '../../../prisma/client'
-import setting from '../../services/setting'
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
@@ -29,6 +28,37 @@ describe('marketcap', () => {
     const result = await commands.marketcap()
 
     expect(result).toEqual(
+      expect.objectContaining({
+        data: {
+          coins: 25,
+          baht: 25 * 3000,
+        },
+      }),
+    )
+  })
+
+  it('is cached for 60 seconds to prevent multiple requests', async () => {
+    const result1 = await commands.marketcap()
+
+    expect(result1).toEqual(
+      expect.objectContaining({
+        data: {
+          coins: 25,
+          baht: 25 * 3000,
+        },
+      }),
+    )
+
+    await prisma.player.create({
+      data: {
+        username: 'baz',
+        coins: 15000,
+      },
+    })
+
+    const result2 = await commands.marketcap()
+
+    expect(result2).toEqual(
       expect.objectContaining({
         data: {
           coins: 25,
