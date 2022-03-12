@@ -309,7 +309,6 @@ export async function twitchService() {
             LOG_CHANNEL_NAME,
             `${username} ได้รับรางวัล JACKPOT ${result.data.win} $ARM`,
           )
-
         } else if (result.data.state == 'win') {
           await botSay(
             client,
@@ -326,7 +325,6 @@ export async function twitchService() {
             LOG_CHANNEL_NAME,
             `${username} ได้รับรางวัล ${result.data.win} $ARM`,
           )
-
         } else if (result.data.state == 'lose') {
           // await botSay(
           //   client,
@@ -462,7 +460,8 @@ export async function twitchService() {
           botSay(
             client,
             channel,
-            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${getRafflePlayers().length
+            `Raffle Status : ${setting.raffleState.toUpperCase()} | ${
+              getRafflePlayers().length
             } $ARM Bought`,
           )
           return
@@ -502,7 +501,6 @@ export async function twitchService() {
           widget.feed(
             `<b class="badge bg-primary">${tags.username}</b> ซื้อตั๋วชิงโชค ${amount} ใบ`,
           )
-
         }
 
         break
@@ -551,7 +549,8 @@ export async function twitchService() {
         )
         const snappedCount = halfOfPlayers.length
 
-        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+        const delay = (ms: number) =>
+          new Promise((resolve) => setTimeout(resolve, ms))
 
         let idx = 0
 
@@ -566,11 +565,7 @@ export async function twitchService() {
             idx += 1
             console.log(`Snapping ${username} (${idx}/${snappedCount})`)
 
-            botSay(
-              client,
-              channel,
-              `@${username} โดนทานอสดีดนิ้ว`,
-            )
+            botSay(client, channel, `@${username} โดนทานอสดีดนิ้ว`)
 
             client.timeout(
               channel,
@@ -580,8 +575,7 @@ export async function twitchService() {
             )
 
             widget.feed(
-              `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${idx
-              }/${snappedCount})`,
+              `<b class="badge bg-primary">THANOS</b> <i class="fas fa-hand-point-up"></i> <b class="badge bg-danger">${username}</b> (<i class="fas fa-user-alt-slash"></i>${idx}/${snappedCount})`,
             )
 
             await delay(1000 / THANOS_SNAP_PEOPLE_PER_SECOND)
@@ -594,6 +588,16 @@ export async function twitchService() {
           client,
           channel,
           `@${tags.username} ใช้งาน Thanos Mode มี ${halfOfPlayers.length} คนในแชทหายตัวไป....`,
+        )
+
+        break
+      case '!marketcap':
+        const marketcap = await commands.marketcap()
+
+        botSay(
+          client,
+          channel,
+          `Market Cap: ${marketcap.data.baht} บาท (${marketcap.data.coins} $ARM)`,
         )
 
         break
@@ -656,12 +660,14 @@ export async function twitchService() {
       await botSay(
         client,
         channel,
-        `${username} ได้รับ ${10 * numberOfSubs
+        `${username} ได้รับ ${
+          10 * numberOfSubs
         } $ARM จากการ Gift Sub ให้สมาชิก ${numberOfSubs} คน armKraab`,
       )
 
       await widget.feed(
-        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${10 * numberOfSubs
+        `<b class="badge bg-primary">${username}</b> ได้รับ <i class="fas fa-coins"></i> ${
+          10 * numberOfSubs
         } $ARM จากการ Gift Sub x ${numberOfSubs}`,
       )
     },

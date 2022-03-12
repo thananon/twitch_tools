@@ -1,8 +1,14 @@
 const mockFeed = jest.fn()
+const mockDisplayGif = jest.fn()
+
 jest.mock('../services/widget', () => {
   return jest.fn().mockImplementation(() => {
-    return { feed: mockFeed }
+    return { feed: mockFeed, displayGif: mockDisplayGif }
   })
+})
+
+jest.mock('../services/discord.ts', () => {
+  return { discordLog: jest.fn() }
 })
 
 import tmi from 'tmi.js'
@@ -38,6 +44,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await prisma.player.deleteMany()
+  ;(client.say as jest.MockedFunction<typeof client.say>).mockClear()
 })
 
 // Tmi has no type for events :cry:
@@ -768,6 +775,26 @@ describe('on message event', () => {
 
   describe('!time', () => {
     it('does something', () => {})
+  })
+
+  describe('!marketcap', () => {
+    it('returns marketcap data', async () => {
+      jest.spyOn(commands, 'marketcap').mockResolvedValue({
+        data: { coins: 100, baht: 100 * 3000 },
+      })
+
+      await mockMessage({
+        channel: '#9armbot',
+        message: '!marketcap',
+      })
+
+      expect(commands.marketcap).toBeCalledTimes(1)
+
+      expect(client.say).toBeCalledWith(
+        '#9armbot',
+        'Market Cap: 300000 บาท (100 $ARM)',
+      )
+    })
   })
 })
 

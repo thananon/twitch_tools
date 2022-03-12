@@ -97,6 +97,24 @@ describe('on message event', () => {
     })
   })
 
+  describe('!marketcap', () => {
+    it('returns marketcap data', async () => {
+      jest.spyOn(commands, 'marketcap').mockResolvedValue({
+        data: { coins: 100, baht: 100 * 3000 },
+      })
+
+      await mockMessage({
+        channel: {},
+        author: {},
+        content: '!marketcap',
+      })
+
+      expect(commands.marketcap).toBeCalledTimes(1)
+
+      expect(channel.send).toBeCalledWith('Market Cap: 300000 บาท (100 $ARM)')
+    })
+  })
+
   describe('!command', () => {
     it('does something', () => {})
   })
