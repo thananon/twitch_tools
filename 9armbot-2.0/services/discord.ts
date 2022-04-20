@@ -151,6 +151,16 @@ export async function discordService() {
         }
 
         break
+
+      case '!marketcap':
+        const marketcap = await commands.marketcap()
+
+        botSay(
+          msg.channel,
+          `Market Cap: ${marketcap.data.baht} บาท (${marketcap.data.coins} $ARM)`,
+        )
+
+        break
       case '!command':
         console.log('TODO')
         break

@@ -31,10 +31,11 @@ class Widget {
 
   displayGif(message: string, id: number, feedType: string = 'alerts') {
     console.log(`${message} ${id}`)
-	this.socket.emit(this.getSocketName(feedType), {
-		itemKey: id,
-		message: message,
-	})
+
+    this.socket.emit(this.getSocketName(feedType), {
+      itemKey: id,
+      message,
+    })
   }
 
   feed(message: string, feedType: string = 'killfeed') {

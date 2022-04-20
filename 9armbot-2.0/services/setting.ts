@@ -71,7 +71,10 @@ class Setting {
 
     setInterval(() => {
       this.sync()
-      console.log('Settings synced')
+
+      if (log) {
+        console.log('Settings synced')
+      }
     }, SYNC_INTERVAL)
   }
 
