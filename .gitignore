@@ -3,5 +3,13 @@ node_modules
 9armbot/botstat.json
 9armbot/coins.json
 9armbot/players.json
-package-lock.json
-yarn.lock
+players-2.0.json
+.node_repl_history
+dist
+
+# Prisma & SQLite
+prisma/*.db
+*.db-journal
+
+# Dotenv-flow
+.env*.local
