@@ -1,12 +1,12 @@
 const upOrDown = (fromVersion, toVersion) => {
   const fromNumbers = fromVersion.split(".").map(el => Number(el));
   const toNumbers = toVersion.split(".").map(el => Number(el));
-  for (let i = 0; i < fromNumbers.length; i++) {
-    if (fromNumbers[i] < toNumbers[i]) {
-      return "up";
-    }
-    if (fromNumbers[i] > toNumbers[i]) {
-      return "down";
+  const longestLength = Math.max(fromNumbers.length, toNumbers.length);
+  for (let i = 0; i < longestLength; i++) {
+    if (!fromNumbers[i]) fromNumbers[i] = 0;
+    if (!toNumbers[i]) toNumbers[i] = 0;
+    if (fromNumbers[i] != toNumbers[i]) {
+      return (fromNumbers[i] < toNumbers[i]) ? "up" : "down";
     }
   }
   return "same";
